@@ -317,7 +317,34 @@ export default function MemoryGame() {
   }
 
   return (
-    <section className="menu" style={{ width: 'min(960px, 100%)' }}>
+    <section
+      className="menu"
+      style={{
+        position: 'relative',
+        width: 'min(960px, 100%)',
+      }}
+    >
+      <button
+        type="button"
+        onClick={() => navigate('/')}
+        style={{
+          backgroundColor: 'rgba(0, 0, 0, 0.45)',
+          border: '1px solid rgba(255, 255, 255, 0.4)',
+          borderRadius: '999px',
+          color: '#fff',
+          cursor: 'pointer',
+          fontFamily: 'inherit',
+          fontSize: '0.9rem',
+          fontWeight: 600,
+          padding: '0.5rem 1.25rem',
+          position: 'absolute',
+          right: '1rem',
+          top: '1rem',
+          transition: 'background-color 0.2s ease, border-color 0.2s ease',
+        }}
+      >
+        Tilbage til menu
+      </button>
       <header className="menu__header" style={{ marginBottom: '1.25rem' }}>
         <h1>Memory</h1>
         <p>Vend kortene og find alle par hurtigst muligt.</p>
@@ -370,21 +397,6 @@ export default function MemoryGame() {
         </label>
 
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            onClick={() => navigate('/')}
-            style={{
-              background: '#0f172a',
-              border: 'none',
-              borderRadius: '999px',
-              color: '#e2e8f0',
-              cursor: 'pointer',
-              fontWeight: 600,
-              padding: '0.65rem 1.5rem',
-            }}
-          >
-            Tilbage til hovedmenuen
-          </button>
           <button
             type="button"
             onClick={() => handleNewGame()}
