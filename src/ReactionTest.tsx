@@ -27,6 +27,7 @@ const textByPhase = (phase: Phase, reactionTime: number | null) => {
 export default function ReactionTest() {
   const [phase, setPhase] = useState<Phase>('waiting')
   const [reactionTime, setReactionTime] = useState<number | null>(null)
+  const [highScores, setHighScores] = useState<number[]>([])
   const timeoutRef = useRef<number | null>(null)
   const startTimeRef = useRef<number | null>(null)
 
@@ -71,7 +72,13 @@ export default function ReactionTest() {
     if (phase === 'now') {
       const endTime = performance.now()
       if (startTimeRef.current !== null) {
-        setReactionTime(endTime - startTimeRef.current)
+        const elapsed = endTime - startTimeRef.current
+        setReactionTime(elapsed)
+        setHighScores((previousScores) => {
+          const updatedScores = [...previousScores, elapsed]
+          updatedScores.sort((a, b) => a - b)
+          return updatedScores.slice(0, 5)
+        })
       } else {
         setReactionTime(null)
       }
@@ -109,12 +116,43 @@ export default function ReactionTest() {
         height: '100vh',
         justifyContent: 'center',
         lineHeight: 1.4,
+        position: 'relative',
         padding: '0 1rem',
         textAlign: 'center',
         width: '100%',
       }}
     >
       {textByPhase(phase, reactionTime)}
+      <div
+        style={{
+          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+          borderRadius: '0.75rem',
+          fontSize: '1rem',
+          left: '1rem',
+          lineHeight: 1.6,
+          padding: '1rem 1.25rem',
+          pointerEvents: 'none',
+          position: 'absolute',
+          textAlign: 'left',
+          top: '1rem',
+          width: 'min(240px, calc(100% - 2rem))',
+        }}
+      >
+        <h2 style={{ fontSize: '1.1rem', margin: '0 0 0.5rem' }}>
+          Top 5 hurtigste tider
+        </h2>
+        {highScores.length === 0 ? (
+          <p style={{ fontSize: '0.95rem', margin: 0 }}>Ingen tider registreret endnu.</p>
+        ) : (
+          <ol style={{ margin: 0, paddingLeft: '1.25rem' }}>
+            {highScores.map((score, index) => (
+              <li key={`${score}-${index}`} style={{ marginBottom: '0.25rem' }}>
+                {Math.round(score)} ms
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
     </div>
   )
 }
