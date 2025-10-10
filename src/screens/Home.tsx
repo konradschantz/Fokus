@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { loadHighscores, type MemoryHighscores } from '../utils/memoryHighscores'
+import BrandLogo from '../components/BrandLogo'
 
 interface GameDefinition {
   id: string
@@ -55,7 +56,13 @@ export default function Home() {
   return (
     <div className="menu">
       <header className="menu__header">
-        <h1>Fokus</h1>
+        <BrandLogo
+          as="h1"
+          align="center"
+          size={96}
+          wordmarkSize="clamp(2.4rem, 6vw, 3.4rem)"
+          style={{ marginBottom: '0.5rem' }}
+        />
         <p>Vælg et spil for at komme i gang.</p>
       </header>
 

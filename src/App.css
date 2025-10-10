@@ -12,6 +12,35 @@
   color: #0f172a;
 }
 
+.brand-logo {
+  align-items: center;
+  display: inline-flex;
+  gap: clamp(0.5rem, 1.8vw, 0.9rem);
+  text-decoration: none;
+  color: inherit;
+}
+
+.brand-logo--center {
+  justify-content: center;
+}
+
+.brand-logo--left {
+  justify-content: flex-start;
+}
+
+.brand-logo__mark {
+  width: var(--logo-size, 64px);
+  height: var(--logo-size, 64px);
+  flex-shrink: 0;
+  filter: drop-shadow(0 8px 16px rgba(37, 99, 235, 0.25));
+}
+
+.brand-logo__wordmark {
+  font-size: var(--wordmark-size, 1.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
 .menu {
   width: min(960px, 100%);
   background-color: rgba(255, 255, 255, 0.85);
@@ -24,6 +53,42 @@
 .menu__header {
   text-align: center;
   margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.menu__top-bar {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: clamp(0.75rem, 3vw, 1.5rem);
+  margin-bottom: clamp(1.25rem, 3vw, 1.75rem);
+}
+
+.menu__back-button {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 64, 175, 0.85));
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.6rem 1.5rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  backdrop-filter: blur(4px);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.menu__back-button:hover {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(37, 99, 235, 0.95));
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: translateY(-1px);
+}
+
+.menu__back-button:focus-visible {
+  outline: 3px solid rgba(99, 102, 241, 0.45);
+  outline-offset: 3px;
 }
 
 .menu__header h1 {
@@ -102,9 +167,23 @@
     color: #e2e8f0;
   }
 
+  .brand-logo__mark {
+    filter: drop-shadow(0 8px 18px rgba(96, 165, 250, 0.35));
+  }
+
   .menu {
     background-color: rgba(15, 23, 42, 0.75);
     box-shadow: 0 24px 60px rgba(2, 6, 23, 0.55);
+  }
+
+  .menu__back-button {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(59, 130, 246, 0.85));
+    border-color: rgba(148, 163, 184, 0.35);
+  }
+
+  .menu__back-button:hover {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(96, 165, 250, 0.95));
+    border-color: rgba(226, 232, 240, 0.6);
   }
 
   .menu__card {
