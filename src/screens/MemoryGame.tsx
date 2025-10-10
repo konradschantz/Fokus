@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   loadHighscores,
   saveHighscores,
@@ -75,6 +76,7 @@ function formatSeconds(ms: number): number {
 }
 
 export default function MemoryGame() {
+  const navigate = useNavigate()
   const [difficulty, setDifficulty] = useState<MemoryDifficulty>('easy')
   const [cards, setCards] = useState<MemoryCard[]>(() => createDeck('easy'))
   const [selectedCards, setSelectedCards] = useState<number[]>([])
@@ -338,12 +340,25 @@ export default function MemoryGame() {
             onChange={handleDifficultyChange}
             style={{
               appearance: 'none',
-              backgroundColor: '#fff',
-              border: '1px solid rgba(79, 70, 229, 0.3)',
+              backgroundImage: 'linear-gradient(135deg, #1d4ed8, #3b82f6)',
+              border: '1px solid rgba(30, 64, 175, 0.75)',
               borderRadius: '0.75rem',
+              boxShadow: '0 6px 12px rgba(37, 99, 235, 0.25)',
+              color: '#f8fafc',
+              cursor: 'pointer',
               fontSize: '1rem',
+              fontWeight: 600,
               padding: '0.65rem 1rem',
               maxWidth: '200px',
+              transition: 'box-shadow 0.2s ease, transform 0.2s ease',
+            }}
+            onFocus={(event) => {
+              event.currentTarget.style.boxShadow = '0 10px 18px rgba(37, 99, 235, 0.35)'
+              event.currentTarget.style.transform = 'translateY(-1px)'
+            }}
+            onBlur={(event) => {
+              event.currentTarget.style.boxShadow = '0 6px 12px rgba(37, 99, 235, 0.25)'
+              event.currentTarget.style.transform = 'translateY(0)'
             }}
           >
             {Object.entries(difficulties).map(([value, config]) => (
@@ -355,6 +370,21 @@ export default function MemoryGame() {
         </label>
 
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            style={{
+              background: '#0f172a',
+              border: 'none',
+              borderRadius: '999px',
+              color: '#e2e8f0',
+              cursor: 'pointer',
+              fontWeight: 600,
+              padding: '0.65rem 1.5rem',
+            }}
+          >
+            Tilbage til hovedmenuen
+          </button>
           <button
             type="button"
             onClick={() => handleNewGame()}
