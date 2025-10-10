@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import BrandLogo from './components/BrandLogo'
 
 type Phase = 'waiting' | 'ready' | 'now' | 'result'
 
@@ -129,33 +130,44 @@ export default function ReactionTest({ onExit }: ReactionTestProps) {
       {textByPhase(phase, reactionTime)}
       <div
         style={{
-          backgroundColor: 'rgba(0, 0, 0, 0.4)',
-          borderRadius: '0.75rem',
-          fontSize: '1rem',
-          left: '1rem',
-          lineHeight: 1.6,
-          padding: '1rem 1.25rem',
-          pointerEvents: 'none',
           position: 'absolute',
-          textAlign: 'left',
+          left: '1rem',
           top: '1rem',
-          width: 'min(240px, calc(100% - 2rem))',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem',
+          alignItems: 'flex-start',
+          maxWidth: 'min(280px, calc(100% - 2rem))',
+          pointerEvents: 'none',
         }}
       >
-        <h2 style={{ fontSize: '1.1rem', margin: '0 0 0.5rem' }}>
-          Top 5 hurtigste tider
-        </h2>
-        {highScores.length === 0 ? (
-          <p style={{ fontSize: '0.95rem', margin: 0 }}>Ingen tider registreret endnu.</p>
-        ) : (
-          <ol style={{ margin: 0, paddingLeft: '1.25rem' }}>
-            {highScores.map((score, index) => (
-              <li key={`${score}-${index}`} style={{ marginBottom: '0.25rem' }}>
-                {Math.round(score)} ms
-              </li>
-            ))}
-          </ol>
-        )}
+        <BrandLogo size={56} wordmarkSize="1.6rem" />
+        <div
+          style={{
+            backgroundColor: 'rgba(0, 0, 0, 0.45)',
+            borderRadius: '0.75rem',
+            fontSize: '1rem',
+            lineHeight: 1.6,
+            padding: '1rem 1.25rem',
+            textAlign: 'left',
+            width: '100%',
+          }}
+        >
+          <h2 style={{ fontSize: '1.1rem', margin: '0 0 0.5rem' }}>
+            Top 5 hurtigste tider
+          </h2>
+          {highScores.length === 0 ? (
+            <p style={{ fontSize: '0.95rem', margin: 0 }}>Ingen tider registreret endnu.</p>
+          ) : (
+            <ol style={{ margin: 0, paddingLeft: '1.25rem' }}>
+              {highScores.map((score, index) => (
+                <li key={`${score}-${index}`} style={{ marginBottom: '0.25rem' }}>
+                  {Math.round(score)} ms
+                </li>
+              ))}
+            </ol>
+          )}
+        </div>
       </div>
       {onExit && (
         <button
@@ -163,21 +175,8 @@ export default function ReactionTest({ onExit }: ReactionTestProps) {
             event.stopPropagation()
             onExit()
           }}
-          style={{
-            backgroundColor: 'rgba(0, 0, 0, 0.45)',
-            border: '1px solid rgba(255, 255, 255, 0.4)',
-            borderRadius: '999px',
-            color: '#fff',
-            cursor: 'pointer',
-            fontFamily: 'inherit',
-            fontSize: '0.9rem',
-            fontWeight: 600,
-            padding: '0.5rem 1.25rem',
-            position: 'absolute',
-            right: '1rem',
-            top: '1rem',
-            transition: 'background-color 0.2s ease, border-color 0.2s ease',
-          }}
+          className="menu__back-button reaction-test__back-button"
+          style={{ right: '1rem', top: '1rem', position: 'absolute' }}
           onMouseDown={(event) => event.stopPropagation()}
           onTouchStart={(event) => event.stopPropagation()}
           onKeyDown={(event) => {

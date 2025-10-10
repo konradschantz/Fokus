@@ -6,6 +6,7 @@ import {
   type MemoryDifficulty,
   type MemoryHighscores,
 } from '../utils/memoryHighscores'
+import BrandLogo from '../components/BrandLogo'
 
 interface MemoryCard {
   id: number
@@ -317,34 +318,13 @@ export default function MemoryGame() {
   }
 
   return (
-    <section
-      className="menu"
-      style={{
-        position: 'relative',
-        width: 'min(960px, 100%)',
-      }}
-    >
-      <button
-        type="button"
-        onClick={() => navigate('/')}
-        style={{
-          backgroundColor: 'rgba(0, 0, 0, 0.45)',
-          border: '1px solid rgba(255, 255, 255, 0.4)',
-          borderRadius: '999px',
-          color: '#fff',
-          cursor: 'pointer',
-          fontFamily: 'inherit',
-          fontSize: '0.9rem',
-          fontWeight: 600,
-          padding: '0.5rem 1.25rem',
-          position: 'absolute',
-          right: '1rem',
-          top: '1rem',
-          transition: 'background-color 0.2s ease, border-color 0.2s ease',
-        }}
-      >
-        Tilbage til menu
-      </button>
+    <section className="menu" style={{ width: 'min(960px, 100%)' }}>
+      <div className="menu__top-bar">
+        <BrandLogo size={64} wordmarkSize="1.75rem" />
+        <button type="button" className="menu__back-button" onClick={() => navigate('/')}>
+          Tilbage til menu
+        </button>
+      </div>
       <header className="menu__header" style={{ marginBottom: '1.25rem' }}>
         <h1>Memory</h1>
         <p>Vend kortene og find alle par hurtigst muligt.</p>
