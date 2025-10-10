@@ -68,25 +68,30 @@
   line-height: 1.6;
 }
 
-.menu__card button {
+.menu__card button,
+.menu__card a {
   align-self: flex-start;
   background: linear-gradient(135deg, #6366f1, #4f46e5);
   border: none;
   border-radius: 999px;
   color: #fff;
   cursor: pointer;
+  display: inline-flex;
   font-size: 0.95rem;
   font-weight: 600;
   padding: 0.75rem 1.75rem;
+  text-decoration: none;
   transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
 
-.menu__card button:hover {
+.menu__card button:hover,
+.menu__card a:hover {
   transform: translateY(-1px);
   box-shadow: 0 18px 35px rgba(79, 70, 229, 0.2);
 }
 
-.menu__card button:focus-visible {
+.menu__card button:focus-visible,
+.menu__card a:focus-visible {
   outline: 3px solid rgba(99, 102, 241, 0.45);
   outline-offset: 3px;
 }
@@ -116,7 +121,8 @@
     color: #cbd5f5;
   }
 
-  .menu__card button {
+  .menu__card button,
+  .menu__card a {
     filter: brightness(1.05);
   }
 }
