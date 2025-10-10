@@ -24,7 +24,11 @@ const textByPhase = (phase: Phase, reactionTime: number | null) => {
   }
 }
 
-export default function ReactionTest() {
+interface ReactionTestProps {
+  onExit?: () => void
+}
+
+export default function ReactionTest({ onExit }: ReactionTestProps) {
   const [phase, setPhase] = useState<Phase>('waiting')
   const [reactionTime, setReactionTime] = useState<number | null>(null)
   const [highScores, setHighScores] = useState<number[]>([])
@@ -153,6 +157,36 @@ export default function ReactionTest() {
           </ol>
         )}
       </div>
+      {onExit && (
+        <button
+          onClick={(event) => {
+            event.stopPropagation()
+            onExit()
+          }}
+          style={{
+            backgroundColor: 'rgba(0, 0, 0, 0.45)',
+            border: '1px solid rgba(255, 255, 255, 0.4)',
+            borderRadius: '999px',
+            color: '#fff',
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            fontSize: '0.9rem',
+            fontWeight: 600,
+            padding: '0.5rem 1.25rem',
+            position: 'absolute',
+            right: '1rem',
+            top: '1rem',
+            transition: 'background-color 0.2s ease, border-color 0.2s ease',
+          }}
+          onMouseDown={(event) => event.stopPropagation()}
+          onTouchStart={(event) => event.stopPropagation()}
+          onKeyDown={(event) => {
+            event.stopPropagation()
+          }}
+        >
+          Tilbage til menu
+        </button>
+      )}
     </div>
   )
 }
