@@ -318,157 +318,174 @@ export default function MemoryGame() {
   }
 
   return (
-    <section className="menu" style={{ width: 'min(960px, 100%)' }}>
+    <section className="menu game-page memory-game">
       <div className="menu__top-bar">
         <BrandLogo size={64} wordmarkSize="1.75rem" />
         <button type="button" className="menu__back-button" onClick={() => navigate('/')}>
           Tilbage til menu
         </button>
       </div>
-      <header className="menu__header" style={{ marginBottom: '1.25rem' }}>
+      <header className="menu__header" style={{ marginBottom: '0.5rem' }}>
         <h1>Memory</h1>
         <p>Vend kortene og find alle par hurtigst muligt.</p>
       </header>
 
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '1rem',
-          justifyContent: 'space-between',
-          marginBottom: '1.25rem',
-          rowGap: '1rem',
-        }}
-      >
-        <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontWeight: 600 }}>
-          Sværhedsgrad
-          <select
-            value={difficulty}
-            onChange={handleDifficultyChange}
-            style={{
-              appearance: 'none',
-              backgroundImage: 'linear-gradient(135deg, #1d4ed8, #3b82f6)',
-              border: '1px solid rgba(30, 64, 175, 0.75)',
-              borderRadius: '0.75rem',
-              boxShadow: '0 6px 12px rgba(37, 99, 235, 0.25)',
-              color: '#f8fafc',
-              cursor: 'pointer',
-              fontSize: '1rem',
-              fontWeight: 600,
-              padding: '0.65rem 1rem',
-              maxWidth: '200px',
-              transition: 'box-shadow 0.2s ease, transform 0.2s ease',
-            }}
-            onFocus={(event) => {
-              event.currentTarget.style.boxShadow = '0 10px 18px rgba(37, 99, 235, 0.35)'
-              event.currentTarget.style.transform = 'translateY(-1px)'
-            }}
-            onBlur={(event) => {
-              event.currentTarget.style.boxShadow = '0 6px 12px rgba(37, 99, 235, 0.25)'
-              event.currentTarget.style.transform = 'translateY(0)'
-            }}
-          >
-            {Object.entries(difficulties).map(([value, config]) => (
-              <option key={value} value={value}>
-                {config.label}
-              </option>
-            ))}
-          </select>
-        </label>
+      <div className="game-page__grid memory-game__layout">
+        <aside className="game-scoreboard">
+          <h2 className="game-scoreboard__title">Scoreboard</h2>
+          <dl className="game-scoreboard__rows">
+            <div className="game-scoreboard__row">
+              <dt>Færreste træk</dt>
+              <dd>{currentHighscore.bestMoves !== null ? currentHighscore.bestMoves : '–'}</dd>
+            </div>
+            <div className="game-scoreboard__row">
+              <dt>Hurtigste tid</dt>
+              <dd>
+                {currentHighscore.bestTimeMs !== null
+                  ? `${formatSeconds(currentHighscore.bestTimeMs)} s`
+                  : '–'}
+              </dd>
+            </div>
+          </dl>
+          <p className="game-scoreboard__footnote">
+            Resultaterne gemmes pr. sværhedsgrad på denne enhed.
+          </p>
+        </aside>
 
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            onClick={() => handleNewGame()}
+        <div className="memory-game__content">
+          <div
             style={{
-              background: '#312e81',
-              border: 'none',
-              borderRadius: '999px',
-              color: '#fff',
-              cursor: 'pointer',
-              fontWeight: 600,
-              padding: '0.65rem 1.5rem',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '1rem',
+              justifyContent: 'space-between',
+              rowGap: '1rem',
             }}
           >
-            Nyt spil
-          </button>
-          <button
-            type="button"
-            onClick={handleUndo}
-            disabled={!lastMismatch || isLocked || isComplete || selectedCards.length > 0}
-            style={{
-              background: '#64748b',
-              border: 'none',
-              borderRadius: '999px',
-              color: '#fff',
-              cursor: !lastMismatch || isLocked || isComplete || selectedCards.length > 0 ? 'not-allowed' : 'pointer',
-              fontWeight: 600,
-              opacity:
-                !lastMismatch || isLocked || isComplete || selectedCards.length > 0 ? 0.5 : 1,
-              padding: '0.65rem 1.5rem',
-              transition: 'opacity 0.2s ease',
-            }}
-          >
-            Fortryd sidste træk
-          </button>
-        </div>
-      </div>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontWeight: 600 }}>
+              Sværhedsgrad
+              <select
+                value={difficulty}
+                onChange={handleDifficultyChange}
+                style={{
+                  appearance: 'none',
+                  backgroundImage: 'linear-gradient(135deg, #1d4ed8, #3b82f6)',
+                  border: '1px solid rgba(30, 64, 175, 0.75)',
+                  borderRadius: '0.75rem',
+                  boxShadow: '0 6px 12px rgba(37, 99, 235, 0.25)',
+                  color: '#f8fafc',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  padding: '0.65rem 1rem',
+                  maxWidth: '200px',
+                  transition: 'box-shadow 0.2s ease, transform 0.2s ease',
+                }}
+                onFocus={(event) => {
+                  event.currentTarget.style.boxShadow = '0 10px 18px rgba(37, 99, 235, 0.35)'
+                  event.currentTarget.style.transform = 'translateY(-1px)'
+                }}
+                onBlur={(event) => {
+                  event.currentTarget.style.boxShadow = '0 6px 12px rgba(37, 99, 235, 0.25)'
+                  event.currentTarget.style.transform = 'translateY(0)'
+                }}
+              >
+                {Object.entries(difficulties).map(([value, config]) => (
+                  <option key={value} value={value}>
+                    {config.label}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '1.5rem',
-          marginBottom: '1.25rem',
-          fontSize: '1.05rem',
-        }}
-      >
-        <div>
-          <strong style={{ display: 'block', marginBottom: '0.35rem' }}>Træk</strong>
-          {moves}
-        </div>
-        <div>
-          <strong style={{ display: 'block', marginBottom: '0.35rem' }}>Tid</strong>
-          {formatSeconds(elapsedMs)} s
-        </div>
-        <div>
-          <strong style={{ display: 'block', marginBottom: '0.35rem' }}>Highscore</strong>
-          {currentHighscore.bestMoves !== null && currentHighscore.bestTimeMs !== null ? (
-            <span>
-              {currentHighscore.bestMoves} træk · {formatSeconds(currentHighscore.bestTimeMs)} s
-            </span>
-          ) : (
-            <span>–</span>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => handleNewGame()}
+                style={{
+                  background: '#312e81',
+                  border: 'none',
+                  borderRadius: '999px',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  padding: '0.65rem 1.5rem',
+                }}
+              >
+                Nyt spil
+              </button>
+              <button
+                type="button"
+                onClick={handleUndo}
+                disabled={!lastMismatch || isLocked || isComplete || selectedCards.length > 0}
+                style={{
+                  background: '#64748b',
+                  border: 'none',
+                  borderRadius: '999px',
+                  color: '#fff',
+                  cursor:
+                    !lastMismatch || isLocked || isComplete || selectedCards.length > 0
+                      ? 'not-allowed'
+                      : 'pointer',
+                  fontWeight: 600,
+                  opacity:
+                    !lastMismatch || isLocked || isComplete || selectedCards.length > 0 ? 0.5 : 1,
+                  padding: '0.65rem 1.5rem',
+                  transition: 'opacity 0.2s ease',
+                }}
+              >
+                Fortryd sidste træk
+              </button>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '1.5rem',
+              fontSize: '1.05rem',
+            }}
+          >
+            <div>
+              <strong style={{ display: 'block', marginBottom: '0.35rem' }}>Træk</strong>
+              {moves}
+            </div>
+            <div>
+              <strong style={{ display: 'block', marginBottom: '0.35rem' }}>Tid</strong>
+              {formatSeconds(elapsedMs)} s
+            </div>
+            <div>
+              <strong style={{ display: 'block', marginBottom: '0.35rem' }}>Match status</strong>
+              {cards.filter((card) => card.matched).length} / {cards.length}
+            </div>
+          </div>
+
+          {isComplete && (
+            <div
+              style={{
+                background: 'rgba(34, 197, 94, 0.15)',
+                borderRadius: '1rem',
+                color: '#047857',
+                padding: '1rem 1.25rem',
+              }}
+            >
+              <strong style={{ display: 'block', marginBottom: '0.35rem' }}>Godt klaret!</strong>
+              Du fandt alle par på {moves} træk og {formatSeconds(elapsedMs)} sekunder.
+            </div>
           )}
-        </div>
-      </div>
 
-      {isComplete && (
-        <div
-          style={{
-            background: 'rgba(34, 197, 94, 0.15)',
-            borderRadius: '1rem',
-            color: '#047857',
-            marginBottom: '1.25rem',
-            padding: '1rem 1.25rem',
-          }}
-        >
-          <strong style={{ display: 'block', marginBottom: '0.35rem' }}>Godt klaret!</strong>
-          Du fandt alle par på {moves} træk og {formatSeconds(elapsedMs)} sekunder.
-        </div>
-      )}
-
-      <div
-        style={{
-          display: 'grid',
-          gap: '0.75rem',
-          gridTemplateColumns,
-          justifyItems: 'stretch',
-          margin: '0 auto',
-          maxWidth: 'min(640px, 100%)',
-        }}
-      >
-        {cards.map((card) => {
+          <div
+            style={{
+              display: 'grid',
+              gap: '0.75rem',
+              gridTemplateColumns,
+              justifyItems: 'stretch',
+              margin: '0 auto',
+              maxWidth: 'min(640px, 100%)',
+            }}
+          >
+            {cards.map((card) => {
           const isShowing = card.revealed || card.matched
           const ariaLabel = card.matched
             ? `Kort, matchet, ${card.symbol}`
@@ -505,6 +522,8 @@ export default function MemoryGame() {
             </button>
           )
         })}
+          </div>
+        </div>
       </div>
     </section>
   )

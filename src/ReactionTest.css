@@ -1,0 +1,101 @@
+.reaction-test__layout {
+  align-items: stretch;
+}
+
+.reaction-test__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.reaction-test__play-area {
+  align-items: center;
+  border-radius: 1.25rem;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  font-size: clamp(1.35rem, 3vw, 2.2rem);
+  font-weight: 600;
+  justify-content: center;
+  min-height: clamp(260px, 42vh, 380px);
+  padding: clamp(1.25rem, 4vw, 2rem);
+  position: relative;
+  text-align: center;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  outline: none;
+}
+
+.reaction-test__play-area:focus-visible {
+  outline: 3px solid rgba(96, 165, 250, 0.6);
+  outline-offset: 4px;
+}
+
+.reaction-test__play-area--waiting {
+  background: radial-gradient(circle at top, #111827, #1f2937);
+}
+
+.reaction-test__play-area--ready {
+  background: radial-gradient(circle at top, #dc2626, #991b1b);
+}
+
+.reaction-test__play-area--now {
+  background: radial-gradient(circle at top, #22c55e, #15803d);
+}
+
+.reaction-test__play-area--result {
+  background: radial-gradient(circle at top, #1e293b, #0f172a);
+}
+
+.reaction-test__message {
+  line-height: 1.4;
+}
+
+.reaction-test__hint {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #475569;
+}
+
+.reaction-test__scores {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.reaction-test__scores li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-variant-numeric: tabular-nums;
+  background: rgba(255, 255, 255, 0.35);
+  color: #1f2937;
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.reaction-test__score-rank {
+  font-weight: 600;
+}
+
+.reaction-test__score-value {
+  font-weight: 600;
+}
+
+@media (max-width: 899px) {
+  .reaction-test__play-area {
+    min-height: clamp(200px, 45vw, 320px);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .reaction-test__hint {
+    color: #cbd5f5;
+  }
+
+  .reaction-test__scores li {
+    background: rgba(30, 41, 59, 0.75);
+    color: #e2e8f0;
+  }
+}
