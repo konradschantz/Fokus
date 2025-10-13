@@ -372,6 +372,19 @@ export default function SortingGame({ onExit }: SortingGameProps) {
         </p>
       </header>
 
+      <div className="sorting-game__actions sorting-game__actions--top">
+        {phase === 'idle' && (
+          <button type="button" className="sorting-game__primary-button" onClick={startGame}>
+            Start spil
+          </button>
+        )}
+        {phase === 'paused' && (
+          <button type="button" className="sorting-game__primary-button" onClick={resumeGame}>
+            Fortsæt
+          </button>
+        )}
+      </div>
+
       <div className="sorting-game__status">
         <div className="sorting-game__metric">
           <span className="sorting-game__metric-label">Score</span>
@@ -418,8 +431,7 @@ export default function SortingGame({ onExit }: SortingGameProps) {
               queue.map((shape, index) => {
                 const isActive = index === 0
                 const offset = Math.min(index, 4)
-                const translateX = offset * 1.6
-                const translateY = offset * 0.3
+                const translateY = offset * -0.65
                 const scale = isActive ? 1 : Math.max(0.7, 1 - offset * 0.08)
                 const opacity = isActive ? 1 : Math.max(0.35, 0.85 - offset * 0.1)
                 const feedbackClass = isActive && feedback ? ` sorting-game__shape--${feedback}` : ''
@@ -431,7 +443,7 @@ export default function SortingGame({ onExit }: SortingGameProps) {
                     style={
                       {
                         '--shape-color': shape.color,
-                        transform: `translateX(calc(-50% + ${translateX}rem)) translateY(${translateY}rem) scale(${scale})`,
+                        transform: `translate(-50%, ${translateY}rem) scale(${scale})`,
                         opacity,
                         zIndex: queue.length - index,
                       } as CSSProperties
@@ -443,9 +455,14 @@ export default function SortingGame({ onExit }: SortingGameProps) {
                 )
               })
             ) : (
-              <div className="sorting-game__queue-placeholder">
-                Tryk på &quot;Start spil&quot; for at begynde at sortere figurerne.
-              </div>
+              <button
+                type="button"
+                className="sorting-game__queue-placeholder"
+                onClick={phase === 'idle' ? startGame : undefined}
+                disabled={phase !== 'idle'}
+              >
+                Tryk her eller på &quot;Start spil&quot; for at begynde at sortere figurerne.
+              </button>
             )}
           </div>
         </div>
@@ -484,19 +501,6 @@ export default function SortingGame({ onExit }: SortingGameProps) {
         >
           Højre →
         </button>
-      </div>
-
-      <div className="sorting-game__actions">
-        {phase === 'idle' && (
-          <button type="button" className="sorting-game__primary-button" onClick={startGame}>
-            Start spil
-          </button>
-        )}
-        {phase === 'paused' && (
-          <button type="button" className="sorting-game__primary-button" onClick={resumeGame}>
-            Fortsæt
-          </button>
-        )}
       </div>
 
       {phase === 'paused' && (
