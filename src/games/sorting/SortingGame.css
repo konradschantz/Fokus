@@ -4,6 +4,23 @@
   padding-bottom: 2.5rem;
 }
 
+.sorting-game__layout {
+  align-items: stretch;
+  gap: clamp(1.35rem, 3vw, 2.35rem);
+}
+
+.sorting-game__content {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 3vw, 1.75rem);
+}
+
+@media (min-width: 900px) {
+  .sorting-game__content {
+    padding-inline: clamp(1.25rem, 4vw, 2.5rem);
+  }
+}
+
 .sorting-game__header {
   margin-bottom: clamp(1.5rem, 4vw, 2rem);
 }
@@ -52,31 +69,38 @@
 }
 
 .sorting-game__play-area {
-  display: flex;
-  align-items: stretch;
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(260px, 1.2fr) minmax(160px, 1fr);
+  align-items: start;
   justify-content: center;
-  gap: clamp(1rem, 4vw, 3rem);
+  gap: clamp(0.85rem, 3vw, 2.75rem);
   margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
-  flex-wrap: wrap;
+  width: 100%;
+}
+
+@media (min-width: 900px) {
+  .sorting-game__play-area {
+    padding-inline: clamp(0.75rem, 3vw, 1.5rem);
+    margin-inline: auto;
+  }
 }
 
 .sorting-game__rule-column {
-  background: rgba(248, 250, 255, 0.85);
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  border-radius: 1.25rem;
-  padding: clamp(1rem, 2.8vw, 1.4rem) clamp(1.1rem, 3vw, 1.6rem);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  flex: 0 1 240px;
+  align-self: start;
+  background: none;
+  border: none;
+  padding: 0;
+  max-width: 240px;
+  width: 100%;
+  min-width: 0;
 }
 
-.sorting-game__rule-column--left {
-  border-left: 4px solid rgba(59, 130, 246, 0.55);
-}
-
+.sorting-game__rule-column--left,
 .sorting-game__rule-column--right {
-  border-right: 4px solid rgba(99, 102, 241, 0.55);
+  border: none;
 }
 
 .sorting-game__rule-title {
@@ -134,10 +158,8 @@
   overflow: visible;
   flex: 1 1 360px;
   max-width: min(100%, 460px);
-}
-
-.sorting-game__queue--hidden {
-  pointer-events: none;
+  justify-self: center;
+  width: 100%;
 }
 
 .sorting-game__queue::after {
@@ -171,18 +193,20 @@
   border: 2px dashed rgba(99, 102, 241, 0.35);
   border-radius: 1.5rem;
   box-shadow: 0 14px 30px rgba(79, 70, 229, 0.18);
+  box-sizing: border-box;
   color: #475569;
   cursor: pointer;
-  display: inline-flex;
+  display: flex;
   font: inherit;
   font-size: clamp(0.95rem, 2.3vw, 1.05rem);
   font-weight: 600;
   justify-content: center;
   line-height: 1.5;
-  max-width: min(100%, 22rem);
   padding: clamp(1.1rem, 3vw, 1.4rem) clamp(1.4rem, 4vw, 2.1rem);
   text-align: center;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  width: 100%;
+  height: 100%;
 }
 
 .sorting-game__queue-placeholder:hover,
@@ -426,20 +450,33 @@
 
 /* Animations removed because queue positioning relies on inline transforms */
 
-@media (max-width: 640px) {
-  .sorting-game {
-    padding-bottom: 2rem;
-  }
-
+@media (max-width: 900px) {
   .sorting-game__play-area {
-    flex-direction: column;
-    align-items: center;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
     gap: 1.25rem;
   }
 
   .sorting-game__rule-column {
-    padding: 0.85rem 1rem;
-    width: min(100%, 320px);
+    max-width: 320px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .sorting-game__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sorting-game__layout .game-scoreboard {
+    max-width: 420px;
+    width: 100%;
+    justify-self: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .sorting-game {
+    padding-bottom: 2rem;
   }
 
   .sorting-game__control-button {
@@ -467,8 +504,8 @@
   }
 
   .sorting-game__rule-column {
-    background: rgba(30, 41, 59, 0.85);
-    border-color: rgba(148, 163, 184, 0.28);
+    background: none;
+    border-color: transparent;
   }
 
   .sorting-game__rule-title {
@@ -489,7 +526,31 @@
   }
 
   .sorting-game__queue-placeholder {
-    color: #cbd5f5;
+    background: rgba(15, 23, 42, 0.82);
+    border-color: rgba(129, 140, 248, 0.45);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.55);
+    color: #e2e8f0;
+  }
+
+  .sorting-game__queue-placeholder:hover,
+  .sorting-game__queue-placeholder:focus-visible {
+    background: rgba(30, 41, 59, 0.88);
+    border-color: rgba(165, 180, 252, 0.65);
+    box-shadow: 0 26px 52px rgba(15, 23, 42, 0.58);
+  }
+
+  .sorting-game__queue-placeholder:disabled {
+    background: rgba(15, 23, 42, 0.72);
+    border-color: rgba(148, 163, 184, 0.35);
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.5);
+    color: rgba(203, 213, 225, 0.85);
+    opacity: 0.85;
+  }
+
+  .sorting-game__queue-placeholder:disabled:hover {
+    background: rgba(15, 23, 42, 0.72);
+    border-color: rgba(148, 163, 184, 0.35);
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.5);
   }
 
   .sorting-game__control-button {
