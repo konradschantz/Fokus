@@ -105,6 +105,7 @@ export default function SortingGame({ onExit }: SortingGameProps) {
   const scoreRef = useRef(score)
   const phaseRef = useRef<Phase>(phase)
   const forcedPauseRef = useRef(false)
+  const audioContextRef = useRef<AudioContext | null>(null)
 
   useEffect(() => {
     scoreRef.current = score
@@ -148,6 +149,55 @@ export default function SortingGame({ onExit }: SortingGameProps) {
     })
   }, [updateBestScore])
 
+  const playFeedbackSound = useCallback((type: 'correct' | 'incorrect') => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const audioContextCtor =
+      window.AudioContext ||
+      (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+
+    if (!audioContextCtor) {
+      return
+    }
+
+    let context = audioContextRef.current
+
+    if (!context) {
+      context = new audioContextCtor()
+      audioContextRef.current = context
+    }
+
+    if (context.state === 'suspended') {
+      void context.resume().catch(() => {})
+    }
+
+    const now = context.currentTime
+    const oscillator = context.createOscillator()
+    const gain = context.createGain()
+
+    const isCorrect = type === 'correct'
+    const duration = isCorrect ? 0.35 : 0.45
+    const startFrequency = isCorrect ? 880 : 240
+    const endFrequency = isCorrect ? 1320 : 160
+    const peakVolume = isCorrect ? 0.18 : 0.22
+
+    oscillator.type = isCorrect ? 'triangle' : 'sawtooth'
+    oscillator.frequency.setValueAtTime(startFrequency, now)
+    oscillator.frequency.exponentialRampToValueAtTime(endFrequency, now + duration)
+
+    gain.gain.setValueAtTime(0, now)
+    gain.gain.linearRampToValueAtTime(peakVolume, now + 0.05)
+    gain.gain.exponentialRampToValueAtTime(0.001, now + duration)
+
+    oscillator.connect(gain)
+    gain.connect(context.destination)
+
+    oscillator.start(now)
+    oscillator.stop(now + duration + 0.05)
+  }, [])
+
   const advanceCurrentShape = useCallback(
     (direction: Direction | null) => {
       setQueue((currentQueue) => {
@@ -166,6 +216,7 @@ export default function SortingGame({ onExit }: SortingGameProps) {
         })
 
         setFeedback(isCorrect ? 'correct' : 'incorrect')
+        playFeedbackSound(isCorrect ? 'correct' : 'incorrect')
 
         if (direction !== null) {
           setSortedCount((previous) => previous + 1)
@@ -175,7 +226,7 @@ export default function SortingGame({ onExit }: SortingGameProps) {
         return nextQueue
       })
     },
-    [rules],
+    [rules, playFeedbackSound],
   )
 
   const handleChoice = useCallback(
@@ -275,6 +326,15 @@ export default function SortingGame({ onExit }: SortingGameProps) {
     }
   }, [feedback])
 
+  useEffect(() => {
+    return () => {
+      if (audioContextRef.current) {
+        audioContextRef.current.close().catch(() => {})
+        audioContextRef.current = null
+      }
+    }
+  }, [])
+
   const startGame = useCallback(() => {
     setScore(0)
     scoreRef.current = 0
@@ -335,7 +395,7 @@ export default function SortingGame({ onExit }: SortingGameProps) {
         </div>
       </div>
 
-      <div className="sorting-game__rules">
+      <div className="sorting-game__play-area">
         <div className="sorting-game__rule-column sorting-game__rule-column--left">
           <div className="sorting-game__rule-title">Venstre</div>
           <div className="sorting-game__rule-items">
@@ -351,6 +411,39 @@ export default function SortingGame({ onExit }: SortingGameProps) {
             ))}
           </div>
         </div>
+
+        <div className="sorting-game__queue">
+          <div className="sorting-game__queue-track" aria-label="Figurkø">
+            {queue.map((shape, index) => {
+              const isActive = index === 0
+              const offset = Math.min(index, 6)
+              const translateX = offset * 2.6
+              const translateY = offset * 0.35
+              const scale = isActive ? 1 : Math.max(0.7, 1 - offset * 0.08)
+              const opacity = isActive ? 1 : Math.max(0.35, 0.85 - offset * 0.1)
+              const feedbackClass = isActive && feedback ? ` sorting-game__shape--${feedback}` : ''
+
+              return (
+                <div
+                  key={shape.id}
+                  className={`sorting-game__shape sorting-game__shape--${shape.type}${isActive ? ' sorting-game__shape--active' : ' sorting-game__shape--queued'}${feedbackClass}`}
+                  style={
+                    {
+                      '--shape-color': shape.color,
+                      transform: `translateX(calc(-50% + ${translateX}rem)) translateY(${translateY}rem) scale(${scale})`,
+                      opacity,
+                      zIndex: queue.length - index,
+                    } as CSSProperties
+                  }
+                  aria-label={isActive ? `Aktiv figur: ${SHAPE_LABELS[shape.type]}` : undefined}
+                  aria-hidden={!isActive}
+                  aria-live={isActive ? 'polite' : undefined}
+                />
+              )
+            })}
+          </div>
+        </div>
+
         <div className="sorting-game__rule-column sorting-game__rule-column--right">
           <div className="sorting-game__rule-title">Højre</div>
           <div className="sorting-game__rule-items">
@@ -365,38 +458,6 @@ export default function SortingGame({ onExit }: SortingGameProps) {
               </div>
             ))}
           </div>
-        </div>
-      </div>
-
-      <div className="sorting-game__queue">
-        <div className="sorting-game__queue-track" aria-label="Figurkø">
-          {queue.map((shape, index) => {
-            const isActive = index === 0
-            const offset = Math.min(index, 6)
-            const translateX = offset * 2.6
-            const translateY = offset * 0.35
-            const scale = isActive ? 1 : Math.max(0.7, 1 - offset * 0.08)
-            const opacity = isActive ? 1 : Math.max(0.35, 0.85 - offset * 0.1)
-            const feedbackClass = isActive && feedback ? ` sorting-game__shape--${feedback}` : ''
-
-            return (
-              <div
-                key={shape.id}
-                className={`sorting-game__shape sorting-game__shape--${shape.type}${isActive ? ' sorting-game__shape--active' : ' sorting-game__shape--queued'}${feedbackClass}`}
-                style={
-                  {
-                    '--shape-color': shape.color,
-                    transform: `translateX(calc(-50% + ${translateX}rem)) translateY(${translateY}rem) scale(${scale})`,
-                    opacity,
-                    zIndex: queue.length - index,
-                  } as CSSProperties
-                }
-                aria-label={isActive ? `Aktiv figur: ${SHAPE_LABELS[shape.type]}` : undefined}
-                aria-hidden={!isActive}
-                aria-live={isActive ? 'polite' : undefined}
-              />
-            )
-          })}
         </div>
       </div>
 

@@ -43,21 +43,24 @@
   color: #1e293b;
 }
 
-.sorting-game__rules {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
-  margin-bottom: clamp(1.5rem, 4vw, 2rem);
+.sorting-game__play-area {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: clamp(1rem, 4vw, 3rem);
+  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+  flex-wrap: wrap;
 }
 
 .sorting-game__rule-column {
   background: rgba(248, 250, 255, 0.85);
   border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 1.25rem;
-  padding: 1rem 1.1rem;
+  padding: clamp(1rem, 2.8vw, 1.4rem) clamp(1.1rem, 3vw, 1.6rem);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  flex: 0 1 240px;
 }
 
 .sorting-game__rule-column--left {
@@ -72,27 +75,27 @@
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  font-size: 0.85rem;
+  font-size: clamp(1.05rem, 2.8vw, 1.35rem);
   color: #1f2937;
 }
 
 .sorting-game__rule-items {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: clamp(0.6rem, 2vw, 0.85rem);
 }
 
 .sorting-game__rule-item {
   align-items: center;
   display: flex;
-  gap: 0.6rem;
-  font-size: 1rem;
+  gap: clamp(0.65rem, 2.2vw, 0.9rem);
+  font-size: clamp(1.05rem, 2.6vw, 1.2rem);
   color: #334155;
 }
 
 .sorting-game__rule-shape {
-  width: 2.25rem;
-  height: 2.25rem;
+  width: clamp(2.6rem, 6vw, 3rem);
+  height: clamp(2.6rem, 6vw, 3rem);
   background: var(--shape-color, #4f46e5);
   border-radius: 0.9rem;
   position: relative;
@@ -363,8 +366,15 @@
     padding-bottom: 2rem;
   }
 
+  .sorting-game__play-area {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
   .sorting-game__rule-column {
-    padding: 0.85rem 0.9rem;
+    padding: 0.85rem 1rem;
+    width: min(100%, 320px);
   }
 
   .sorting-game__control-button {
