@@ -438,6 +438,18 @@
 
 /* Animations removed because queue positioning relies on inline transforms */
 
+@media (max-width: 1100px) {
+  .sorting-game__play-area {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: clamp(0.9rem, 3vw, 1.5rem);
+  }
+
+  .sorting-game__rule-column {
+    max-width: 320px;
+  }
+}
+
 @media (max-width: 900px) {
   .sorting-game__play-area {
     grid-template-columns: minmax(0, 1fr);
