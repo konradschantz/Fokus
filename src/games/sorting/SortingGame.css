@@ -136,6 +136,10 @@
   width: 100%;
 }
 
+.sorting-game__queue--hidden {
+  pointer-events: none;
+}
+
 .sorting-game__queue::after {
   content: '';
   position: absolute;
