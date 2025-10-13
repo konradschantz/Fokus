@@ -88,6 +88,7 @@ export default function SortingGame({ onExit }: SortingGameProps) {
   const [rules, setRules] = useState<SortingRules>(() => generateRules())
   const [score, setScore] = useState(0)
   const [sortedCount, setSortedCount] = useState(0)
+  const [lastResult, setLastResult] = useState<{ score: number; sorted: number } | null>(null)
   const [bestScore, setBestScore] = useState(() => {
     if (typeof window === 'undefined') {
       return 0
@@ -101,6 +102,7 @@ export default function SortingGame({ onExit }: SortingGameProps) {
 
   const shapeIdRef = useRef(queue.length)
   const scoreRef = useRef(score)
+  const sortedCountRef = useRef(sortedCount)
   const phaseRef = useRef<Phase>(phase)
   const forcedPauseRef = useRef(false)
   const audioContextRef = useRef<AudioContext | null>(null)
@@ -109,6 +111,10 @@ export default function SortingGame({ onExit }: SortingGameProps) {
   useEffect(() => {
     scoreRef.current = score
   }, [score])
+
+  useEffect(() => {
+    sortedCountRef.current = sortedCount
+  }, [sortedCount])
 
   useEffect(() => {
     phaseRef.current = phase
@@ -192,12 +198,15 @@ export default function SortingGame({ onExit }: SortingGameProps) {
   }, [])
 
   const finishGame = useCallback(() => {
+    const finalScore = scoreRef.current
+    const finalSorted = sortedCountRef.current
+    setLastResult({ score: finalScore, sorted: finalSorted })
+
     setPhase((currentPhase) => {
       if (currentPhase === 'finished') {
         return currentPhase
       }
 
-      const finalScore = scoreRef.current
       updateBestScore(finalScore)
       phaseRef.current = 'finished'
       return 'finished'
@@ -416,7 +425,7 @@ export default function SortingGame({ onExit }: SortingGameProps) {
   )
 
   return (
-    <section className="menu sorting-game">
+    <section className="menu game-page sorting-game">
       <div className="menu__top-bar">
         <BrandLogo size={64} wordmarkSize="1.75rem" />
         <button type="button" className="menu__back-button" onClick={onExit}>
@@ -431,54 +440,77 @@ export default function SortingGame({ onExit }: SortingGameProps) {
         </p>
       </header>
 
-      <div className="sorting-game__actions sorting-game__actions--top">
-        {phase === 'idle' && (
-          <button type="button" className="sorting-game__primary-button" onClick={startGame}>
-            Start spil
-          </button>
-        )}
-        {phase === 'paused' && (
-          <button type="button" className="sorting-game__primary-button" onClick={resumeGame}>
-            Fortsæt
-          </button>
-        )}
-      </div>
+      <div className="game-page__grid sorting-game__layout">
+        <aside className="game-scoreboard">
+          <h2 className="game-scoreboard__title">Scoreboard</h2>
+          <dl className="game-scoreboard__rows">
+            <div className="game-scoreboard__row">
+              <dt>Bedste score</dt>
+              <dd>{bestScore}</dd>
+            </div>
+            <div className="game-scoreboard__row">
+              <dt>Sidste score</dt>
+              <dd>{lastResult ? lastResult.score : '–'}</dd>
+            </div>
+            <div className="game-scoreboard__row">
+              <dt>Sorterede figurer</dt>
+              <dd>{lastResult ? lastResult.sorted : '–'}</dd>
+            </div>
+          </dl>
+          <p className="game-scoreboard__footnote">
+            Rekorden gemmes lokalt og opdateres automatisk, når du slår den.
+          </p>
+        </aside>
 
-      <div className="sorting-game__status">
-        <div className="sorting-game__metric">
-          <span className="sorting-game__metric-label">Score</span>
-          <span className="sorting-game__metric-value">{score}</span>
-        </div>
-        <div className="sorting-game__metric">
-          <span className="sorting-game__metric-label">Bedste</span>
-          <span className="sorting-game__metric-value">{bestScore}</span>
-        </div>
-        <div className="sorting-game__metric">
-          <span className="sorting-game__metric-label">Sorterede</span>
-          <span className="sorting-game__metric-value">{sortedCount}</span>
-        </div>
-        <div className="sorting-game__metric">
-          <span className="sorting-game__metric-label">Tid</span>
-          <span className="sorting-game__metric-value">{formatTime(timeRemaining)}</span>
-        </div>
-      </div>
-
-      <div className="sorting-game__play-area">
-        <div className="sorting-game__rule-column sorting-game__rule-column--left">
-          <div className="sorting-game__rule-title">Venstre</div>
-          <div className="sorting-game__rule-items">
-            {leftShapes.map((shape) => (
-              <div key={`left-${shape}`} className={`sorting-game__rule-item sorting-game__rule-item--${shape}`}>
-                <span
-                  className={`sorting-game__rule-shape sorting-game__rule-shape--${shape}`}
-                  style={{ '--shape-color': SHAPE_COLORS[shape] } as CSSProperties}
-                  aria-hidden="true"
-                />
-                <span className="sorting-game__rule-label">{SHAPE_LABELS[shape]}</span>
-              </div>
-            ))}
+        <div className="sorting-game__content">
+          <div className="sorting-game__actions sorting-game__actions--top">
+            {phase === 'idle' && (
+              <button type="button" className="sorting-game__primary-button" onClick={startGame}>
+                Start spil
+              </button>
+            )}
+            {phase === 'paused' && (
+              <button type="button" className="sorting-game__primary-button" onClick={resumeGame}>
+                Fortsæt
+              </button>
+            )}
           </div>
-        </div>
+
+          <div className="sorting-game__status">
+            <div className="sorting-game__metric">
+              <span className="sorting-game__metric-label">Score</span>
+              <span className="sorting-game__metric-value">{score}</span>
+            </div>
+            <div className="sorting-game__metric">
+              <span className="sorting-game__metric-label">Bedste</span>
+              <span className="sorting-game__metric-value">{bestScore}</span>
+            </div>
+            <div className="sorting-game__metric">
+              <span className="sorting-game__metric-label">Sorterede</span>
+              <span className="sorting-game__metric-value">{sortedCount}</span>
+            </div>
+            <div className="sorting-game__metric">
+              <span className="sorting-game__metric-label">Tid</span>
+              <span className="sorting-game__metric-value">{formatTime(timeRemaining)}</span>
+            </div>
+          </div>
+
+          <div className="sorting-game__play-area">
+            <div className="sorting-game__rule-column sorting-game__rule-column--left">
+              <div className="sorting-game__rule-title">Venstre</div>
+              <div className="sorting-game__rule-items">
+                {leftShapes.map((shape) => (
+                  <div key={`left-${shape}`} className={`sorting-game__rule-item sorting-game__rule-item--${shape}`}>
+                    <span
+                      className={`sorting-game__rule-shape sorting-game__rule-shape--${shape}`}
+                      style={{ '--shape-color': SHAPE_COLORS[shape] } as CSSProperties}
+                      aria-hidden="true"
+                    />
+                    <span className="sorting-game__rule-label">{SHAPE_LABELS[shape]}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
 
         <div className="sorting-game__queue">
           <div className="sorting-game__queue-track" aria-label="Figurkø">
@@ -522,83 +554,85 @@ export default function SortingGame({ onExit }: SortingGameProps) {
           </div>
         </div>
 
-        <div className="sorting-game__rule-column sorting-game__rule-column--right">
-          <div className="sorting-game__rule-title">Højre</div>
-          <div className="sorting-game__rule-items">
-            {rightShapes.map((shape) => (
-              <div key={`right-${shape}`} className={`sorting-game__rule-item sorting-game__rule-item--${shape}`}>
-                <span
-                  className={`sorting-game__rule-shape sorting-game__rule-shape--${shape}`}
-                  style={{ '--shape-color': SHAPE_COLORS[shape] } as CSSProperties}
-                  aria-hidden="true"
-                />
-                <span className="sorting-game__rule-label">{SHAPE_LABELS[shape]}</span>
+            <div className="sorting-game__rule-column sorting-game__rule-column--right">
+              <div className="sorting-game__rule-title">Højre</div>
+              <div className="sorting-game__rule-items">
+                {rightShapes.map((shape) => (
+                  <div key={`right-${shape}`} className={`sorting-game__rule-item sorting-game__rule-item--${shape}`}>
+                    <span
+                      className={`sorting-game__rule-shape sorting-game__rule-shape--${shape}`}
+                      style={{ '--shape-color': SHAPE_COLORS[shape] } as CSSProperties}
+                      aria-hidden="true"
+                    />
+                    <span className="sorting-game__rule-label">{SHAPE_LABELS[shape]}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="sorting-game__controls" aria-hidden={phase !== 'running'}>
-        <button
-          type="button"
-          className="sorting-game__control-button sorting-game__control-button--left"
-          onClick={() => handleChoice('left')}
-          disabled={phase !== 'running'}
-        >
-          ← Venstre
-        </button>
-        <button
-          type="button"
-          className="sorting-game__control-button sorting-game__control-button--right"
-          onClick={() => handleChoice('right')}
-          disabled={phase !== 'running'}
-        >
-          Højre →
-        </button>
-      </div>
-
-      {phase === 'paused' && (
-        <div className="sorting-game__overlay" role="status" aria-live="assertive">
-          <div className="sorting-game__overlay-content">
-            <h2>Pause</h2>
-            <p>Vinduet mistede fokus. Klik på "Fortsæt" eller fokusér vinduet for at fortsætte.</p>
-          </div>
-        </div>
-      )}
-
-      {phase === 'finished' && (
-        <div className="sorting-game__overlay" role="status" aria-live="assertive">
-          <div className="sorting-game__overlay-content sorting-game__overlay-content--finished">
-            <h2>Spillet er slut!</h2>
-            <p className="sorting-game__overlay-description">Se din score og vælg hvad du vil gøre nu.</p>
-            <dl className="sorting-game__scoreboard">
-              <div className="sorting-game__scoreboard-row">
-                <dt>Din score</dt>
-                <dd>{scoreRef.current}</dd>
-              </div>
-              <div className="sorting-game__scoreboard-row">
-                <dt>Sorterede figurer</dt>
-                <dd>{sortedCount}</dd>
-              </div>
-              <div className="sorting-game__scoreboard-row">
-                <dt>Bedste score</dt>
-                <dd>{bestScore}</dd>
-              </div>
-            </dl>
-            <div className="sorting-game__overlay-actions">
-              <button type="button" className="sorting-game__primary-button" onClick={startGame}>
-                Prøv igen
-              </button>
-              {onExit && (
-                <button type="button" className="sorting-game__secondary-button" onClick={onExit}>
-                  Afslut spil
-                </button>
-              )}
             </div>
           </div>
+
+          <div className="sorting-game__controls" aria-hidden={phase !== 'running'}>
+            <button
+              type="button"
+              className="sorting-game__control-button sorting-game__control-button--left"
+              onClick={() => handleChoice('left')}
+              disabled={phase !== 'running'}
+            >
+              ← Venstre
+            </button>
+            <button
+              type="button"
+              className="sorting-game__control-button sorting-game__control-button--right"
+              onClick={() => handleChoice('right')}
+              disabled={phase !== 'running'}
+            >
+              Højre →
+            </button>
+          </div>
+
+          {phase === 'paused' && (
+            <div className="sorting-game__overlay" role="status" aria-live="assertive">
+              <div className="sorting-game__overlay-content">
+                <h2>Pause</h2>
+                <p>Vinduet mistede fokus. Klik på "Fortsæt" eller fokusér vinduet for at fortsætte.</p>
+              </div>
+            </div>
+          )}
+
+          {phase === 'finished' && (
+            <div className="sorting-game__overlay" role="status" aria-live="assertive">
+              <div className="sorting-game__overlay-content sorting-game__overlay-content--finished">
+                <h2>Spillet er slut!</h2>
+                <p className="sorting-game__overlay-description">Se din score og vælg hvad du vil gøre nu.</p>
+                <dl className="sorting-game__scoreboard">
+                  <div className="sorting-game__scoreboard-row">
+                    <dt>Din score</dt>
+                    <dd>{scoreRef.current}</dd>
+                  </div>
+                  <div className="sorting-game__scoreboard-row">
+                    <dt>Sorterede figurer</dt>
+                    <dd>{sortedCount}</dd>
+                  </div>
+                  <div className="sorting-game__scoreboard-row">
+                    <dt>Bedste score</dt>
+                    <dd>{bestScore}</dd>
+                  </div>
+                </dl>
+                <div className="sorting-game__overlay-actions">
+                  <button type="button" className="sorting-game__primary-button" onClick={startGame}>
+                    Prøv igen
+                  </button>
+                  {onExit && (
+                    <button type="button" className="sorting-game__secondary-button" onClick={onExit}>
+                      Afslut spil
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </section>
   )
 }

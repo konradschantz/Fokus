@@ -20,8 +20,8 @@ function App() {
         <Route index element={<Home />} />
         <Route path="memory" element={<MemoryGame />} />
         <Route path="sorting" element={<SortingGameScreen />} />
+        <Route path="reaction-test" element={<ReactionTestScreen />} />
       </Route>
-      <Route path="reaction-test" element={<ReactionTestScreen />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
