@@ -28,6 +28,14 @@ const games: GameDefinition[] = [
     path: '/memory',
     startLabel: 'Start memory',
   },
+  {
+    id: 'sorting',
+    name: 'Sorteringsspillet',
+    description:
+      'Sortér figurerne til venstre eller højre efter reglerne. Brug piletasterne, hold tempoet og jag din bedste score.',
+    path: '/sorting',
+    startLabel: 'Start sorteringsspil',
+  },
 ]
 
 export default function Home() {
