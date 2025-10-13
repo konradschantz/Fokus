@@ -110,6 +110,24 @@ export default function ReactionTest({ onExit }: ReactionTestProps) {
       </header>
 
       <div className="game-page__grid reaction-test__layout">
+        <div className="reaction-test__content">
+          <div
+            className={`reaction-test__play-area reaction-test__play-area--${phase}`}
+            onClick={handleClick}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                handleClick()
+              }
+            }}
+          >
+            <span className="reaction-test__message">{textByPhase(phase, reactionTime)}</span>
+          </div>
+          <p className="reaction-test__hint">Tip: Brug mellemrumstasten for at starte og reagere hurtigt.</p>
+        </div>
+
         <aside className="game-scoreboard">
           <h2 className="game-scoreboard__title">Scoreboard</h2>
           {highScores.length === 0 ? (
@@ -128,24 +146,6 @@ export default function ReactionTest({ onExit }: ReactionTestProps) {
             De fem hurtigste reaktionstider gemmes lokalt i denne browser.
           </p>
         </aside>
-
-        <div className="reaction-test__content">
-          <div
-            className={`reaction-test__play-area reaction-test__play-area--${phase}`}
-            onClick={handleClick}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault()
-                handleClick()
-              }
-            }}
-          >
-            <span className="reaction-test__message">{textByPhase(phase, reactionTime)}</span>
-          </div>
-          <p className="reaction-test__hint">Tip: Brug mellemrumstasten for at starte og reagere hurtigt.</p>
-        </div>
       </div>
     </section>
   )
