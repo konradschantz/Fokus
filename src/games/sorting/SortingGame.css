@@ -52,31 +52,29 @@
 }
 
 .sorting-game__play-area {
-  display: flex;
-  align-items: stretch;
+  display: grid;
+  grid-template-columns: minmax(200px, 240px) minmax(280px, 1fr) minmax(200px, 240px);
+  align-items: start;
   justify-content: center;
   gap: clamp(1rem, 4vw, 3rem);
   margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
-  flex-wrap: wrap;
 }
 
 .sorting-game__rule-column {
-  background: rgba(248, 250, 255, 0.85);
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  border-radius: 1.25rem;
-  padding: clamp(1rem, 2.8vw, 1.4rem) clamp(1.1rem, 3vw, 1.6rem);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  flex: 0 1 240px;
+  align-self: start;
+  background: none;
+  border: none;
+  padding: 0;
+  max-width: 240px;
+  width: 100%;
 }
 
-.sorting-game__rule-column--left {
-  border-left: 4px solid rgba(59, 130, 246, 0.55);
-}
-
+.sorting-game__rule-column--left,
 .sorting-game__rule-column--right {
-  border-right: 4px solid rgba(99, 102, 241, 0.55);
+  border: none;
 }
 
 .sorting-game__rule-title {
@@ -134,6 +132,8 @@
   overflow: visible;
   flex: 1 1 360px;
   max-width: min(100%, 460px);
+  justify-self: center;
+  width: 100%;
 }
 
 .sorting-game__queue--hidden {
@@ -426,20 +426,21 @@
 
 /* Animations removed because queue positioning relies on inline transforms */
 
-@media (max-width: 640px) {
-  .sorting-game {
-    padding-bottom: 2rem;
-  }
-
+@media (max-width: 900px) {
   .sorting-game__play-area {
-    flex-direction: column;
-    align-items: center;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
     gap: 1.25rem;
   }
 
   .sorting-game__rule-column {
-    padding: 0.85rem 1rem;
-    width: min(100%, 320px);
+    max-width: 320px;
+  }
+}
+
+@media (max-width: 640px) {
+  .sorting-game {
+    padding-bottom: 2rem;
   }
 
   .sorting-game__control-button {
@@ -467,8 +468,8 @@
   }
 
   .sorting-game__rule-column {
-    background: rgba(30, 41, 59, 0.85);
-    border-color: rgba(148, 163, 184, 0.28);
+    background: none;
+    border-color: transparent;
   }
 
   .sorting-game__rule-title {
