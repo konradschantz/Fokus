@@ -3,6 +3,7 @@ import './App.css'
 import Home from './screens/Home'
 import MemoryGame from './screens/MemoryGame'
 import ReactionTestScreen from './screens/ReactionTestScreen'
+import SortingGameScreen from './screens/SortingGameScreen'
 
 function AppLayout() {
   return (
@@ -18,6 +19,7 @@ function App() {
       <Route element={<AppLayout />}>
         <Route index element={<Home />} />
         <Route path="memory" element={<MemoryGame />} />
+        <Route path="sorting" element={<SortingGameScreen />} />
       </Route>
       <Route path="reaction-test" element={<ReactionTestScreen />} />
       <Route path="*" element={<Navigate to="/" replace />} />
