@@ -104,6 +104,7 @@ export default function SortingGame({ onExit }: SortingGameProps) {
   const phaseRef = useRef<Phase>(phase)
   const forcedPauseRef = useRef(false)
   const audioContextRef = useRef<AudioContext | null>(null)
+  const hintTimeoutRef = useRef<number | null>(null)
 
   useEffect(() => {
     scoreRef.current = score
@@ -112,6 +113,64 @@ export default function SortingGame({ onExit }: SortingGameProps) {
   useEffect(() => {
     phaseRef.current = phase
   }, [phase])
+
+  const clearHintTimeout = useCallback(() => {
+    if (hintTimeoutRef.current !== null) {
+      window.clearTimeout(hintTimeoutRef.current)
+      hintTimeoutRef.current = null
+    }
+  }, [])
+
+  const scheduleHintShuffle = useCallback(() => {
+    if (phaseRef.current !== 'running') {
+      return
+    }
+
+    clearHintTimeout()
+
+    const delay = (10 + Math.random() * 30) * 1000
+
+    hintTimeoutRef.current = window.setTimeout(() => {
+      setRules((currentRules) => {
+        const shapeToFlip = randomItem(SHAPE_TYPES)
+        const toggledDirection =
+          currentRules[shapeToFlip] === 'left' ? 'right' : 'left'
+
+        let nextRules: SortingRules = {
+          ...currentRules,
+          [shapeToFlip]: toggledDirection,
+        }
+
+        const directions = new Set<Direction>(Object.values(nextRules))
+
+        if (directions.size === 1) {
+          const alternativeShapes = SHAPE_TYPES.filter((shape) => shape !== shapeToFlip)
+          const backupShape = randomItem(alternativeShapes)
+
+          nextRules = {
+            ...nextRules,
+            [backupShape]: nextRules[backupShape] === 'left' ? 'right' : 'left',
+          }
+        }
+
+        return nextRules
+      })
+
+      scheduleHintShuffle()
+    }, delay)
+  }, [clearHintTimeout])
+
+  useEffect(() => {
+    if (phase === 'running') {
+      scheduleHintShuffle()
+    } else {
+      clearHintTimeout()
+    }
+
+    return () => {
+      clearHintTimeout()
+    }
+  }, [phase, scheduleHintShuffle, clearHintTimeout])
 
   const updateBestScore = useCallback((finalScore: number) => {
     setBestScore((previous) => {
@@ -458,8 +517,8 @@ export default function SortingGame({ onExit }: SortingGameProps) {
               <button
                 type="button"
                 className="sorting-game__queue-placeholder"
-                onClick={phase === 'idle' ? startGame : undefined}
-                disabled={phase !== 'idle'}
+                onClick={startGame}
+                disabled={phase === 'running' || phase === 'paused'}
               >
                 Tryk her eller på &quot;Start spil&quot; for at begynde at sortere figurerne.
               </button>
