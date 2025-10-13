@@ -1,6 +1,4 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { loadHighscores, type MemoryHighscores } from '../utils/memoryHighscores'
 import BrandLogo from '../components/BrandLogo'
 
 interface GameDefinition {
@@ -39,28 +37,6 @@ const games: GameDefinition[] = [
 ]
 
 export default function Home() {
-  const [highscores, setHighscores] = useState<MemoryHighscores>(() => loadHighscores())
-
-  useEffect(() => {
-    const updateScores = () => {
-      setHighscores(loadHighscores())
-    }
-
-    updateScores()
-
-    if (typeof window === 'undefined') {
-      return
-    }
-
-    window.addEventListener('storage', updateScores)
-    return () => {
-      window.removeEventListener('storage', updateScores)
-    }
-  }, [])
-
-  const easyScore = highscores.easy
-  const hasEasyScore = easyScore.bestMoves !== null && easyScore.bestTimeMs !== null
-
   return (
     <div className="menu">
       <header className="menu__header">
@@ -73,28 +49,6 @@ export default function Home() {
         />
         <p>Vælg et spil for at komme i gang.</p>
       </header>
-
-      <section
-        style={{
-          backgroundColor: 'rgba(99, 102, 241, 0.08)',
-          borderRadius: '1rem',
-          marginBottom: '1.5rem',
-          padding: '1rem 1.25rem',
-          fontSize: '0.95rem',
-          lineHeight: 1.6,
-        }}
-      >
-        <strong style={{ display: 'block', marginBottom: '0.25rem' }}>
-          Bedste hukommelses-score (Let):
-        </strong>
-        {hasEasyScore ? (
-          <span>
-            {easyScore.bestMoves} træk · {Math.max(0, Math.floor(easyScore.bestTimeMs! / 1000))} s
-          </span>
-        ) : (
-          <span>–</span>
-        )}
-      </section>
 
       <section className="menu__grid">
         {games.map((game) => (

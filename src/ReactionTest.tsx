@@ -1,14 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import BrandLogo from './components/BrandLogo'
+import './ReactionTest.css'
 
 type Phase = 'waiting' | 'ready' | 'now' | 'result'
-
-const backgroundByPhase: Record<Phase, string> = {
-  waiting: '#222',
-  ready: '#d33',
-  now: '#3d3',
-  result: '#222',
-}
 
 const textByPhase = (phase: Phase, reactionTime: number | null) => {
   switch (phase) {
@@ -100,92 +94,59 @@ export default function ReactionTest({ onExit }: ReactionTestProps) {
   }
 
   return (
-    <div
-      onClick={handleClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault()
-          handleClick()
-        }
-      }}
-      style={{
-        alignItems: 'center',
-        backgroundColor: backgroundByPhase[phase],
-        color: '#fff',
-        cursor: 'pointer',
-        display: 'flex',
-        fontFamily: 'system-ui, sans-serif',
-        fontSize: '2rem',
-        height: '100vh',
-        justifyContent: 'center',
-        lineHeight: 1.4,
-        position: 'relative',
-        padding: '0 1rem',
-        textAlign: 'center',
-        width: '100%',
-      }}
-    >
-      {textByPhase(phase, reactionTime)}
-      <div
-        style={{
-          position: 'absolute',
-          left: '1rem',
-          top: '1rem',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.75rem',
-          alignItems: 'flex-start',
-          maxWidth: 'min(280px, calc(100% - 2rem))',
-          pointerEvents: 'none',
-        }}
-      >
-        <BrandLogo size={56} wordmarkSize="1.6rem" />
-        <div
-          style={{
-            backgroundColor: 'rgba(0, 0, 0, 0.45)',
-            borderRadius: '0.75rem',
-            fontSize: '1rem',
-            lineHeight: 1.6,
-            padding: '1rem 1.25rem',
-            textAlign: 'left',
-            width: '100%',
-          }}
-        >
-          <h2 style={{ fontSize: '1.1rem', margin: '0 0 0.5rem' }}>
-            Top 5 hurtigste tider
-          </h2>
+    <section className="menu game-page reaction-test">
+      <div className="menu__top-bar">
+        <BrandLogo size={64} wordmarkSize="1.75rem" />
+        {onExit && (
+          <button type="button" className="menu__back-button" onClick={onExit}>
+            Tilbage til menu
+          </button>
+        )}
+      </div>
+
+      <header className="menu__header">
+        <h1>Reaktionstest</h1>
+        <p>Hold fokus og klik så hurtigt som muligt, når feltet skifter farve.</p>
+      </header>
+
+      <div className="game-page__grid reaction-test__layout">
+        <aside className="game-scoreboard">
+          <h2 className="game-scoreboard__title">Scoreboard</h2>
           {highScores.length === 0 ? (
-            <p style={{ fontSize: '0.95rem', margin: 0 }}>Ingen tider registreret endnu.</p>
+            <p className="game-scoreboard__empty">Ingen tider registreret endnu.</p>
           ) : (
-            <ol style={{ margin: 0, paddingLeft: '1.25rem' }}>
+            <ol className="reaction-test__scores">
               {highScores.map((score, index) => (
-                <li key={`${score}-${index}`} style={{ marginBottom: '0.25rem' }}>
-                  {Math.round(score)} ms
+                <li key={`${score}-${index}`}>
+                  <span className="reaction-test__score-rank">#{index + 1}</span>
+                  <span className="reaction-test__score-value">{Math.round(score)} ms</span>
                 </li>
               ))}
             </ol>
           )}
+          <p className="game-scoreboard__footnote">
+            De fem hurtigste reaktionstider gemmes lokalt i denne browser.
+          </p>
+        </aside>
+
+        <div className="reaction-test__content">
+          <div
+            className={`reaction-test__play-area reaction-test__play-area--${phase}`}
+            onClick={handleClick}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                handleClick()
+              }
+            }}
+          >
+            <span className="reaction-test__message">{textByPhase(phase, reactionTime)}</span>
+          </div>
+          <p className="reaction-test__hint">Tip: Brug mellemrumstasten for at starte og reagere hurtigt.</p>
         </div>
       </div>
-      {onExit && (
-        <button
-          onClick={(event) => {
-            event.stopPropagation()
-            onExit()
-          }}
-          className="menu__back-button reaction-test__back-button"
-          style={{ right: '1rem', top: '1rem', position: 'absolute' }}
-          onMouseDown={(event) => event.stopPropagation()}
-          onTouchStart={(event) => event.stopPropagation()}
-          onKeyDown={(event) => {
-            event.stopPropagation()
-          }}
-        >
-          Tilbage til menu
-        </button>
-      )}
-    </div>
+    </section>
   )
 }
