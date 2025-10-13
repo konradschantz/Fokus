@@ -20,7 +20,11 @@ interface SortingRules {
 }
 
 const SHAPE_TYPES: ShapeType[] = ['square', 'triangle', 'circle']
-const SHAPE_COLORS = ['#f97316', '#22d3ee', '#a855f7', '#facc15', '#ef4444', '#10b981'] as const
+const SHAPE_COLORS: Record<ShapeType, string> = {
+  square: '#f97316',
+  triangle: '#22d3ee',
+  circle: '#a855f7',
+}
 const SHAPE_LABELS: Record<ShapeType, string> = {
   square: 'Firkant',
   triangle: 'Trekant',
@@ -65,10 +69,12 @@ function formatTime(seconds: number): string {
 }
 
 function createShape(id: number): Shape {
+  const type = randomItem(SHAPE_TYPES)
+
   return {
     id,
-    type: randomItem(SHAPE_TYPES),
-    color: randomItem(SHAPE_COLORS),
+    type,
+    color: SHAPE_COLORS[type],
   }
 }
 
@@ -337,6 +343,7 @@ export default function SortingGame({ onExit }: SortingGameProps) {
               <div key={`left-${shape}`} className={`sorting-game__rule-item sorting-game__rule-item--${shape}`}>
                 <span
                   className={`sorting-game__rule-shape sorting-game__rule-shape--${shape}`}
+                  style={{ '--shape-color': SHAPE_COLORS[shape] } as CSSProperties}
                   aria-hidden="true"
                 />
                 <span className="sorting-game__rule-label">{SHAPE_LABELS[shape]}</span>
@@ -351,6 +358,7 @@ export default function SortingGame({ onExit }: SortingGameProps) {
               <div key={`right-${shape}`} className={`sorting-game__rule-item sorting-game__rule-item--${shape}`}>
                 <span
                   className={`sorting-game__rule-shape sorting-game__rule-shape--${shape}`}
+                  style={{ '--shape-color': SHAPE_COLORS[shape] } as CSSProperties}
                   aria-hidden="true"
                 />
                 <span className="sorting-game__rule-label">{SHAPE_LABELS[shape]}</span>
@@ -422,14 +430,6 @@ export default function SortingGame({ onExit }: SortingGameProps) {
             Fortsæt
           </button>
         )}
-        {phase === 'finished' && (
-          <>
-            <div className="sorting-game__summary">Din slutscore: {scoreRef.current}</div>
-            <button type="button" className="sorting-game__primary-button" onClick={startGame}>
-              Spil igen
-            </button>
-          </>
-        )}
       </div>
 
       {phase === 'paused' && (
@@ -443,11 +443,33 @@ export default function SortingGame({ onExit }: SortingGameProps) {
 
       {phase === 'finished' && (
         <div className="sorting-game__overlay" role="status" aria-live="assertive">
-          <div className="sorting-game__overlay-content">
-            <h2>Tiden er gået!</h2>
-            <p>Din score: {scoreRef.current}</p>
-            <p>Sorterede figurer: {sortedCount}</p>
-            <p>Bedste score: {bestScore}</p>
+          <div className="sorting-game__overlay-content sorting-game__overlay-content--finished">
+            <h2>Spillet er slut!</h2>
+            <p className="sorting-game__overlay-description">Se din score og vælg hvad du vil gøre nu.</p>
+            <dl className="sorting-game__scoreboard">
+              <div className="sorting-game__scoreboard-row">
+                <dt>Din score</dt>
+                <dd>{scoreRef.current}</dd>
+              </div>
+              <div className="sorting-game__scoreboard-row">
+                <dt>Sorterede figurer</dt>
+                <dd>{sortedCount}</dd>
+              </div>
+              <div className="sorting-game__scoreboard-row">
+                <dt>Bedste score</dt>
+                <dd>{bestScore}</dd>
+              </div>
+            </dl>
+            <div className="sorting-game__overlay-actions">
+              <button type="button" className="sorting-game__primary-button" onClick={startGame}>
+                Prøv igen
+              </button>
+              {onExit && (
+                <button type="button" className="sorting-game__secondary-button" onClick={onExit}>
+                  Afslut spil
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

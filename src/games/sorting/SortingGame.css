@@ -93,40 +93,20 @@
 .sorting-game__rule-shape {
   width: 2.25rem;
   height: 2.25rem;
-  background: rgba(79, 70, 229, 0.14);
-  border-radius: 0.75rem;
+  background: var(--shape-color, #4f46e5);
+  border-radius: 0.9rem;
   position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-block;
+  flex-shrink: 0;
+  box-shadow: 0 6px 12px rgba(15, 23, 42, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.sorting-game__rule-shape::after {
-  content: '';
-  display: block;
-  width: 75%;
-  height: 75%;
-  background: rgba(79, 70, 229, 0.8);
-  border-radius: 1rem;
+.sorting-game__rule-shape--circle {
+  border-radius: 50%;
 }
 
-.sorting-game__rule-item--square .sorting-game__rule-shape::after {
-  background: #f97316;
-}
-
-.sorting-game__rule-item--triangle .sorting-game__rule-shape::after {
-  background: #22d3ee;
-}
-
-.sorting-game__rule-item--circle .sorting-game__rule-shape::after {
-  background: #a855f7;
-}
-
-.sorting-game__rule-shape--circle::after {
-  border-radius: 999px;
-}
-
-.sorting-game__rule-shape--triangle::after {
+.sorting-game__rule-shape--triangle {
   border-radius: 0;
   clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
 }
@@ -194,13 +174,13 @@
 }
 
 .sorting-game__shape--correct {
-  box-shadow: 0 22px 42px rgba(34, 197, 94, 0.38);
-  filter: saturate(1.2) brightness(1.05);
+  box-shadow: 0 0 0 12px rgba(34, 197, 94, 0.35), 0 26px 48px rgba(34, 197, 94, 0.45);
+  filter: saturate(1.15) brightness(1.05);
 }
 
 .sorting-game__shape--incorrect {
-  box-shadow: 0 20px 38px rgba(248, 113, 113, 0.38);
-  filter: saturate(0.75) brightness(0.95);
+  box-shadow: 0 0 0 12px rgba(248, 113, 113, 0.35), 0 26px 48px rgba(248, 113, 113, 0.45);
+  filter: saturate(0.85) brightness(0.9);
 }
 
 .sorting-game__controls {
@@ -268,13 +248,6 @@
   outline: none;
 }
 
-.sorting-game__summary {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #1e293b;
-  text-align: center;
-}
-
 .sorting-game__overlay {
   position: absolute;
   inset: 0;
@@ -292,6 +265,84 @@
   max-width: 420px;
   display: grid;
   gap: 0.75rem;
+}
+
+.sorting-game__overlay-content--finished {
+  max-width: 480px;
+  gap: 1rem;
+}
+
+.sorting-game__overlay-description {
+  margin: 0;
+  line-height: 1.6;
+  font-size: 1rem;
+  color: #e2e8f0;
+}
+
+.sorting-game__scoreboard {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.sorting-game__scoreboard-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 0.9rem;
+  padding: 0.85rem 1.1rem;
+  gap: 1rem;
+}
+
+.sorting-game__scoreboard-row dt {
+  margin: 0;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #cbd5f5;
+}
+
+.sorting-game__scoreboard-row dd {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.sorting-game__overlay-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.sorting-game__secondary-button {
+  background: rgba(248, 250, 255, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  border-radius: 999px;
+  color: #f8fafc;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.85rem 2rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.sorting-game__secondary-button:hover,
+.sorting-game__secondary-button:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.32);
+  background: rgba(148, 163, 184, 0.22);
+  border-color: rgba(148, 163, 184, 0.85);
+}
+
+.sorting-game__secondary-button:focus-visible {
+  outline: 3px solid rgba(148, 163, 184, 0.7);
+  outline-offset: 3px;
 }
 
 .sorting-game__overlay-content h2 {
@@ -353,6 +404,10 @@
     color: #e0e7ff;
   }
 
+  .sorting-game__rule-shape {
+    box-shadow: 0 8px 16px rgba(15, 23, 42, 0.45);
+  }
+
   .sorting-game__queue {
     background: linear-gradient(135deg, rgba(30, 64, 175, 0.28), rgba(67, 56, 202, 0.3));
     border-color: rgba(99, 102, 241, 0.32);
@@ -366,7 +421,31 @@
     box-shadow: 0 20px 40px rgba(37, 99, 235, 0.35);
   }
 
-  .sorting-game__summary {
-    color: #e2e8f0;
+  .sorting-game__overlay-description {
+    color: #cbd5f5;
+  }
+
+  .sorting-game__scoreboard-row {
+    background: rgba(15, 23, 42, 0.72);
+    border-color: rgba(148, 163, 184, 0.32);
+  }
+
+  .sorting-game__scoreboard-row dt {
+    color: #94a3b8;
+  }
+
+  .sorting-game__scoreboard-row dd {
+    color: #f1f5f9;
+  }
+
+  .sorting-game__secondary-button {
+    background: rgba(148, 163, 184, 0.12);
+    border-color: rgba(148, 163, 184, 0.55);
+    color: #f8fafc;
+  }
+
+  .sorting-game__secondary-button:hover,
+  .sorting-game__secondary-button:focus-visible {
+    background: rgba(148, 163, 184, 0.22);
   }
 }
