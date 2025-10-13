@@ -331,27 +331,6 @@ export default function MemoryGame() {
       </header>
 
       <div className="game-page__grid memory-game__layout">
-        <aside className="game-scoreboard">
-          <h2 className="game-scoreboard__title">Scoreboard</h2>
-          <dl className="game-scoreboard__rows">
-            <div className="game-scoreboard__row">
-              <dt>Færreste træk</dt>
-              <dd>{currentHighscore.bestMoves !== null ? currentHighscore.bestMoves : '–'}</dd>
-            </div>
-            <div className="game-scoreboard__row">
-              <dt>Hurtigste tid</dt>
-              <dd>
-                {currentHighscore.bestTimeMs !== null
-                  ? `${formatSeconds(currentHighscore.bestTimeMs)} s`
-                  : '–'}
-              </dd>
-            </div>
-          </dl>
-          <p className="game-scoreboard__footnote">
-            Resultaterne gemmes pr. sværhedsgrad på denne enhed.
-          </p>
-        </aside>
-
         <div className="memory-game__content">
           <div
             style={{
@@ -524,6 +503,27 @@ export default function MemoryGame() {
         })}
           </div>
         </div>
+
+        <aside className="game-scoreboard">
+          <h2 className="game-scoreboard__title">Scoreboard</h2>
+          <dl className="game-scoreboard__rows">
+            <div className="game-scoreboard__row">
+              <dt>Færreste træk</dt>
+              <dd>{currentHighscore.bestMoves !== null ? currentHighscore.bestMoves : '–'}</dd>
+            </div>
+            <div className="game-scoreboard__row">
+              <dt>Hurtigste tid</dt>
+              <dd>
+                {currentHighscore.bestTimeMs !== null
+                  ? `${formatSeconds(currentHighscore.bestTimeMs)} s`
+                  : '–'}
+              </dd>
+            </div>
+          </dl>
+          <p className="game-scoreboard__footnote">
+            Resultaterne gemmes pr. sværhedsgrad på denne enhed.
+          </p>
+        </aside>
       </div>
     </section>
   )

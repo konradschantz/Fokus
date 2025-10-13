@@ -441,27 +441,6 @@ export default function SortingGame({ onExit }: SortingGameProps) {
       </header>
 
       <div className="game-page__grid sorting-game__layout">
-        <aside className="game-scoreboard">
-          <h2 className="game-scoreboard__title">Scoreboard</h2>
-          <dl className="game-scoreboard__rows">
-            <div className="game-scoreboard__row">
-              <dt>Bedste score</dt>
-              <dd>{bestScore}</dd>
-            </div>
-            <div className="game-scoreboard__row">
-              <dt>Sidste score</dt>
-              <dd>{lastResult ? lastResult.score : '–'}</dd>
-            </div>
-            <div className="game-scoreboard__row">
-              <dt>Sorterede figurer</dt>
-              <dd>{lastResult ? lastResult.sorted : '–'}</dd>
-            </div>
-          </dl>
-          <p className="game-scoreboard__footnote">
-            Rekorden gemmes lokalt og opdateres automatisk, når du slår den.
-          </p>
-        </aside>
-
         <div className="sorting-game__content">
           <div className="sorting-game__actions sorting-game__actions--top">
             {phase === 'idle' && (
@@ -632,6 +611,27 @@ export default function SortingGame({ onExit }: SortingGameProps) {
             </div>
           )}
         </div>
+
+        <aside className="game-scoreboard">
+          <h2 className="game-scoreboard__title">Scoreboard</h2>
+          <dl className="game-scoreboard__rows">
+            <div className="game-scoreboard__row">
+              <dt>Bedste score</dt>
+              <dd>{bestScore}</dd>
+            </div>
+            <div className="game-scoreboard__row">
+              <dt>Sidste score</dt>
+              <dd>{lastResult ? lastResult.score : '–'}</dd>
+            </div>
+            <div className="game-scoreboard__row">
+              <dt>Sorterede figurer</dt>
+              <dd>{lastResult ? lastResult.sorted : '–'}</dd>
+            </div>
+          </dl>
+          <p className="game-scoreboard__footnote">
+            Rekorden gemmes lokalt og opdateres automatisk, når du slår den.
+          </p>
+        </aside>
       </div>
     </section>
   )

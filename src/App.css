@@ -116,15 +116,9 @@
 }
 
 .game-page__grid {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: clamp(1rem, 3vw, 1.75rem);
-}
-
-@media (min-width: 900px) {
-  .game-page__grid {
-    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
-    align-items: start;
-  }
 }
 
 .game-scoreboard {
