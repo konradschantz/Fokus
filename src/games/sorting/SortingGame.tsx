@@ -480,11 +480,7 @@ export default function SortingGame({ onExit }: SortingGameProps) {
           </div>
         </div>
 
-        <div
-          className={`sorting-game__queue${
-            phase === 'running' || phase === 'paused' ? '' : ' sorting-game__queue--hidden'
-          }`}
-        >
+        <div className="sorting-game__queue">
           <div className="sorting-game__queue-track" aria-label="Figurkø">
             {phase === 'running' || phase === 'paused' ? (
               queue.map((shape, index) => {
