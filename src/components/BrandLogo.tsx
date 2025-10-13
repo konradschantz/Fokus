@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
-import logoUrl from '../assets/brand-logo.svg'
+
+const LOGO_URL = '/brand-logo.svg'
 
 type BrandLogoElement = 'div' | 'span' | 'h1' | 'header'
 
@@ -40,7 +41,7 @@ export default function BrandLogo({
 
   return (
     <Component className={classes} style={inlineStyle}>
-      <img src={logoUrl} alt="Fokus" className="brand-logo__mark" />
+      <img src={LOGO_URL} alt="Fokus" className="brand-logo__mark" />
       {showWordmark ? <span className="brand-logo__wordmark">Fokus</span> : null}
     </Component>
   )
