@@ -84,9 +84,7 @@ interface SortingGameProps {
 
 export default function SortingGame({ onExit }: SortingGameProps) {
   const [phase, setPhase] = useState<Phase>('idle')
-  const [queue, setQueue] = useState<Shape[]>(() =>
-    Array.from({ length: INITIAL_QUEUE_LENGTH }, (_, index) => createShape(index)),
-  )
+  const [queue, setQueue] = useState<Shape[]>([])
   const [rules, setRules] = useState<SortingRules>(() => generateRules())
   const [score, setScore] = useState(0)
   const [sortedCount, setSortedCount] = useState(0)
@@ -114,8 +112,6 @@ export default function SortingGame({ onExit }: SortingGameProps) {
   useEffect(() => {
     phaseRef.current = phase
   }, [phase])
-
-  const activeShape = queue[0]
 
   const updateBestScore = useCallback((finalScore: number) => {
     setBestScore((previous) => {
@@ -412,35 +408,45 @@ export default function SortingGame({ onExit }: SortingGameProps) {
           </div>
         </div>
 
-        <div className="sorting-game__queue">
+        <div
+          className={`sorting-game__queue${
+            phase === 'running' || phase === 'paused' ? '' : ' sorting-game__queue--hidden'
+          }`}
+        >
           <div className="sorting-game__queue-track" aria-label="Figurkø">
-            {queue.map((shape, index) => {
-              const isActive = index === 0
-              const offset = Math.min(index, 6)
-              const translateX = offset * 2.6
-              const translateY = offset * 0.35
-              const scale = isActive ? 1 : Math.max(0.7, 1 - offset * 0.08)
-              const opacity = isActive ? 1 : Math.max(0.35, 0.85 - offset * 0.1)
-              const feedbackClass = isActive && feedback ? ` sorting-game__shape--${feedback}` : ''
+            {phase === 'running' || phase === 'paused' ? (
+              queue.map((shape, index) => {
+                const isActive = index === 0
+                const offset = Math.min(index, 4)
+                const translateX = offset * 1.6
+                const translateY = offset * 0.3
+                const scale = isActive ? 1 : Math.max(0.7, 1 - offset * 0.08)
+                const opacity = isActive ? 1 : Math.max(0.35, 0.85 - offset * 0.1)
+                const feedbackClass = isActive && feedback ? ` sorting-game__shape--${feedback}` : ''
 
-              return (
-                <div
-                  key={shape.id}
-                  className={`sorting-game__shape sorting-game__shape--${shape.type}${isActive ? ' sorting-game__shape--active' : ' sorting-game__shape--queued'}${feedbackClass}`}
-                  style={
-                    {
-                      '--shape-color': shape.color,
-                      transform: `translateX(calc(-50% + ${translateX}rem)) translateY(${translateY}rem) scale(${scale})`,
-                      opacity,
-                      zIndex: queue.length - index,
-                    } as CSSProperties
-                  }
-                  aria-label={isActive ? `Aktiv figur: ${SHAPE_LABELS[shape.type]}` : undefined}
-                  aria-hidden={!isActive}
-                  aria-live={isActive ? 'polite' : undefined}
-                />
-              )
-            })}
+                return (
+                  <div
+                    key={shape.id}
+                    className={`sorting-game__shape sorting-game__shape--${shape.type}${isActive ? ' sorting-game__shape--active' : ' sorting-game__shape--queued'}${feedbackClass}`}
+                    style={
+                      {
+                        '--shape-color': shape.color,
+                        transform: `translateX(calc(-50% + ${translateX}rem)) translateY(${translateY}rem) scale(${scale})`,
+                        opacity,
+                        zIndex: queue.length - index,
+                      } as CSSProperties
+                    }
+                    aria-label={isActive ? `Aktiv figur: ${SHAPE_LABELS[shape.type]}` : undefined}
+                    aria-hidden={!isActive}
+                    aria-live={isActive ? 'polite' : undefined}
+                  />
+                )
+              })
+            ) : (
+              <div className="sorting-game__queue-placeholder">
+                Tryk på &quot;Start spil&quot; for at begynde at sortere figurerne.
+              </div>
+            )}
           </div>
         </div>
 
