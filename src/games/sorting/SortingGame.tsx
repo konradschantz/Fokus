@@ -21,11 +21,13 @@ interface SortingRules {
 
 const SHAPE_TYPES: ShapeType[] = ['square', 'triangle', 'circle']
 const SHAPE_COLORS = ['#f97316', '#22d3ee', '#a855f7', '#facc15', '#ef4444', '#10b981'] as const
+const SHAPE_LABELS: Record<ShapeType, string> = {
+  square: 'Firkant',
+  triangle: 'Trekant',
+  circle: 'Cirkel',
+}
 
 const GAME_DURATION_SECONDS = 60
-const SPEED_INCREASE_THRESHOLD = 30
-const NORMAL_RESPONSE_WINDOW_MS = 1800
-const FAST_RESPONSE_WINDOW_MS = 1150
 const INITIAL_QUEUE_LENGTH = 5
 const BEST_SCORE_STORAGE_KEY = 'sorting-game-best-score'
 
@@ -81,6 +83,7 @@ export default function SortingGame({ onExit }: SortingGameProps) {
   )
   const [rules, setRules] = useState<SortingRules>(() => generateRules())
   const [score, setScore] = useState(0)
+  const [sortedCount, setSortedCount] = useState(0)
   const [bestScore, setBestScore] = useState(() => {
     if (typeof window === 'undefined') {
       return 0
@@ -91,13 +94,11 @@ export default function SortingGame({ onExit }: SortingGameProps) {
   })
   const [timeRemaining, setTimeRemaining] = useState(GAME_DURATION_SECONDS)
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null)
-  const [speedLevel, setSpeedLevel] = useState<'normal' | 'fast'>('normal')
 
   const shapeIdRef = useRef(queue.length)
   const scoreRef = useRef(score)
   const phaseRef = useRef<Phase>(phase)
   const forcedPauseRef = useRef(false)
-  const responseTimeoutRef = useRef<number | null>(null)
 
   useEffect(() => {
     scoreRef.current = score
@@ -108,7 +109,6 @@ export default function SortingGame({ onExit }: SortingGameProps) {
   }, [phase])
 
   const activeShape = queue[0]
-  const upcomingShapes = useMemo(() => queue.slice(1, 5), [queue])
 
   const updateBestScore = useCallback((finalScore: number) => {
     setBestScore((previous) => {
@@ -161,6 +161,10 @@ export default function SortingGame({ onExit }: SortingGameProps) {
 
         setFeedback(isCorrect ? 'correct' : 'incorrect')
 
+        if (direction !== null) {
+          setSortedCount((previous) => previous + 1)
+        }
+
         const nextQueue = [...rest, createShape(shapeIdRef.current++)]
         return nextQueue
       })
@@ -172,11 +176,6 @@ export default function SortingGame({ onExit }: SortingGameProps) {
     (direction: Direction) => {
       if (phaseRef.current !== 'running') {
         return
-      }
-
-      if (responseTimeoutRef.current !== null) {
-        window.clearTimeout(responseTimeoutRef.current)
-        responseTimeoutRef.current = null
       }
 
       advanceCurrentShape(direction)
@@ -233,16 +232,6 @@ export default function SortingGame({ onExit }: SortingGameProps) {
   }, [phase, handleChoice])
 
   useEffect(() => {
-    if (phase === 'running' && timeRemaining <= SPEED_INCREASE_THRESHOLD) {
-      setSpeedLevel('fast')
-    }
-
-    if (phase === 'idle' || phase === 'finished') {
-      setSpeedLevel('normal')
-    }
-  }, [phase, timeRemaining])
-
-  useEffect(() => {
     const handleBlur = () => {
       if (phaseRef.current === 'running') {
         forcedPauseRef.current = true
@@ -280,39 +269,6 @@ export default function SortingGame({ onExit }: SortingGameProps) {
     }
   }, [feedback])
 
-  useEffect(() => {
-    if (phase !== 'running') {
-      if (responseTimeoutRef.current !== null) {
-        window.clearTimeout(responseTimeoutRef.current)
-        responseTimeoutRef.current = null
-      }
-      return
-    }
-
-    if (!activeShape) {
-      return
-    }
-
-    if (responseTimeoutRef.current !== null) {
-      window.clearTimeout(responseTimeoutRef.current)
-    }
-
-    const delay = speedLevel === 'fast' ? FAST_RESPONSE_WINDOW_MS : NORMAL_RESPONSE_WINDOW_MS
-
-    responseTimeoutRef.current = window.setTimeout(() => {
-      responseTimeoutRef.current = null
-      advanceCurrentShape(null)
-    }, delay)
-
-    return () => {
-      if (responseTimeoutRef.current !== null) {
-        window.clearTimeout(responseTimeoutRef.current)
-        responseTimeoutRef.current = null
-      }
-    }
-  }, [phase, activeShape, speedLevel, advanceCurrentShape])
-
-
   const startGame = useCallback(() => {
     setScore(0)
     scoreRef.current = 0
@@ -320,12 +276,8 @@ export default function SortingGame({ onExit }: SortingGameProps) {
     setRules(generateRules())
     resetQueue()
     setFeedback(null)
+    setSortedCount(0)
     forcedPauseRef.current = false
-    setSpeedLevel('normal')
-    if (responseTimeoutRef.current !== null) {
-      window.clearTimeout(responseTimeoutRef.current)
-      responseTimeoutRef.current = null
-    }
     setPhase('running')
   }, [resetQueue])
 
@@ -335,10 +287,6 @@ export default function SortingGame({ onExit }: SortingGameProps) {
       setPhase('running')
     }
   }, [])
-
-  const speedClass = useMemo(() => {
-    return speedLevel === 'fast' ? 'sorting-game__queue--fast' : 'sorting-game__queue--normal'
-  }, [speedLevel])
 
   const leftShapes = useMemo(() => SHAPE_TYPES.filter((shape) => rules[shape] === 'left'), [rules])
   const rightShapes = useMemo(
@@ -372,6 +320,10 @@ export default function SortingGame({ onExit }: SortingGameProps) {
           <span className="sorting-game__metric-value">{bestScore}</span>
         </div>
         <div className="sorting-game__metric">
+          <span className="sorting-game__metric-label">Sorterede</span>
+          <span className="sorting-game__metric-value">{sortedCount}</span>
+        </div>
+        <div className="sorting-game__metric">
           <span className="sorting-game__metric-label">Tid</span>
           <span className="sorting-game__metric-value">{formatTime(timeRemaining)}</span>
         </div>
@@ -383,12 +335,11 @@ export default function SortingGame({ onExit }: SortingGameProps) {
           <div className="sorting-game__rule-items">
             {leftShapes.map((shape) => (
               <div key={`left-${shape}`} className={`sorting-game__rule-item sorting-game__rule-item--${shape}`}>
-                <span className="sorting-game__rule-icon" aria-hidden="true">
-                  {shape === 'square' && '▢'}
-                  {shape === 'triangle' && '△'}
-                  {shape === 'circle' && '◯'}
-                </span>
-                <span className="sorting-game__rule-label">{shape === 'square' ? 'Firkant' : shape === 'triangle' ? 'Trekant' : 'Cirkel'}</span>
+                <span
+                  className={`sorting-game__rule-shape sorting-game__rule-shape--${shape}`}
+                  aria-hidden="true"
+                />
+                <span className="sorting-game__rule-label">{SHAPE_LABELS[shape]}</span>
               </div>
             ))}
           </div>
@@ -398,38 +349,46 @@ export default function SortingGame({ onExit }: SortingGameProps) {
           <div className="sorting-game__rule-items">
             {rightShapes.map((shape) => (
               <div key={`right-${shape}`} className={`sorting-game__rule-item sorting-game__rule-item--${shape}`}>
-                <span className="sorting-game__rule-icon" aria-hidden="true">
-                  {shape === 'square' && '▢'}
-                  {shape === 'triangle' && '△'}
-                  {shape === 'circle' && '◯'}
-                </span>
-                <span className="sorting-game__rule-label">{shape === 'square' ? 'Firkant' : shape === 'triangle' ? 'Trekant' : 'Cirkel'}</span>
+                <span
+                  className={`sorting-game__rule-shape sorting-game__rule-shape--${shape}`}
+                  aria-hidden="true"
+                />
+                <span className="sorting-game__rule-label">{SHAPE_LABELS[shape]}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className={`sorting-game__queue ${speedClass}`}>
-        {activeShape ? (
-          <div
-            key={activeShape.id}
-            className={`sorting-game__shape sorting-game__shape--active sorting-game__shape--${activeShape.type} ${feedback ? `sorting-game__shape--${feedback}` : ''}`}
-            style={{ '--shape-color': activeShape.color } as CSSProperties}
-            aria-live="polite"
-          />
-        ) : (
-          <div className="sorting-game__shape sorting-game__shape--placeholder" />
-        )}
+      <div className="sorting-game__queue">
+        <div className="sorting-game__queue-track" aria-label="Figurkø">
+          {queue.map((shape, index) => {
+            const isActive = index === 0
+            const offset = Math.min(index, 6)
+            const translateX = offset * 2.6
+            const translateY = offset * 0.35
+            const scale = isActive ? 1 : Math.max(0.7, 1 - offset * 0.08)
+            const opacity = isActive ? 1 : Math.max(0.35, 0.85 - offset * 0.1)
+            const feedbackClass = isActive && feedback ? ` sorting-game__shape--${feedback}` : ''
 
-        <div className="sorting-game__upcoming" aria-label="Kommende figurer">
-          {upcomingShapes.map((shape) => (
-            <div
-              key={shape.id}
-              className={`sorting-game__shape sorting-game__shape--${shape.type}`}
-              style={{ '--shape-color': shape.color } as CSSProperties}
-            />
-          ))}
+            return (
+              <div
+                key={shape.id}
+                className={`sorting-game__shape sorting-game__shape--${shape.type}${isActive ? ' sorting-game__shape--active' : ' sorting-game__shape--queued'}${feedbackClass}`}
+                style={
+                  {
+                    '--shape-color': shape.color,
+                    transform: `translateX(calc(-50% + ${translateX}rem)) translateY(${translateY}rem) scale(${scale})`,
+                    opacity,
+                    zIndex: queue.length - index,
+                  } as CSSProperties
+                }
+                aria-label={isActive ? `Aktiv figur: ${SHAPE_LABELS[shape.type]}` : undefined}
+                aria-hidden={!isActive}
+                aria-live={isActive ? 'polite' : undefined}
+              />
+            )
+          })}
         </div>
       </div>
 
@@ -482,20 +441,12 @@ export default function SortingGame({ onExit }: SortingGameProps) {
         </div>
       )}
 
-      {phase === 'idle' && (
-        <div className="sorting-game__overlay sorting-game__overlay--transparent" role="status" aria-live="polite">
-          <div className="sorting-game__overlay-content">
-            <h2>Klar?</h2>
-            <p>Tryk på "Start spil" og brug derefter piletasterne for at sortere figurerne.</p>
-          </div>
-        </div>
-      )}
-
       {phase === 'finished' && (
         <div className="sorting-game__overlay" role="status" aria-live="assertive">
           <div className="sorting-game__overlay-content">
             <h2>Tiden er gået!</h2>
             <p>Din score: {scoreRef.current}</p>
+            <p>Sorterede figurer: {sortedCount}</p>
             <p>Bedste score: {bestScore}</p>
           </div>
         </div>
