@@ -525,7 +525,6 @@ export default function SortingGame({ onExit }: SortingGameProps) {
                 type="button"
                 className="sorting-game__queue-placeholder"
                 onClick={startGame}
-                disabled={phase === 'running' || phase === 'paused'}
               >
                 Tryk her eller på &quot;Start spil&quot; for at begynde at sortere figurerne.
               </button>
