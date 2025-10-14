@@ -10,6 +10,7 @@ type BrandLogoProps = {
   size?: number
   wordmarkSize?: string
   showWordmark?: boolean
+  wordmarkText?: string
   className?: string
   style?: CSSProperties
 }
@@ -20,6 +21,7 @@ export default function BrandLogo({
   size = 64,
   wordmarkSize = '1.5rem',
   showWordmark = true,
+  wordmarkText = 'Fokus',
   className = '',
   style,
 }: BrandLogoProps) {
@@ -41,8 +43,10 @@ export default function BrandLogo({
 
   return (
     <Component className={classes} style={inlineStyle}>
-      <img src={LOGO_URL} alt="Fokus" className="brand-logo__mark" />
-      {showWordmark ? <span className="brand-logo__wordmark">Fokus</span> : null}
+      <img src={LOGO_URL} alt={wordmarkText} className="brand-logo__mark" />
+      {showWordmark ? (
+        <span className="brand-logo__wordmark">{wordmarkText}</span>
+      ) : null}
     </Component>
   )
 }
