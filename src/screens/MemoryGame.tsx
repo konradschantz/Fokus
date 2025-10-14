@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   loadHighscores,
@@ -50,6 +50,15 @@ const symbols = [
 
 const HIDE_DELAY_MS = 700
 
+interface ToneOptions {
+  type: OscillatorType
+  startFrequency: number
+  endFrequency?: number
+  duration: number
+  volume?: number
+  startDelay?: number
+}
+
 function shuffle<T>(list: T[]): T[] {
   const array = [...list]
   for (let index = array.length - 1; index > 0; index -= 1) {
@@ -94,6 +103,150 @@ export default function MemoryGame() {
   const timerRef = useRef<number | null>(null)
   const hideTimeoutRef = useRef<number | null>(null)
   const [isTimerRunning, setIsTimerRunning] = useState(false)
+  const audioContextRef = useRef<AudioContext | null>(null)
+  const hasPlayedStartSoundRef = useRef(false)
+
+  const getAudioContext = useCallback(() => {
+    if (typeof window === 'undefined') {
+      return null
+    }
+
+    const AudioContextCtor =
+      window.AudioContext ||
+      (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+
+    if (!AudioContextCtor) {
+      return null
+    }
+
+    if (!audioContextRef.current) {
+      audioContextRef.current = new AudioContextCtor()
+    }
+
+    return audioContextRef.current
+  }, [])
+
+  const playTone = useCallback(
+    ({ type, startFrequency, endFrequency, duration, volume = 0.2, startDelay = 0 }: ToneOptions) => {
+      const context = getAudioContext()
+      if (!context) {
+        return
+      }
+
+      if (context.state === 'suspended') {
+        void context.resume().catch(() => {})
+      }
+
+      const safeStartFrequency = Math.max(20, startFrequency)
+      const safeEndFrequency = Math.max(20, endFrequency ?? startFrequency)
+      const now = context.currentTime + Math.max(0, startDelay)
+
+      const oscillator = context.createOscillator()
+      const gain = context.createGain()
+
+      oscillator.type = type
+      oscillator.frequency.setValueAtTime(safeStartFrequency, now)
+      if (safeEndFrequency !== safeStartFrequency) {
+        oscillator.frequency.exponentialRampToValueAtTime(safeEndFrequency, now + duration)
+      }
+
+      const initialGain = 0.0001
+      const peakGain = Math.max(initialGain, Math.min(1, volume))
+
+      gain.gain.setValueAtTime(initialGain, now)
+      gain.gain.exponentialRampToValueAtTime(peakGain, now + 0.02)
+      gain.gain.exponentialRampToValueAtTime(initialGain, now + duration)
+
+      oscillator.connect(gain)
+      gain.connect(context.destination)
+
+      oscillator.start(now)
+      oscillator.stop(now + duration + 0.05)
+    },
+    [getAudioContext],
+  )
+
+  const playCardClickSound = useCallback(() => {
+    const context = getAudioContext()
+    if (!context) {
+      return
+    }
+
+    if (context.state === 'suspended') {
+      void context.resume().catch(() => {})
+    }
+
+    const duration = 0.12
+    const now = context.currentTime
+    const sampleRate = context.sampleRate
+    const frameCount = Math.max(1, Math.ceil(sampleRate * duration))
+    const buffer = context.createBuffer(1, frameCount, sampleRate)
+    const data = buffer.getChannelData(0)
+
+    for (let index = 0; index < frameCount; index += 1) {
+      const fade = 1 - index / frameCount
+      const envelope = fade * fade * fade
+      data[index] = (Math.random() * 2 - 1) * envelope
+    }
+
+    const source = context.createBufferSource()
+    source.buffer = buffer
+
+    const gain = context.createGain()
+    gain.gain.setValueAtTime(0.0001, now)
+    gain.gain.linearRampToValueAtTime(0.35, now + 0.01)
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration)
+
+    source.connect(gain)
+    gain.connect(context.destination)
+
+    source.start(now)
+    source.stop(now + duration + 0.05)
+  }, [getAudioContext])
+
+  const playGameStartSound = useCallback(() => {
+    playTone({
+      type: 'triangle',
+      startFrequency: 440,
+      endFrequency: 660,
+      duration: 0.22,
+      volume: 0.3,
+    })
+    playTone({
+      type: 'triangle',
+      startFrequency: 660,
+      endFrequency: 880,
+      duration: 0.24,
+      volume: 0.24,
+      startDelay: 0.2,
+    })
+  }, [playTone])
+
+  const playGameCompleteSound = useCallback(() => {
+    playTone({
+      type: 'sine',
+      startFrequency: 660,
+      endFrequency: 990,
+      duration: 0.28,
+      volume: 0.28,
+    })
+    playTone({
+      type: 'sine',
+      startFrequency: 990,
+      endFrequency: 1320,
+      duration: 0.32,
+      volume: 0.26,
+      startDelay: 0.26,
+    })
+    playTone({
+      type: 'triangle',
+      startFrequency: 1320,
+      endFrequency: 880,
+      duration: 0.36,
+      volume: 0.22,
+      startDelay: 0.52,
+    })
+  }, [playTone])
 
   useEffect(() => {
     if (!isTimerRunning) {
@@ -129,6 +282,10 @@ export default function MemoryGame() {
       }
       if (hideTimeoutRef.current !== null) {
         window.clearTimeout(hideTimeoutRef.current)
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close().catch(() => {})
+        audioContextRef.current = null
       }
     }
   }, [])
@@ -166,6 +323,9 @@ export default function MemoryGame() {
     setLastMismatch(null)
     setIsTimerRunning(false)
     startTimestampRef.current = null
+    hasPlayedStartSoundRef.current = false
+    playGameStartSound()
+    hasPlayedStartSoundRef.current = true
   }
 
   const updateHighscores = (movesCount: number, timeMs: number, finishedDifficulty: MemoryDifficulty) => {
@@ -207,6 +367,8 @@ export default function MemoryGame() {
     setIsComplete(true)
     startTimestampRef.current = null
     updateHighscores(finalMoves, finalTime, difficulty)
+    hasPlayedStartSoundRef.current = false
+    playGameCompleteSound()
   }
 
   const handleCardClick = (cardId: number) => {
@@ -227,7 +389,13 @@ export default function MemoryGame() {
       startTimestampRef.current = performance.now()
       setElapsedMs(0)
       setIsTimerRunning(true)
+      if (!hasPlayedStartSoundRef.current) {
+        playGameStartSound()
+        hasPlayedStartSoundRef.current = true
+      }
     }
+
+    playCardClickSound()
 
     const revealedCards = cards.map((item) =>
       item.id === cardId ? { ...item, revealed: true } : item,

@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+} from 'react'
 import BrandLogo from '../../components/BrandLogo'
 import './SortingGame.css'
 
@@ -107,6 +115,13 @@ export default function SortingGame({ onExit }: SortingGameProps) {
   const forcedPauseRef = useRef(false)
   const audioContextRef = useRef<AudioContext | null>(null)
   const hintTimeoutRef = useRef<number | null>(null)
+  const swipeStateRef = useRef({
+    pointerId: null as number | null,
+    pointerType: 'mouse' as ReactPointerEvent<HTMLDivElement>['pointerType'] | 'unknown',
+    startX: 0,
+    startY: 0,
+    hasSwiped: false,
+  })
 
   useEffect(() => {
     scoreRef.current = score
@@ -304,6 +319,95 @@ export default function SortingGame({ onExit }: SortingGameProps) {
     [advanceCurrentShape],
   )
 
+  const resetSwipeState = useCallback(() => {
+    swipeStateRef.current = {
+      pointerId: null,
+      pointerType: 'unknown',
+      startX: 0,
+      startY: 0,
+      hasSwiped: false,
+    }
+  }, [])
+
+  const handlePointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (phaseRef.current !== 'running') {
+        return
+      }
+
+      if (!event.isPrimary) {
+        return
+      }
+
+      if (event.pointerType === 'mouse' && event.button !== 0) {
+        return
+      }
+
+      swipeStateRef.current = {
+        pointerId: event.pointerId,
+        pointerType: event.pointerType ?? 'unknown',
+        startX: event.clientX,
+        startY: event.clientY,
+        hasSwiped: false,
+      }
+
+      if (event.currentTarget.setPointerCapture) {
+        event.currentTarget.setPointerCapture(event.pointerId)
+      }
+    },
+    [],
+  )
+
+  const handlePointerMove = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      const state = swipeStateRef.current
+
+      if (
+        phaseRef.current !== 'running' ||
+        state.pointerId !== event.pointerId ||
+        state.hasSwiped
+      ) {
+        return
+      }
+
+      const deltaX = event.clientX - state.startX
+      const deltaY = event.clientY - state.startY
+
+      const absDeltaX = Math.abs(deltaX)
+      const absDeltaY = Math.abs(deltaY)
+
+      const isTouchPointer = state.pointerType === 'touch' || state.pointerType === 'pen'
+      const horizontalThreshold = isTouchPointer ? 24 : 36
+
+      if (absDeltaX < horizontalThreshold || absDeltaX <= absDeltaY) {
+        return
+      }
+
+      const swipeDirection: Direction = deltaX > 0 ? 'right' : 'left'
+      state.hasSwiped = true
+      handleChoice(swipeDirection)
+
+      resetSwipeState()
+
+      if (event.currentTarget.releasePointerCapture) {
+        event.currentTarget.releasePointerCapture(event.pointerId)
+      }
+    },
+    [handleChoice, resetSwipeState],
+  )
+
+  const handlePointerEnd = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (swipeStateRef.current.pointerId === event.pointerId) {
+        if (event.currentTarget.releasePointerCapture) {
+          event.currentTarget.releasePointerCapture(event.pointerId)
+        }
+        resetSwipeState()
+      }
+    },
+    [resetSwipeState],
+  )
+
   useEffect(() => {
     if (phase !== 'running') {
       return
@@ -399,6 +503,12 @@ export default function SortingGame({ onExit }: SortingGameProps) {
     }
   }, [])
 
+  useEffect(() => {
+    if (phase !== 'running') {
+      resetSwipeState()
+    }
+  }, [phase, resetSwipeState])
+
   const startGame = useCallback(() => {
     setScore(0)
     scoreRef.current = 0
@@ -436,7 +546,8 @@ export default function SortingGame({ onExit }: SortingGameProps) {
       <header className="menu__header sorting-game__header">
         <h1>Sorteringsspillet</h1>
         <p>
-          Sortér figurerne efter reglerne ved at bruge piletasterne eller knapperne nedenfor.
+          Sortér figurerne efter reglerne ved at bruge piletasterne, knapperne nedenfor eller ved at
+          swipe figuren mod den rigtige side på mobilen.
         </p>
       </header>
 
@@ -491,46 +602,58 @@ export default function SortingGame({ onExit }: SortingGameProps) {
               </div>
             </div>
 
-        <div className="sorting-game__queue">
-          <div className="sorting-game__queue-track" aria-label="Figurkø">
-            {phase === 'running' || phase === 'paused' ? (
-              queue.map((shape, index) => {
-                const isActive = index === 0
-                const offset = Math.min(index, 4)
-                const translateY = offset * -0.65
-                const scale = isActive ? 1 : Math.max(0.7, 1 - offset * 0.08)
-                const opacity = isActive ? 1 : Math.max(0.35, 0.85 - offset * 0.1)
-                const feedbackClass = isActive && feedback ? ` sorting-game__shape--${feedback}` : ''
-
-                return (
-                  <div
-                    key={shape.id}
-                    className={`sorting-game__shape sorting-game__shape--${shape.type}${isActive ? ' sorting-game__shape--active' : ' sorting-game__shape--queued'}${feedbackClass}`}
-                    style={
-                      {
-                        '--shape-color': shape.color,
-                        transform: `translate(-50%, ${translateY}rem) scale(${scale})`,
-                        opacity,
-                        zIndex: queue.length - index,
-                      } as CSSProperties
-                    }
-                    aria-label={isActive ? `Aktiv figur: ${SHAPE_LABELS[shape.type]}` : undefined}
-                    aria-hidden={!isActive}
-                    aria-live={isActive ? 'polite' : undefined}
-                  />
-                )
-              })
-            ) : (
-              <button
-                type="button"
-                className="sorting-game__queue-placeholder"
-                onClick={startGame}
+            <div className="sorting-game__queue">
+              <div
+                className="sorting-game__queue-track"
+                aria-label="Figurkø"
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerEnd}
+                onPointerCancel={handlePointerEnd}
+                onPointerLeave={handlePointerEnd}
               >
-                Tryk her eller på &quot;Start spil&quot; for at begynde at sortere figurerne.
-              </button>
-            )}
-          </div>
-        </div>
+                {phase === 'running' || phase === 'paused' ? (
+                  queue.map((shape, index) => {
+                    const isActive = index === 0
+                    const offset = Math.min(index, 4)
+                    const translateY = offset * -0.65
+                    const scale = isActive ? 1 : Math.max(0.7, 1 - offset * 0.08)
+                    const opacity = isActive ? 1 : Math.max(0.35, 0.85 - offset * 0.1)
+                    const feedbackClass = isActive && feedback ? ` sorting-game__shape--${feedback}` : ''
+
+                    return (
+                      <div
+                        key={shape.id}
+                        className={`sorting-game__shape sorting-game__shape--${shape.type}${
+                          isActive ? ' sorting-game__shape--active' : ' sorting-game__shape--queued'
+                        }${feedbackClass}`}
+                        style={
+                          {
+                            '--shape-color': shape.color,
+                            transform: `translate(-50%, ${translateY}rem) scale(${scale})`,
+                            opacity,
+                            zIndex: queue.length - index,
+                          } as CSSProperties
+                        }
+                        aria-label={
+                          isActive ? `Aktiv figur: ${SHAPE_LABELS[shape.type]}` : undefined
+                        }
+                        aria-hidden={!isActive}
+                        aria-live={isActive ? 'polite' : undefined}
+                      />
+                    )
+                  })
+                ) : (
+                  <button
+                    type="button"
+                    className="sorting-game__queue-placeholder"
+                    onClick={startGame}
+                  >
+                    Tryk her eller på &quot;Start spil&quot; for at begynde at sortere figurerne.
+                  </button>
+                )}
+              </div>
+            </div>
 
             <div className="sorting-game__rule-column sorting-game__rule-column--right">
               <div className="sorting-game__rule-title">Højre</div>
