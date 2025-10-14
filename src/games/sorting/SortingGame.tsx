@@ -530,7 +530,8 @@ export default function SortingGame({ onExit }: SortingGameProps) {
       <header className="menu__header sorting-game__header">
         <h1>Sorteringsspillet</h1>
         <p>
-          Sortér figurerne efter reglerne ved at bruge piletasterne eller knapperne nedenfor.
+          Sortér figurerne efter reglerne ved at bruge piletasterne, knapperne nedenfor eller ved at
+          swipe figuren mod den rigtige side på mobilen.
         </p>
       </header>
 
