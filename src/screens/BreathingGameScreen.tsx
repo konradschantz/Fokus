@@ -256,7 +256,7 @@ export default function BreathingGameScreen() {
 
       {phase === 'select' && (
         <div className="flex flex-col items-center gap-8 text-center">
-          <span className="breath-session__badge">Nyt minigame</span>
+      
           <div className="max-w-2xl space-y-4">
             <h1 className="text-4xl text-slate-900">Åndedræt</h1>
             <p className="text-lg leading-relaxed text-slate-600">
