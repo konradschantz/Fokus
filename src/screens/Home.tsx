@@ -53,6 +53,7 @@ export default function Home() {
           align="center"
           size={96}
           wordmarkSize="clamp(2.4rem, 6vw, 3.4rem)"
+          wordmarkText="Fokus 2.0"
           style={{ marginBottom: '0.5rem' }}
         />
         <p>Vælg et spil for at komme i gang.</p>
