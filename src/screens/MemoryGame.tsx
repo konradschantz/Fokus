@@ -167,42 +167,14 @@ export default function MemoryGame() {
   )
 
   const playCardClickSound = useCallback(() => {
-    const context = getAudioContext()
-    if (!context) {
-      return
-    }
-
-    if (context.state === 'suspended') {
-      void context.resume().catch(() => {})
-    }
-
-    const duration = 0.12
-    const now = context.currentTime
-    const sampleRate = context.sampleRate
-    const frameCount = Math.max(1, Math.ceil(sampleRate * duration))
-    const buffer = context.createBuffer(1, frameCount, sampleRate)
-    const data = buffer.getChannelData(0)
-
-    for (let index = 0; index < frameCount; index += 1) {
-      const fade = 1 - index / frameCount
-      const envelope = fade * fade * fade
-      data[index] = (Math.random() * 2 - 1) * envelope
-    }
-
-    const source = context.createBufferSource()
-    source.buffer = buffer
-
-    const gain = context.createGain()
-    gain.gain.setValueAtTime(0.0001, now)
-    gain.gain.linearRampToValueAtTime(0.35, now + 0.01)
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration)
-
-    source.connect(gain)
-    gain.connect(context.destination)
-
-    source.start(now)
-    source.stop(now + duration + 0.05)
-  }, [getAudioContext])
+    playTone({
+      type: 'sine',
+      startFrequency: 520,
+      endFrequency: 660,
+      duration: 0.18,
+      volume: 0.25,
+    })
+  }, [playTone])
 
   const playGameStartSound = useCallback(() => {
     playTone({

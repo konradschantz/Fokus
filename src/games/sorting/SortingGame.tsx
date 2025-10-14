@@ -117,7 +117,6 @@ export default function SortingGame({ onExit }: SortingGameProps) {
   const hintTimeoutRef = useRef<number | null>(null)
   const swipeStateRef = useRef({
     pointerId: null as number | null,
-    pointerType: 'mouse' as ReactPointerEvent<HTMLDivElement>['pointerType'] | 'unknown',
     startX: 0,
     startY: 0,
     hasSwiped: false,
@@ -322,7 +321,6 @@ export default function SortingGame({ onExit }: SortingGameProps) {
   const resetSwipeState = useCallback(() => {
     swipeStateRef.current = {
       pointerId: null,
-      pointerType: 'unknown',
       startX: 0,
       startY: 0,
       hasSwiped: false,
@@ -335,17 +333,8 @@ export default function SortingGame({ onExit }: SortingGameProps) {
         return
       }
 
-      if (!event.isPrimary) {
-        return
-      }
-
-      if (event.pointerType === 'mouse' && event.button !== 0) {
-        return
-      }
-
       swipeStateRef.current = {
         pointerId: event.pointerId,
-        pointerType: event.pointerType ?? 'unknown',
         startX: event.clientX,
         startY: event.clientY,
         hasSwiped: false,
@@ -376,10 +365,7 @@ export default function SortingGame({ onExit }: SortingGameProps) {
       const absDeltaX = Math.abs(deltaX)
       const absDeltaY = Math.abs(deltaY)
 
-      const isTouchPointer = state.pointerType === 'touch' || state.pointerType === 'pen'
-      const horizontalThreshold = isTouchPointer ? 24 : 36
-
-      if (absDeltaX < horizontalThreshold || absDeltaX <= absDeltaY) {
+      if (absDeltaX < 30 || absDeltaX < absDeltaY) {
         return
       }
 
@@ -387,13 +373,11 @@ export default function SortingGame({ onExit }: SortingGameProps) {
       state.hasSwiped = true
       handleChoice(swipeDirection)
 
-      resetSwipeState()
-
       if (event.currentTarget.releasePointerCapture) {
         event.currentTarget.releasePointerCapture(event.pointerId)
       }
     },
-    [handleChoice, resetSwipeState],
+    [handleChoice],
   )
 
   const handlePointerEnd = useCallback(
