@@ -4,6 +4,7 @@ import Home from './screens/Home'
 import MemoryGame from './screens/MemoryGame'
 import ReactionTestScreen from './screens/ReactionTestScreen'
 import SortingGameScreen from './screens/SortingGameScreen'
+import BreathingGameScreen from './screens/BreathingGameScreen'
 
 function AppLayout() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="memory" element={<MemoryGame />} />
         <Route path="sorting" element={<SortingGameScreen />} />
         <Route path="reaction-test" element={<ReactionTestScreen />} />
+        <Route path="breath" element={<BreathingGameScreen />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

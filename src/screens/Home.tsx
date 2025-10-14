@@ -19,6 +19,14 @@ const games: GameDefinition[] = [
     startLabel: 'Start reaktionstest',
   },
   {
+    id: 'breath',
+    name: 'Åndedræt',
+    description:
+      'En guidet vejrtrækningssession med rolig animation, ambient lyd og sessionstimer til 3, 5 eller 10 minutter.',
+    path: '/breath',
+    startLabel: 'Start åndedræt',
+  },
+  {
     id: 'memory',
     name: 'Memory',
     description:

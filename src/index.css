@@ -14,3 +14,239 @@ body {
 a {
   color: inherit;
 }
+
+/* Minimal Tailwind-inspired utility set for the Åndedræt minigame */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.max-w-2xl {
+  max-width: 42rem;
+}
+
+.space-y-4 > * + * {
+  margin-top: 1rem;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.gap-6 {
+  gap: 1.5rem;
+}
+
+.gap-8 {
+  gap: 2rem;
+}
+
+.gap-10 {
+  gap: 2.5rem;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.text-base {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+.text-4xl {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.leading-relaxed {
+  line-height: 1.625;
+}
+
+.text-slate-500 {
+  color: #64748b;
+}
+
+.text-slate-600 {
+  color: #475569;
+}
+
+.text-slate-900 {
+  color: #0f172a;
+}
+
+.text-sky-700 {
+  color: #0369a1;
+}
+
+.breath-circle {
+  position: relative;
+  --from-color: #3b82f6;
+  --to-color: #a855f7;
+  --glow-color: rgba(59, 130, 246, 0.35);
+  background: radial-gradient(circle at 30% 30%, var(--from-color), var(--to-color));
+  box-shadow: 0 0 80px var(--glow-color);
+  border-radius: 50%;
+  width: 16rem;
+  height: 16rem;
+}
+
+@media (min-width: 640px) {
+  .breath-circle {
+    width: 18rem;
+    height: 18rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .breath-circle {
+    width: 20rem;
+    height: 20rem;
+  }
+}
+
+.breath-circle::after {
+  content: '';
+  position: absolute;
+  inset: 18%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+.breath-session__option {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.85), rgba(99, 102, 241, 0.85));
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.9rem 2.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 18px 40px rgba(79, 70, 229, 0.28);
+}
+
+.breath-session__option:hover,
+.breath-session__option:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 50px rgba(79, 70, 229, 0.35);
+  outline: none;
+}
+
+.breath-session__option:focus-visible {
+  box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.4);
+}
+
+.breath-session__option:disabled {
+  cursor: default;
+  opacity: 0.75;
+  box-shadow: none;
+}
+
+.breath-session__button-secondary {
+  background: transparent;
+  border-radius: 999px;
+  border: 1px solid rgba(37, 99, 235, 0.35);
+  color: #1e3a8a;
+  padding: 0.75rem 2rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+}
+
+.breath-session__button-secondary:hover,
+.breath-session__button-secondary:focus-visible {
+  background-color: rgba(191, 219, 254, 0.6);
+  color: #1d4ed8;
+  border-color: rgba(59, 130, 246, 0.6);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.breath-session__button-secondary:focus-visible {
+  box-shadow: 0 0 0 3px rgba(191, 219, 254, 0.7);
+}
+
+.breath-session__button-secondary:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+}
+
+.breath-session__progress {
+  height: 0.5rem;
+  width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.15), rgba(30, 64, 175, 0.2));
+  overflow: hidden;
+}
+
+.breath-session__progress-fill {
+  height: 100%;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.85), rgba(45, 212, 191, 0.85));
+  transition: width 0.35s ease;
+}
+
+.breath-session__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+}
+
+.breath-session__timer {
+  font-feature-settings: 'tnum';
+  font-variant-numeric: tabular-nums;
+}
