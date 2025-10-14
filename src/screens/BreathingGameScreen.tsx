@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BrandLogo from '../components/BrandLogo'
 
@@ -9,6 +9,16 @@ const sessionOptions = [
 ]
 
 type Phase = 'select' | 'session' | 'complete'
+
+type BreathPhase = 'inhale' | 'exhale' | 'hold'
+
+type BreathingMode = 'box' | '478'
+
+type BreathingSegment = {
+  phase: BreathPhase
+  duration: number
+  prompt: string
+}
 
 type AudioRefs = {
   context: AudioContext | null
@@ -22,6 +32,30 @@ const initialAudioRefs: AudioRefs = {
   gain: null,
 }
 
+const breathingModes: Record<BreathingMode, { label: string; description: string; segments: BreathingSegment[] }> = {
+  box: {
+    label: 'Box breathing 4-4-4-4',
+    description: 'Fire sekunder ind, fire sekunder hold, fire sekunder ud og fire sekunder ro før næste indånding.',
+    segments: [
+      { phase: 'inhale', duration: 4, prompt: 'Indånd roligt gennem næsen' },
+      { phase: 'hold', duration: 4, prompt: 'Hold vejret og mærk roen' },
+      { phase: 'exhale', duration: 4, prompt: 'Udånd langsomt gennem munden' },
+      { phase: 'hold', duration: 4, prompt: 'Hold en kort pause før næste cyklus' },
+    ],
+  },
+  '478': {
+    label: '4-7-8 vejrtrækning',
+    description: 'Fire sekunder ind, hold i syv og udånd langsomt i otte sekunder.',
+    segments: [
+      { phase: 'inhale', duration: 4, prompt: 'Indånd roligt og fyld lungerne' },
+      { phase: 'hold', duration: 7, prompt: 'Hold vejret i roligt fokus' },
+      { phase: 'exhale', duration: 8, prompt: 'Udånd langsomt og slip spændingerne' },
+    ],
+  },
+}
+
+const audioStorageKey = 'breath-settings'
+
 const formatTime = (totalSeconds: number) => {
   const minutes = Math.floor(totalSeconds / 60)
   const seconds = totalSeconds % 60
@@ -30,16 +64,44 @@ const formatTime = (totalSeconds: number) => {
 
 export default function BreathingGameScreen() {
   const navigate = useNavigate()
+  const initialSettings = useMemo(() => {
+    if (typeof window === 'undefined') {
+      return { mode: 'box' as BreathingMode, volume: 0.6 }
+    }
+    try {
+      const stored = window.localStorage.getItem(audioStorageKey)
+      if (!stored) {
+        return { mode: 'box' as BreathingMode, volume: 0.6 }
+      }
+      const parsed = JSON.parse(stored) as Partial<{ mode: BreathingMode; volume: number }>
+      const mode: BreathingMode = parsed?.mode === '478' || parsed?.mode === 'box' ? parsed.mode : 'box'
+      const volume = typeof parsed?.volume === 'number' && parsed.volume >= 0 && parsed.volume <= 1 ? parsed.volume : 0.6
+      return { mode, volume }
+    } catch (error) {
+      console.warn('Kunne ikke læse gemte lydindstillinger', error)
+      return { mode: 'box' as BreathingMode, volume: 0.6 }
+    }
+  }, [])
+
   const [phase, setPhase] = useState<Phase>('select')
   const [selectedMinutes, setSelectedMinutes] = useState<number | null>(null)
   const [remainingSeconds, setRemainingSeconds] = useState(0)
   const [isInhaling, setIsInhaling] = useState(false)
-  const [ambientOn, setAmbientOn] = useState(true)
+  const [breathMode, setBreathMode] = useState<BreathingMode>(initialSettings.mode)
+  const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0)
+  const [breathPhase, setBreathPhase] = useState<BreathPhase>('inhale')
+  const [segmentRemaining, setSegmentRemaining] = useState(0)
   const [audioSupported, setAudioSupported] = useState(true)
+  const [isMuted, setIsMuted] = useState(false)
+  const [volume, setVolume] = useState(initialSettings.volume)
+
   const audioRefs = useRef<AudioRefs>({ ...initialAudioRefs })
   const timerRef = useRef<number | null>(null)
-  const pointerStartY = useRef<number | null>(null)
+  const segmentTimeoutRef = useRef<number | null>(null)
+  const segmentIntervalRef = useRef<number | null>(null)
+  const hasUnlockedAudioRef = useRef(false)
 
+  const segments = useMemo(() => breathingModes[breathMode].segments, [breathMode])
   const totalSeconds = selectedMinutes ? selectedMinutes * 60 : 0
   const progress = totalSeconds > 0 ? 1 - remainingSeconds / totalSeconds : 0
 
@@ -55,7 +117,18 @@ export default function BreathingGameScreen() {
     return style
   }, [isInhaling])
 
-  const stopAmbientTone = () => {
+  const clearSegmentTimers = useCallback(() => {
+    if (segmentTimeoutRef.current !== null) {
+      window.clearTimeout(segmentTimeoutRef.current)
+      segmentTimeoutRef.current = null
+    }
+    if (segmentIntervalRef.current !== null) {
+      window.clearInterval(segmentIntervalRef.current)
+      segmentIntervalRef.current = null
+    }
+  }, [])
+
+  const stopAmbientTone = useCallback(() => {
     const { context, oscillator, gain } = audioRefs.current
     if (!context || !oscillator || !gain) {
       return
@@ -67,23 +140,24 @@ export default function BreathingGameScreen() {
     oscillator.stop(now + 0.9)
 
     audioRefs.current = { ...initialAudioRefs }
-  }
+  }, [])
 
-  const fadeGain = (target: number) => {
-    const { context, gain } = audioRefs.current
-    if (!context || !gain) {
-      return
-    }
-    const now = context.currentTime
-    gain.gain.cancelScheduledValues(now)
-    gain.gain.linearRampToValueAtTime(target, now + 0.75)
-  }
+  const fadeGain = useCallback(
+    (baseTarget: number) => {
+      const { context, gain } = audioRefs.current
+      if (!context || !gain) {
+        return
+      }
 
-  const ensureAmbientTone = async () => {
-    if (!ambientOn) {
-      return
-    }
+      const now = context.currentTime
+      const target = baseTarget * (isMuted ? 0 : volume)
+      gain.gain.cancelScheduledValues(now)
+      gain.gain.linearRampToValueAtTime(target, now + 0.75)
+    },
+    [isMuted, volume]
+  )
 
+  const ensureAmbientTone = useCallback(async () => {
     if (typeof window === 'undefined') {
       return
     }
@@ -97,9 +171,12 @@ export default function BreathingGameScreen() {
 
     if (audioRefs.current.context) {
       if (audioRefs.current.context.state === 'suspended') {
-        await audioRefs.current.context.resume()
+        try {
+          await audioRefs.current.context.resume()
+        } catch (error) {
+          console.error('Kunne ikke genoptage AudioContext', error)
+        }
       }
-      fadeGain(isInhaling ? 0.055 : 0.03)
       return
     }
 
@@ -116,83 +193,188 @@ export default function BreathingGameScreen() {
       oscillator.start()
 
       audioRefs.current = { context, oscillator, gain }
-      fadeGain(isInhaling ? 0.055 : 0.03)
     } catch (error) {
       console.error('Kunne ikke starte ambient lyd', error)
       setAudioSupported(false)
     }
-  }
+  }, [])
 
-  const handleStartSession = async (minutes: number) => {
-    setSelectedMinutes(minutes)
-    setRemainingSeconds(minutes * 60)
-    setPhase('session')
-    setIsInhaling(false)
+  const applyAmbientLevel = useCallback(
+    (baseTarget: number) => {
+      if (!audioRefs.current.context) {
+        void ensureAmbientTone().then(() => {
+          fadeGain(baseTarget)
+        })
+        return
+      }
+      fadeGain(baseTarget)
+    },
+    [ensureAmbientTone, fadeGain]
+  )
+
+  const createBellChime = useCallback(
+    (context: AudioContext) => {
+      const now = context.currentTime
+      const masterGain = context.createGain()
+      masterGain.gain.setValueAtTime(0.0001, now)
+      masterGain.gain.exponentialRampToValueAtTime(Math.max(0.0001, volume * 0.8), now + 0.01)
+      masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.6)
+      masterGain.connect(context.destination)
+
+      const overtoneRatios = [1, 1.5, 2.15]
+      const baseFrequency = 660
+
+      overtoneRatios.forEach((ratio, index) => {
+        const oscillator = context.createOscillator()
+        oscillator.type = 'sine'
+        oscillator.frequency.setValueAtTime(baseFrequency * ratio, now)
+        oscillator.detune.setValueAtTime(index === 0 ? 0 : ratio * 20, now)
+
+        const gain = context.createGain()
+        gain.gain.setValueAtTime(1 / (index + 1.25), now)
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.6)
+
+        oscillator.connect(gain).connect(masterGain)
+        oscillator.start(now)
+        oscillator.stop(now + 1.6)
+      })
+
+      window.setTimeout(() => {
+        masterGain.disconnect()
+      }, 1700)
+    },
+    [volume]
+  )
+
+  const playBell = useCallback(() => {
+    if (isMuted || volume === 0) {
+      return
+    }
+
+    const { context } = audioRefs.current
+    if (!context) {
+      void ensureAmbientTone().then(() => {
+        const refreshedContext = audioRefs.current.context
+        if (refreshedContext && !isMuted && volume > 0) {
+          createBellChime(refreshedContext)
+        }
+      })
+      return
+    }
+
+    createBellChime(context)
+  }, [createBellChime, ensureAmbientTone, isMuted, volume])
+
+  const unlockAudio = useCallback(async () => {
+    if (!hasUnlockedAudioRef.current) {
+      hasUnlockedAudioRef.current = true
+      await ensureAmbientTone()
+      const context = audioRefs.current.context
+      if (context && context.state === 'suspended') {
+        try {
+          await context.resume()
+        } catch (error) {
+          console.error('Kunne ikke genoptage AudioContext', error)
+        }
+      }
+      const silentUnlockContext = audioRefs.current.context
+      if (silentUnlockContext) {
+        try {
+          const buffer = silentUnlockContext.createBuffer(1, 1, silentUnlockContext.sampleRate)
+          const source = silentUnlockContext.createBufferSource()
+          source.buffer = buffer
+          source.connect(silentUnlockContext.destination)
+          source.start()
+        } catch (error) {
+          console.error('Kunne ikke aktivere lyd', error)
+        }
+      }
+      return
+    }
     await ensureAmbientTone()
-  }
+  }, [ensureAmbientTone, isMuted, volume])
 
-  const handleSessionComplete = () => {
+  const startSegment = useCallback(
+    (index: number) => {
+      if (segments.length === 0) {
+        return
+      }
+
+      clearSegmentTimers()
+      const nextIndex = index % segments.length
+      const segment = segments[nextIndex]
+      setCurrentSegmentIndex(nextIndex)
+      setBreathPhase(segment.phase)
+      setSegmentRemaining(segment.duration)
+      setIsInhaling((previous) => {
+        if (segment.phase === 'inhale') {
+          return true
+        }
+        if (segment.phase === 'exhale') {
+          return false
+        }
+        return previous
+      })
+      playBell()
+
+      segmentIntervalRef.current = window.setInterval(() => {
+        setSegmentRemaining((previous) => (previous > 0 ? previous - 1 : 0))
+      }, 1000)
+
+      segmentTimeoutRef.current = window.setTimeout(() => {
+        startSegment(nextIndex + 1)
+      }, segment.duration * 1000)
+    },
+    [segments, playBell, clearSegmentTimers]
+  )
+
+  const handleSessionComplete = useCallback(() => {
+    clearSegmentTimers()
+    setRemainingSeconds(0)
     setPhase('complete')
     setIsInhaling(false)
+    setBreathPhase('inhale')
+    setSegmentRemaining(0)
+    setCurrentSegmentIndex(0)
     stopAmbientTone()
-  }
+  }, [clearSegmentTimers, stopAmbientTone])
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
+    clearSegmentTimers()
     setPhase('select')
-    setSelectedMinutes(null)
     setRemainingSeconds(0)
     setIsInhaling(false)
-    if (ambientOn) {
-      stopAmbientTone()
-    }
-  }
+    setBreathPhase('inhale')
+    setSegmentRemaining(0)
+    setCurrentSegmentIndex(0)
+    stopAmbientTone()
+  }, [clearSegmentTimers, stopAmbientTone])
 
-  const resumeAudioIfNeeded = async () => {
-    const { context } = audioRefs.current
-    if (context && context.state === 'suspended') {
-      try {
-        await context.resume()
-      } catch (error) {
-        console.error('Kunne ikke genoptage AudioContext', error)
-      }
-    } else if (!context) {
-      await ensureAmbientTone()
-    }
-  }
-
-  const handlePointerDown = async (event: React.PointerEvent<HTMLDivElement>) => {
-    if (phase !== 'session') {
+  const handleStartSession = useCallback(async () => {
+    if (!selectedMinutes) {
       return
     }
-    pointerStartY.current = event.clientY
-    setIsInhaling(true)
-    await resumeAudioIfNeeded()
-  }
-
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (phase !== 'session' || pointerStartY.current === null) {
+    if (segments.length === 0) {
       return
     }
-
-    const delta = event.clientY - pointerStartY.current
-    if (delta < -20) {
-      setIsInhaling(true)
-    }
-    if (delta > 20) {
-      setIsInhaling(false)
-    }
-  }
-
-  const handlePointerUp = () => {
-    if (phase !== 'session') {
-      return
-    }
-    pointerStartY.current = null
-    setIsInhaling(false)
-  }
+    clearSegmentTimers()
+    const minutes = selectedMinutes
+    const firstSegment = segments[0]
+    setRemainingSeconds(minutes * 60)
+    setCurrentSegmentIndex(0)
+    setBreathPhase(firstSegment.phase)
+    setSegmentRemaining(firstSegment.duration)
+    setIsInhaling(firstSegment.phase === 'inhale')
+    await unlockAudio()
+    setPhase('session')
+  }, [selectedMinutes, segments, unlockAudio, clearSegmentTimers])
 
   useEffect(() => {
     if (phase !== 'session') {
+      if (timerRef.current !== null) {
+        window.clearInterval(timerRef.current)
+        timerRef.current = null
+      }
       return
     }
 
@@ -218,34 +400,47 @@ export default function BreathingGameScreen() {
         timerRef.current = null
       }
     }
-  }, [phase])
+  }, [phase, handleSessionComplete])
 
   useEffect(() => {
-    if (!ambientOn) {
-      stopAmbientTone()
-    } else if (phase === 'session') {
-      void ensureAmbientTone()
+    if (phase === 'session') {
+      startSegment(0)
+    } else {
+      clearSegmentTimers()
     }
-  }, [ambientOn, phase])
+  }, [phase, startSegment, clearSegmentTimers])
 
   useEffect(() => {
-    if (!ambientOn) {
+    if (typeof window === 'undefined') {
       return
     }
-    fadeGain(isInhaling ? 0.055 : 0.028)
-  }, [isInhaling, ambientOn])
+    window.localStorage.setItem(audioStorageKey, JSON.stringify({ mode: breathMode, volume }))
+  }, [breathMode, volume])
+
+  useEffect(() => {
+    if (phase === 'session') {
+      applyAmbientLevel(isInhaling ? 0.055 : 0.028)
+    }
+  }, [phase, isInhaling, applyAmbientLevel, isMuted, volume])
 
   useEffect(() => {
     return () => {
       if (timerRef.current !== null) {
         window.clearInterval(timerRef.current)
       }
+      clearSegmentTimers()
       stopAmbientTone()
     }
-  }, [])
+  }, [clearSegmentTimers, stopAmbientTone])
 
   const formattedRemaining = formatTime(Math.max(remainingSeconds, 0))
   const progressWidth = `${Math.min(100, Math.max(0, progress * 100))}%`
+  const currentSegment = segments[currentSegmentIndex] ?? segments[0]
+  const phaseLabels: Record<BreathPhase, string> = {
+    inhale: 'Indånd',
+    exhale: 'Udånd',
+    hold: 'Hold',
+  }
 
   return (
     <section className="menu flex flex-col gap-10">
@@ -256,31 +451,67 @@ export default function BreathingGameScreen() {
 
       {phase === 'select' && (
         <div className="flex flex-col items-center gap-8 text-center">
-      
           <div className="max-w-2xl space-y-4">
             <h1 className="text-4xl text-slate-900">Åndedræt</h1>
             <p className="text-lg leading-relaxed text-slate-600">
-              Et meditativt flow hvor du styrer rytmen i din vejrtrækning. Tryk eller swipe op for at indånde og giv slip eller swipe ned for at udånde.
+              Følg guidede vejrtrækningsmønstre med klokkeslag, lys og bevægelse. Vælg længde og rytme, og tryk derefter på start for at aktivere lyd og animationer.
             </p>
             <p className="text-base text-slate-500">
-              Vælg en session for at komme i gang. Alle animationer kører i rolig 60 fps for at give en blid oplevelse.
+              Sessionen starter først, når du trykker &quot;Start&quot; – det sikrer at lyden kan afspilles på alle enheder.
             </p>
           </div>
-          <div className="flex items-center justify-center gap-6">
-            {sessionOptions.map((option) => (
-              <button
-                key={option.minutes}
-                type="button"
-                className="breath-session__option"
-                onClick={() => void handleStartSession(option.minutes)}
-              >
-                {option.label}
-              </button>
-            ))}
+
+          <div className="flex flex-col items-center gap-6 w-full">
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              {sessionOptions.map((option) => (
+                <button
+                  key={option.minutes}
+                  type="button"
+                  className="breath-session__option"
+                  data-selected={selectedMinutes === option.minutes}
+                  aria-pressed={selectedMinutes === option.minutes}
+                  onClick={() => setSelectedMinutes(option.minutes)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-col items-center gap-3 max-w-2xl">
+              <span className="text-sm font-semibold uppercase tracking-wider text-slate-500">Vejrtrækningsmønster</span>
+              <div className="flex flex-wrap items-center justify-center gap-4">
+                {(Object.keys(breathingModes) as BreathingMode[]).map((modeKey) => {
+                  const mode = breathingModes[modeKey]
+                  return (
+                    <button
+                      key={modeKey}
+                      type="button"
+                      className="breath-session__option breath-session__mode-button"
+                      data-selected={breathMode === modeKey}
+                      aria-pressed={breathMode === modeKey}
+                      onClick={() => setBreathMode(modeKey)}
+                    >
+                      {mode.label}
+                    </button>
+                  )
+                })}
+              </div>
+              <p className="text-sm text-slate-500">{breathingModes[breathMode].description}</p>
+            </div>
+
+            <button
+              type="button"
+              className="breath-session__option breath-session__start-button"
+              onClick={() => void handleStartSession()}
+              disabled={!selectedMinutes}
+            >
+              Start
+            </button>
           </div>
+
           {!audioSupported && (
             <p className="text-sm text-slate-500 max-w-2xl">
-              Din browser understøtter ikke Web Audio API. Spillet kan stadig gennemføres, men uden den blide baggrundslyd.
+              Din browser understøtter ikke Web Audio API. Sessionen kan stadig gennemføres, men uden den blide baggrundslyd.
             </p>
           )}
         </div>
@@ -289,10 +520,10 @@ export default function BreathingGameScreen() {
       {phase === 'session' && (
         <div className="flex flex-col gap-8">
           <header className="flex flex-col gap-4 items-start text-left">
-            <span className="breath-session__badge">Session i gang</span>
-            <h2 className="text-2xl text-slate-900">Følg din vejrtrækning</h2>
+            <span className="breath-session__badge">{breathingModes[breathMode].label}</span>
+            <h2 className="text-2xl text-slate-900">Følg klokkeslagene</h2>
             <p className="text-base text-slate-600 max-w-2xl">
-              Hold eller swipe op for at udvide cirklen (indånding). Giv slip eller swipe ned for at trække den sammen (udånding). Lad din rytme være rolig og stabil.
+              Hvert klokkeslag markerer næste fase. Lad cirklen guide din rytme, og følg teksten for indånding, pauser og udånding.
             </p>
           </header>
 
@@ -300,55 +531,42 @@ export default function BreathingGameScreen() {
             <div className="breath-session__progress-fill" style={{ width: progressWidth }} />
           </div>
 
-          <div className="flex flex-col items-center gap-6">
-            <div
-              role="presentation"
-              className="breath-circle"
-              style={circleStyle}
-              onPointerDown={(event) => void handlePointerDown(event)}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-              onPointerCancel={handlePointerUp}
-              onPointerLeave={handlePointerUp}
-              onKeyDown={async (event) => {
-                if (event.key === ' ' || event.key === 'ArrowUp') {
-                  event.preventDefault()
-                  setIsInhaling(true)
-                  await resumeAudioIfNeeded()
-                }
-                if (event.key === 'ArrowDown') {
-                  event.preventDefault()
-                  setIsInhaling(false)
-                }
-              }}
-              onKeyUp={(event) => {
-                if (event.key === ' ' || event.key === 'ArrowUp') {
-                  setIsInhaling(false)
-                }
-              }}
-              tabIndex={0}
-            />
-            <div className="flex flex-col items-center gap-4 text-center">
+          <div className="flex flex-col items-center gap-6 text-center">
+            <div className="breath-circle" style={circleStyle} aria-hidden="true" />
+            <div className="flex flex-col items-center gap-3">
+              <span className="breath-session__badge">{phaseLabels[breathPhase]}</span>
               <div className="text-4xl font-semibold text-sky-700 breath-session__timer">{formattedRemaining}</div>
-              <p className="text-base text-slate-600 max-w-2xl">
-                Forestil dig at du fylder kroppen med ro ved hver indånding, og slipper spændingerne fri ved hver udånding.
-              </p>
+              {currentSegment && <p className="text-base text-slate-600 max-w-2xl">{currentSegment.prompt}</p>}
+              <p className="text-sm text-slate-500">Næste skift om {Math.max(segmentRemaining, 0)} sek.</p>
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
             <button type="button" className="breath-session__button-secondary" onClick={handleReset}>
               Afslut session
             </button>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-slate-500">Baggrundslyd</span>
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:justify-end">
               <button
                 type="button"
                 className="breath-session__button-secondary"
-                onClick={() => setAmbientOn((previous) => !previous)}
+                onClick={() => setIsMuted((previous) => !previous)}
               >
-                {ambientOn ? 'Slå lyd fra' : 'Slå lyd til'}
+                {isMuted ? 'Slå lyd til' : 'Slå lyd fra'}
               </button>
+              <label className="breath-session__volume-control">
+                <span className="text-sm text-slate-500">Volumen</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={1}
+                  value={Math.round(volume * 100)}
+                  onChange={(event) => setVolume(Number(event.currentTarget.value) / 100)}
+                  className="breath-session__volume-slider"
+                  aria-label="Juster lydstyrke"
+                  disabled={isMuted}
+                />
+              </label>
             </div>
           </div>
         </div>
