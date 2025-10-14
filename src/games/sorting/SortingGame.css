@@ -165,6 +165,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  touch-action: pan-y;
 }
 
 .sorting-game__queue-track .sorting-game__shape {
