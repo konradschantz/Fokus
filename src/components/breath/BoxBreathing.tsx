@@ -21,7 +21,7 @@ const presets: PresetOption[] = [
   { id: '5', label: '5-5-5-5', seconds: 5 },
 ]
 
-const audioSource = '/audio/breath_ambience.mp3'
+const audioSource = '/audio/bell-meditation.mp3'
 
 const easeInOutCubic = (t: number) => {
   if (t <= 0) {
