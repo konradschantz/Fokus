@@ -119,8 +119,8 @@ export default function SortingGame({ onExit }: SortingGameProps) {
     pointerId: null as number | null,
     startX: 0,
     startY: 0,
-    hasSwiped: false,
   })
+  const [activeDragOffset, setActiveDragOffset] = useState<{ x: number; y: number } | null>(null)
 
   useEffect(() => {
     scoreRef.current = score
@@ -323,8 +323,8 @@ export default function SortingGame({ onExit }: SortingGameProps) {
       pointerId: null,
       startX: 0,
       startY: 0,
-      hasSwiped: false,
     }
+    setActiveDragOffset(null)
   }, [])
 
   const handlePointerDown = useCallback(
@@ -337,8 +337,9 @@ export default function SortingGame({ onExit }: SortingGameProps) {
         pointerId: event.pointerId,
         startX: event.clientX,
         startY: event.clientY,
-        hasSwiped: false,
       }
+
+      setActiveDragOffset({ x: 0, y: 0 })
 
       if (event.currentTarget.setPointerCapture) {
         event.currentTarget.setPointerCapture(event.pointerId)
@@ -353,8 +354,7 @@ export default function SortingGame({ onExit }: SortingGameProps) {
 
       if (
         phaseRef.current !== 'running' ||
-        state.pointerId !== event.pointerId ||
-        state.hasSwiped
+        state.pointerId !== event.pointerId
       ) {
         return
       }
@@ -362,34 +362,36 @@ export default function SortingGame({ onExit }: SortingGameProps) {
       const deltaX = event.clientX - state.startX
       const deltaY = event.clientY - state.startY
 
-      const absDeltaX = Math.abs(deltaX)
-      const absDeltaY = Math.abs(deltaY)
-
-      if (absDeltaX < 30 || absDeltaX < absDeltaY) {
-        return
-      }
-
-      const swipeDirection: Direction = deltaX > 0 ? 'right' : 'left'
-      state.hasSwiped = true
-      handleChoice(swipeDirection)
-
-      if (event.currentTarget.releasePointerCapture) {
-        event.currentTarget.releasePointerCapture(event.pointerId)
-      }
+      setActiveDragOffset({ x: deltaX, y: deltaY })
     },
-    [handleChoice],
+    [],
   )
 
   const handlePointerEnd = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
-      if (swipeStateRef.current.pointerId === event.pointerId) {
-        if (event.currentTarget.releasePointerCapture) {
-          event.currentTarget.releasePointerCapture(event.pointerId)
-        }
-        resetSwipeState()
+      const state = swipeStateRef.current
+
+      if (state.pointerId !== event.pointerId) {
+        return
       }
+
+      if (event.currentTarget.releasePointerCapture) {
+        event.currentTarget.releasePointerCapture(event.pointerId)
+      }
+
+      const deltaX = event.clientX - state.startX
+      const deltaY = event.clientY - state.startY
+      const absDeltaX = Math.abs(deltaX)
+      const absDeltaY = Math.abs(deltaY)
+
+      if (phaseRef.current === 'running' && absDeltaX >= 30 && absDeltaX > absDeltaY) {
+        const swipeDirection: Direction = deltaX > 0 ? 'right' : 'left'
+        handleChoice(swipeDirection)
+      }
+
+      resetSwipeState()
     },
-    [resetSwipeState],
+    [handleChoice, resetSwipeState],
   )
 
   useEffect(() => {
@@ -604,17 +606,32 @@ export default function SortingGame({ onExit }: SortingGameProps) {
                     const scale = isActive ? 1 : Math.max(0.7, 1 - offset * 0.08)
                     const opacity = isActive ? 1 : Math.max(0.35, 0.85 - offset * 0.1)
                     const feedbackClass = isActive && feedback ? ` sorting-game__shape--${feedback}` : ''
+                    const dragClass =
+                      isActive && activeDragOffset ? ' sorting-game__shape--dragging' : ''
+                    const baseClass = `sorting-game__shape sorting-game__shape--${shape.type}`
+                    const stateClass = isActive
+                      ? ' sorting-game__shape--active'
+                      : ' sorting-game__shape--queued'
+                    const shapeClassName = `${baseClass}${stateClass}${dragClass}${feedbackClass}`
+
+                    const transformParts = [`translate(-50%, ${translateY}rem)`]
+
+                    if (isActive && activeDragOffset) {
+                      transformParts.push(
+                        `translate(${activeDragOffset.x}px, ${activeDragOffset.y}px)`,
+                      )
+                    }
+
+                    transformParts.push(`scale(${scale})`)
 
                     return (
                       <div
                         key={shape.id}
-                        className={`sorting-game__shape sorting-game__shape--${shape.type}${
-                          isActive ? ' sorting-game__shape--active' : ' sorting-game__shape--queued'
-                        }${feedbackClass}`}
+                        className={shapeClassName}
                         style={
                           {
                             '--shape-color': shape.color,
-                            transform: `translate(-50%, ${translateY}rem) scale(${scale})`,
+                            transform: transformParts.join(' '),
                             opacity,
                             zIndex: queue.length - index,
                           } as CSSProperties
