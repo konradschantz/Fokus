@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { kv } from '@vercel/kv'
-import { get, put } from '@vercel/blob'
+
 
 type MemoryDifficulty = 'easy' | 'medium' | 'hard'
 
@@ -12,7 +12,7 @@ interface MemoryHighscoreEntry {
 type MemoryHighscores = Record<MemoryDifficulty, MemoryHighscoreEntry>
 
 const KV_KEY = 'memory-game:highscores'
-const BLOB_PATH = 'memory-game/highscores.json'
+
 
 const defaultEntry: MemoryHighscoreEntry = { bestMoves: null, bestTimeMs: null }
 
@@ -59,53 +59,10 @@ function sanitizeHighscores(value: unknown): MemoryHighscores {
   }
 }
 
-async function readFromBlob(): Promise<MemoryHighscores | null> {
-  try {
-    const result = await get(BLOB_PATH)
-    const text = await result.blob.text()
-    const parsed = JSON.parse(text) as unknown
-    return sanitizeHighscores(parsed)
-  } catch (error) {
-    console.error('Kunne ikke læse memory-highscores fra Vercel Blob.', error)
-    return null
-  }
-}
 
-async function writeToBlob(highscores: MemoryHighscores): Promise<void> {
-  try {
-    await put(BLOB_PATH, JSON.stringify(highscores), {
-      access: 'private',
-      contentType: 'application/json',
-      addRandomSuffix: false,
-    })
-  } catch (error) {
-    console.error('Kunne ikke skrive memory-highscores til Vercel Blob.', error)
-  }
-}
 
-async function handleGet(res: VercelResponse) {
-  try {
-    const stored = await kv.get<MemoryHighscores | null>(KV_KEY)
-    if (stored) {
-      const highscores = sanitizeHighscores(stored)
-      res.status(200).json({ highscores })
-      return
-    }
 
-    const blobHighscores = await readFromBlob()
-    if (blobHighscores) {
-      await kv.set(KV_KEY, blobHighscores)
-      res.status(200).json({ highscores: blobHighscores })
-      return
-    }
 
-    const defaults = createDefaultHighscores()
-    res.status(200).json({ highscores: defaults })
-  } catch (error) {
-    console.error('Fejl ved hentning af memory-highscores.', error)
-    res.status(500).json({ error: 'Kunne ikke hente highscores.' })
-  }
-}
 
 async function parseRequestBody(req: VercelRequest): Promise<unknown> {
   if (req.body !== undefined) {
