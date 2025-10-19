@@ -43,5 +43,5 @@ Sørg for at konfigurere følgende miljøvariabler på Vercel (og lokalt, hvis d
 
 ## Spil
 
-- **Reaktionstest** – klik så hurtigt som muligt, når skærmen skifter farve, jagt dine hurtigste reaktionstider, og få dem gemt centralt via Vercel KV.
+- **Reaktionstest** – klik så hurtigt som muligt, når skærmen skifter farve, og jagt dine hurtigste reaktionstider.
 - **Memory** – vend to kort ad gangen og find alle par. Du kan vælge mellem tre sværhedsgrader: Let (4 × 4, 8 par), Mellem (5 × 4, 10 par) og Svær (6 × 4, 12 par). Spillet holder nu styr på dine bedste tider og færreste træk pr. niveau via Vercel KV og lagrer en JSON-log i Vercel Blob for persistens.
