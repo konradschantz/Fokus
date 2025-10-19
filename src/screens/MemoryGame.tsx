@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
+  createDefaultHighscores,
   loadHighscores,
   saveHighscores,
   type MemoryDifficulty,
@@ -94,7 +95,9 @@ export default function MemoryGame() {
   const [elapsedMs, setElapsedMs] = useState(0)
   const [isLocked, setIsLocked] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
-  const [highscores, setHighscores] = useState<MemoryHighscores>(() => loadHighscores())
+  const [highscores, setHighscores] = useState<MemoryHighscores>(() =>
+    createDefaultHighscores(),
+  )
   const [lastMismatch, setLastMismatch] = useState<{ first: number; second: number } | null>(
     null,
   )
@@ -105,6 +108,23 @@ export default function MemoryGame() {
   const [isTimerRunning, setIsTimerRunning] = useState(false)
   const audioContextRef = useRef<AudioContext | null>(null)
   const hasPlayedStartSoundRef = useRef(false)
+
+  useEffect(() => {
+    let isMounted = true
+
+    const fetchHighscores = async () => {
+      const remoteHighscores = await loadHighscores()
+      if (isMounted) {
+        setHighscores(remoteHighscores)
+      }
+    }
+
+    void fetchHighscores()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   const getAudioContext = useCallback(() => {
     if (typeof window === 'undefined') {
@@ -322,7 +342,7 @@ export default function MemoryGame() {
       }
 
       if (hasChanged) {
-        saveHighscores(next)
+        void saveHighscores(next)
         return next
       }
 
@@ -661,7 +681,8 @@ export default function MemoryGame() {
             </div>
           </dl>
           <p className="game-scoreboard__footnote">
-            Resultaterne gemmes pr. sværhedsgrad på denne enhed.
+            Resultaterne gemmes pr. sværhedsgrad via Vercel KV, så du kan
+            gense dine bedste præstationer.
           </p>
         </aside>
       </div>

@@ -1,3 +1,5 @@
+import { getApiUrl } from './apiBase'
+
 export type MemoryDifficulty = 'easy' | 'medium' | 'hard'
 
 export interface MemoryHighscoreEntry {
@@ -23,55 +25,77 @@ function cloneDefaultHighscores(): MemoryHighscores {
   }
 }
 
-export function loadHighscores(): MemoryHighscores {
-  if (typeof window === 'undefined') {
+function sanitizeEntry(value: unknown): MemoryHighscoreEntry {
+  if (!value || typeof value !== 'object') {
+    return { ...defaultEntry }
+  }
+
+  const record = value as Record<string, unknown>
+  const bestMoves = record.bestMoves
+  const bestTimeMs = record.bestTimeMs
+
+  return {
+    bestMoves:
+      typeof bestMoves === 'number' && Number.isFinite(bestMoves)
+        ? bestMoves
+        : null,
+    bestTimeMs:
+      typeof bestTimeMs === 'number' && Number.isFinite(bestTimeMs)
+        ? bestTimeMs
+        : null,
+  }
+}
+
+function sanitizeHighscores(value: unknown): MemoryHighscores {
+  if (!value || typeof value !== 'object') {
     return cloneDefaultHighscores()
   }
 
+  const source = value as Record<string, unknown>
+
+  return {
+    easy: sanitizeEntry(source.easy),
+    medium: sanitizeEntry(source.medium),
+    hard: sanitizeEntry(source.hard),
+  }
+}
+
+export async function loadHighscores(): Promise<MemoryHighscores> {
   try {
-    const stored = window.localStorage.getItem('memoryHighscores')
-    if (!stored) {
-      return cloneDefaultHighscores()
+    const response = await fetch(getApiUrl('/api/memory-highscores'))
+
+    if (!response.ok) {
+      throw new Error(`Serveren svarede med status ${response.status}`)
     }
 
-    const parsed = JSON.parse(stored) as unknown
-    const result = cloneDefaultHighscores()
+    const payload = (await response.json()) as { highscores?: unknown } | undefined
+    const data = payload?.highscores ?? payload
 
-    if (parsed && typeof parsed === 'object') {
-      for (const difficulty of Object.keys(result) as MemoryDifficulty[]) {
-        const entry = (parsed as Record<string, unknown>)[difficulty]
-        if (entry && typeof entry === 'object') {
-          const bestMoves = (entry as Record<string, unknown>).bestMoves
-          const bestTimeMs = (entry as Record<string, unknown>).bestTimeMs
-          result[difficulty] = {
-            bestMoves:
-              typeof bestMoves === 'number' && Number.isFinite(bestMoves)
-                ? bestMoves
-                : null,
-            bestTimeMs:
-              typeof bestTimeMs === 'number' && Number.isFinite(bestTimeMs)
-                ? bestTimeMs
-                : null,
-          }
-        }
-      }
-    }
-
-    return result
+    return sanitizeHighscores(data)
   } catch (error) {
-    console.warn('Kunne ikke indlæse memory-highscores, bruger defaults.', error)
+    console.error('Kunne ikke indlæse memory-highscores fra serveren.', error)
     return cloneDefaultHighscores()
   }
 }
 
-export function saveHighscores(highscores: MemoryHighscores) {
-  if (typeof window === 'undefined') {
-    return
-  }
-
+export async function saveHighscores(highscores: MemoryHighscores): Promise<void> {
   try {
-    window.localStorage.setItem('memoryHighscores', JSON.stringify(highscores))
+    const response = await fetch(getApiUrl('/api/memory-highscores'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ highscores }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Serveren svarede med status ${response.status}`)
+    }
   } catch (error) {
-    console.warn('Kunne ikke gemme memory-highscores.', error)
+    console.error('Kunne ikke gemme memory-highscores på serveren.', error)
   }
+}
+
+export function createDefaultHighscores(): MemoryHighscores {
+  return cloneDefaultHighscores()
 }
