@@ -9,6 +9,7 @@ yarn-debug.log*
 yarn-error.log*
 .nyc_output/
 build/
+*.tsbuildinfo
 
 # Python
 __pycache__/
