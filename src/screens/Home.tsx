@@ -19,12 +19,12 @@ const games: GameDefinition[] = [
     startLabel: 'Start reaktionstest',
   },
   {
-    id: 'breath',
-    name: 'Åndedræt',
+    id: 'meditation',
+    name: 'Meditation',
     description:
-      'En guidet vejrtrækningssession med rolig animation, ambient lyd og sessionstimer til 3, 5 eller 10 minutter.',
-    path: '/breath',
-    startLabel: 'Start åndedræt',
+      'Fordyb dig i guidede øvelser som Box Breathing og Yoga Meditation med levende lys. Find ro og fokus gennem vejrtrækning og nærvær.',
+    path: '/meditation',
+    startLabel: 'Start meditation',
   },
   {
     id: 'memory',

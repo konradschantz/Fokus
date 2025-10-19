@@ -40,7 +40,6 @@ export default function YogaCandleMeditation() {
 
     try {
       const audio = new Audio(audioSource)
-      audio.loop = true
       audio.volume = 0.4
       audio.addEventListener(
         'canplaythrough',
@@ -64,12 +63,13 @@ export default function YogaCandleMeditation() {
     }
   }, [])
 
-  const playAudio = useCallback(async () => {
+  const playBell = useCallback(async () => {
     const element = ensureAudio()
     if (!element) {
       return
     }
     try {
+      element.currentTime = 0
       await element.play()
       setAudioAvailable((previous) => (previous ?? true))
     } catch (error) {
@@ -109,12 +109,13 @@ export default function YogaCandleMeditation() {
         stopAnimation()
         pauseAudio()
         setRemainingMs(0)
+        void playBell()
         return
       }
 
       animationFrameRef.current = requestAnimationFrame(step)
     },
-    [pauseAudio, stopAnimation],
+    [pauseAudio, playBell, stopAnimation],
   )
 
   const handleStart = useCallback(() => {
@@ -129,8 +130,8 @@ export default function YogaCandleMeditation() {
     setStatus('running')
     resetAudio()
     animationFrameRef.current = requestAnimationFrame(step)
-    void playAudio()
-  }, [playAudio, resetAudio, status, step, stopAnimation])
+    void playBell()
+  }, [playBell, resetAudio, status, step, stopAnimation])
 
   const handlePauseResume = useCallback(() => {
     if (status === 'idle' || status === 'completed') {
@@ -149,8 +150,7 @@ export default function YogaCandleMeditation() {
     remainingAtStartRef.current = remainingRef.current
     startTimestampRef.current = null
     animationFrameRef.current = requestAnimationFrame(step)
-    void playAudio()
-  }, [pauseAudio, playAudio, status, step, stopAnimation])
+  }, [pauseAudio, status, step, stopAnimation])
 
   const handleReset = useCallback(() => {
     stopAnimation()
@@ -244,7 +244,7 @@ export default function YogaCandleMeditation() {
       </div>
 
       {audioAvailable === false && (
-        <p className="breathing-card__notice">Den stille baggrundslyd kunne ikke indlæses. Meditationen virker uden lyd.</p>
+        <p className="breathing-card__notice">Klokkelyden kunne ikke indlæses. Meditationen virker uden lyd.</p>
       )}
 
       <div className="sr-only" aria-live="polite">
