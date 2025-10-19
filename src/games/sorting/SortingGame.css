@@ -166,6 +166,11 @@
   align-items: center;
   justify-content: center;
   touch-action: pan-y;
+  cursor: grab;
+}
+
+.sorting-game__queue-track:active {
+  cursor: grabbing;
 }
 
 .sorting-game__queue-track .sorting-game__shape {
@@ -245,6 +250,11 @@
 .sorting-game__shape--active {
   filter: saturate(1.1);
   box-shadow: 0 20px 40px rgba(79, 70, 229, 0.32);
+}
+
+.sorting-game__shape--dragging {
+  transition: transform 0s linear, box-shadow 0.3s ease, filter 0.3s ease, opacity 0.3s ease;
+  cursor: grabbing;
 }
 
 .sorting-game__shape--queued {
