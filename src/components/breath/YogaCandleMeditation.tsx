@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 type MeditationStatus = 'idle' | 'running' | 'paused' | 'completed'
 
 const TOTAL_DURATION_MS = 5 * 60 * 1000
-const audioSource = '/audio/yoga_soft.mp3'
+const audioSource = '/audio/bell-meditation.mp3'
 
 const formatClock = (milliseconds: number) => {
   const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000))
