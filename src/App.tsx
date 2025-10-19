@@ -4,7 +4,9 @@ import Home from './screens/Home'
 import MemoryGame from './screens/MemoryGame'
 import ReactionTestScreen from './screens/ReactionTestScreen'
 import SortingGameScreen from './screens/SortingGameScreen'
-import BreathingGameScreen from './screens/BreathingGameScreen'
+import MeditationHubScreen from './screens/MeditationHubScreen'
+import MeditationBoxBreathingScreen from './screens/MeditationBoxBreathingScreen'
+import MeditationYogaCandleScreen from './screens/MeditationYogaCandleScreen'
 
 function AppLayout() {
   return (
@@ -22,7 +24,14 @@ function App() {
         <Route path="memory" element={<MemoryGame />} />
         <Route path="sorting" element={<SortingGameScreen />} />
         <Route path="reaction-test" element={<ReactionTestScreen />} />
-        <Route path="breath" element={<BreathingGameScreen />} />
+        <Route path="meditation">
+          <Route index element={<MeditationHubScreen />} />
+          <Route path="box-breathing" element={<MeditationBoxBreathingScreen />} />
+          <Route path="yoga-candle" element={<MeditationYogaCandleScreen />} />
+        </Route>
+        <Route path="breath" element={<Navigate to="/meditation" replace />} />
+        <Route path="breathing" element={<Navigate to="/meditation" replace />} />
+        <Route path="åndedræt" element={<Navigate to="/meditation" replace />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
