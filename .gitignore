@@ -37,7 +37,7 @@ htmlcov/
 
 # Environment variables
 .env
-
+.env.local
 # Misc
 .DS_Store
 .idea/
