@@ -9,6 +9,10 @@ import {
 } from 'react'
 import BrandLogo from '../../components/BrandLogo'
 import './SortingGame.css'
+import {
+  loadSortingBestScore,
+  saveSortingBestScore,
+} from '../../utils/sortingBestScore'
 
 type ShapeType = 'square' | 'triangle' | 'circle'
 type Direction = 'left' | 'right'
@@ -97,14 +101,7 @@ export default function SortingGame({ onExit }: SortingGameProps) {
   const [score, setScore] = useState(0)
   const [sortedCount, setSortedCount] = useState(0)
   const [lastResult, setLastResult] = useState<{ score: number; sorted: number } | null>(null)
-  const [bestScore, setBestScore] = useState(() => {
-    if (typeof window === 'undefined') {
-      return 0
-    }
-
-    const storedValue = window.localStorage.getItem(BEST_SCORE_STORAGE_KEY)
-    return storedValue ? Number.parseInt(storedValue, 10) || 0 : 0
-  })
+  const [bestScore, setBestScore] = useState(0)
   const [timeRemaining, setTimeRemaining] = useState(GAME_DURATION_SECONDS)
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null)
 
@@ -121,6 +118,23 @@ export default function SortingGame({ onExit }: SortingGameProps) {
     startY: 0,
   })
   const [activeDragOffset, setActiveDragOffset] = useState<{ x: number; y: number } | null>(null)
+
+  useEffect(() => {
+    let isMounted = true
+
+    const fetchBestScore = async () => {
+      const remoteBestScore = await loadSortingBestScore()
+      if (isMounted) {
+        setBestScore(remoteBestScore)
+      }
+    }
+
+    void fetchBestScore()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   useEffect(() => {
     scoreRef.current = score
@@ -198,9 +212,7 @@ export default function SortingGame({ onExit }: SortingGameProps) {
         return previous
       }
 
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(BEST_SCORE_STORAGE_KEY, String(finalScore))
-      }
+      void saveSortingBestScore(finalScore)
 
       return finalScore
     })
@@ -752,10 +764,12 @@ export default function SortingGame({ onExit }: SortingGameProps) {
             </div>
           </dl>
           <p className="game-scoreboard__footnote">
-            Rekorden gemmes lokalt og opdateres automatisk, når du slår den.
+            Rekorden gemmes nu sikkert via Vercel KV og opdateres automatisk,
+            når du slår den.
           </p>
         </aside>
       </div>
     </section>
   )
 }
+
