@@ -1,41 +1,83 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
-  <title>Fokus logo</title>
+  <title>Fokus brain logo</title>
   <path
-    d="M64 10c-18 0-32 14-32 32v5.5c-8.4 5-14 14.5-14 25 0 16.6 13.4 30 30 30h4v5c0 11.6 9.4 21 21 21s21-9.4 21-21v-5h4c16.6 0 30-13.4 30-30 0-10.5-5.6-20-14-25V42C96 24 82 10 64 10z"
-    fill="#3b82f6"
-    stroke="#0f172a"
-    stroke-width="6"
+    d="M64 8c-21 0-38 17-38 38v5.5c-10.2 6.3-16.5 17.5-16.5 30.5 0 21 17 38 38 38h4v6c0 12.7 10.3 23 23 23s23-10.3 23-23v-6h4c21 0 38-17 38-38 0-13-6.3-24.2-16.5-30.5V46C102 25 85 8 64 8z"
+    fill="#35b1ff"
+    stroke="#0a0a0a"
+    stroke-width="8"
     stroke-linecap="round"
     stroke-linejoin="round"
   />
   <path
-    d="M48 26c-8.8 0-16 7.2-16 16v4.5M80 26c8.8 0 16 7.2 16 16v4.5"
+    d="M46 24c-10 0-18 8-18 18v7"
     fill="none"
-    stroke="#0f172a"
-    stroke-width="6"
+    stroke="#0a0a0a"
+    stroke-width="8"
     stroke-linecap="round"
   />
   <path
-    d="M40 68c0-7 5.2-12 12-12 7 0 12 5 12 12v34"
+    d="M82 24c10 0 18 8 18 18v7"
     fill="none"
-    stroke="#0f172a"
-    stroke-width="6"
+    stroke="#0a0a0a"
+    stroke-width="8"
+    stroke-linecap="round"
+  />
+  <path
+    d="M40 70c0-8 6-14 14-14s14 6 14 14v40"
+    fill="none"
+    stroke="#0a0a0a"
+    stroke-width="8"
     stroke-linecap="round"
     stroke-linejoin="round"
   />
   <path
-    d="M88 68c0-7-5.2-12-12-12-7 0-12 5-12 12v34"
+    d="M88 70c0-8-6-14-14-14s-14 6-14 14v40"
     fill="none"
-    stroke="#0f172a"
-    stroke-width="6"
+    stroke="#0a0a0a"
+    stroke-width="8"
     stroke-linecap="round"
     stroke-linejoin="round"
   />
   <path
-    d="M24 72h12M92 72h12"
+    d="M28 74h10"
     fill="none"
-    stroke="#0f172a"
-    stroke-width="6"
+    stroke="#0a0a0a"
+    stroke-width="8"
+    stroke-linecap="round"
+  />
+  <path
+    d="M90 74h10"
+    fill="none"
+    stroke="#0a0a0a"
+    stroke-width="8"
+    stroke-linecap="round"
+  />
+  <path
+    d="M46 52c0 4.5 3.5 8 8 8"
+    fill="none"
+    stroke="#0a0a0a"
+    stroke-width="8"
+    stroke-linecap="round"
+  />
+  <path
+    d="M36 60c0 4 3 7 7 7"
+    fill="none"
+    stroke="#0a0a0a"
+    stroke-width="8"
+    stroke-linecap="round"
+  />
+  <path
+    d="M82 52c0 4.5-3.5 8-8 8"
+    fill="none"
+    stroke="#0a0a0a"
+    stroke-width="8"
+    stroke-linecap="round"
+  />
+  <path
+    d="M92 60c0 4-3 7-7 7"
+    fill="none"
+    stroke="#0a0a0a"
+    stroke-width="8"
     stroke-linecap="round"
   />
 </svg>
