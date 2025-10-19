@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import BrandLogo from './components/BrandLogo'
 import './ReactionTest.css'
+import {
+  loadReactionHighscores,
+  mergeReactionHighscores,
+  saveReactionHighscores,
+} from './utils/reactionHighscores'
 
 type Phase = 'waiting' | 'ready' | 'now' | 'result'
 
@@ -39,6 +44,23 @@ export default function ReactionTest({ onExit }: ReactionTestProps) {
     }
   }, [])
 
+  useEffect(() => {
+    let isMounted = true
+
+    const fetchHighscores = async () => {
+      const scores = await loadReactionHighscores()
+      if (isMounted) {
+        setHighScores(scores)
+      }
+    }
+
+    void fetchHighscores()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   const scheduleReadyTimeout = () => {
     const delay = Math.floor(Math.random() * 3000) + 2000
     timeoutRef.current = window.setTimeout(() => {
@@ -72,12 +94,17 @@ export default function ReactionTest({ onExit }: ReactionTestProps) {
       const endTime = performance.now()
       if (startTimeRef.current !== null) {
         const elapsed = endTime - startTimeRef.current
-        setReactionTime(elapsed)
-        setHighScores((previousScores) => {
-          const updatedScores = [...previousScores, elapsed]
-          updatedScores.sort((a, b) => a - b)
-          return updatedScores.slice(0, 5)
-        })
+        if (!Number.isFinite(elapsed) || elapsed < 0) {
+          setReactionTime(null)
+        } else {
+          const safeElapsed = Math.max(0, elapsed)
+          setReactionTime(safeElapsed)
+          setHighScores((previousScores) => {
+            const next = mergeReactionHighscores(previousScores, safeElapsed)
+            void saveReactionHighscores(next)
+            return next
+          })
+        }
       } else {
         setReactionTime(null)
       }
@@ -143,7 +170,8 @@ export default function ReactionTest({ onExit }: ReactionTestProps) {
             </ol>
           )}
           <p className="game-scoreboard__footnote">
-            De fem hurtigste reaktionstider gemmes lokalt i denne browser.
+            De fem hurtigste reaktionstider gemmes via Vercel KV og er tilgængelige på tværs
+            af enheder.
           </p>
         </aside>
       </div>
