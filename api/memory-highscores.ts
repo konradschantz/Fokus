@@ -98,6 +98,17 @@ async function parseRequestBody(req: VercelRequest): Promise<unknown> {
     return null
   }
 }
+async function handleGet(res: VercelResponse) {
+  try {
+    const stored = await kv.get<number[] | null>(KV_KEY)
+    const highscores = sanitizeHighscores(stored ?? [])
+
+    res.status(200).json({ highscores })
+  } catch (error) {
+    console.error('Fejl ved hentning af reaktionstest-highscores.', error)
+    res.status(500).json({ error: 'Kunne ikke hente highscores.' })
+  }
+}
 
 async function handlePost(req: VercelRequest, res: VercelResponse) {
   try {
@@ -107,7 +118,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
     const highscores = sanitizeHighscores(submitted)
 
     await kv.set(KV_KEY, highscores)
-    await writeToBlob(highscores)
+
 
     res.status(200).json({ highscores })
   } catch (error) {
