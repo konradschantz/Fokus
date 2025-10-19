@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
 
-const LOGO_URL = '/brand-logo.svg'
+const LOGO_URL = '/brand-logo.png'
 
 type BrandLogoElement = 'div' | 'span' | 'h1' | 'header'
 
