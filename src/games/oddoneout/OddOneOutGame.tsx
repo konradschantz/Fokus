@@ -10,20 +10,24 @@ import {
 import motion from 'framer-motion'
 import BrandLogo from '../../components/BrandLogo'
 import { postOddOneOutScore } from '../../utils/oddOneOutScores'
+import { MAX_GRID_SIZE } from './constants'
 
 type OddOneOutPhase = 'idle' | 'running' | 'finished'
 
-type ShapeType = 'circle' | 'square' | 'triangle' | 'donut' | 'cross'
+type Shape = 'CIRCLE' | 'SQUARE' | 'TRIANGLE' | 'DONUT' | 'CROSS'
 
 interface OddOneOutCell {
   id: number
   isTarget: boolean
-  type: ShapeType
+  type: Shape
   color: string
   accentColor: string
   scale: number
   rotation: number
   strokeWidth: number
+  outlineColor: string
+  outlineWidth: number
+  dropShadow: string
 }
 
 interface BoardState {
@@ -33,7 +37,14 @@ interface BoardState {
 }
 
 const GAME_DURATION_SECONDS = 60
-const SHAPE_TYPES: ShapeType[] = ['circle', 'square', 'triangle', 'donut', 'cross']
+const SHAPE_TYPES: Shape[] = ['CIRCLE', 'SQUARE', 'TRIANGLE', 'DONUT', 'CROSS']
+const CONTRASTING_SHAPES: Record<Shape, readonly Shape[]> = {
+  CIRCLE: ['SQUARE', 'CROSS'],
+  SQUARE: ['CIRCLE', 'DONUT'],
+  TRIANGLE: ['DONUT', 'CROSS'],
+  DONUT: ['TRIANGLE', 'SQUARE'],
+  CROSS: ['CIRCLE', 'TRIANGLE'],
+}
 const SEA_TONES = ['#bae6fd', '#7dd3fc', '#5eead4', '#99f6e4', '#67e8f9', '#c4b5fd']
 const COLOR_VARIANCE = [0.32, 0.24, 0.16, 0.11, 0.08]
 const SCALE_VARIANCE = [0, 0, 0.04, 0.08, 0.1]
@@ -46,7 +57,9 @@ function randomItem<T>(collection: readonly T[]): T {
   return collection[Math.floor(Math.random() * collection.length)]
 }
 
-function hexToRgb(hex: string): { r: number; g: number; b: number } {
+type RGB = { r: number; g: number; b: number }
+
+function hexToRgb(hex: string): RGB {
   const normalized = hex.replace('#', '')
   const bigint = Number.parseInt(normalized.length === 3 ? normalized.repeat(2) : normalized, 16)
   return {
@@ -56,60 +69,124 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
   }
 }
 
-function rgbToHex({ r, g, b }: { r: number; g: number; b: number }): string {
-  const toHex = (value: number) =>
-    clamp(Math.round(value), 0, 255)
-      .toString(16)
-      .padStart(2, '0')
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`
+function rgbToCss({ r, g, b }: RGB): string {
+  const normalize = (value: number) => clamp(Math.round(value), 0, 255)
+  return `rgb(${normalize(r)}, ${normalize(g)}, ${normalize(b)})`
 }
 
-function adjustColor(hex: string, amount: number): string {
-  const base = hexToRgb(hex)
-  const mixTarget = amount >= 0 ? { r: 255, g: 255, b: 255 } : { r: 0, g: 0, b: 0 }
-  const ratio = clamp(Math.abs(amount), 0, 1)
+function mixColor(color: RGB, target: RGB, ratio: number): RGB {
+  const safeRatio = clamp(ratio, 0, 1)
+  return {
+    r: color.r + (target.r - color.r) * safeRatio,
+    g: color.g + (target.g - color.g) * safeRatio,
+    b: color.b + (target.b - color.b) * safeRatio,
+  }
+}
 
-  return rgbToHex({
-    r: base.r + (mixTarget.r - base.r) * ratio,
-    g: base.g + (mixTarget.g - base.g) * ratio,
-    b: base.b + (mixTarget.b - base.b) * ratio,
+function adjustColor(color: RGB, amount: number): RGB {
+  const target = amount >= 0 ? { r: 255, g: 255, b: 255 } : { r: 0, g: 0, b: 0 }
+  const ratio = Math.abs(amount)
+  return mixColor(color, target, ratio)
+}
+
+function luminance({ r, g, b }: RGB): number {
+  const mapped = [r, g, b].map((value) => {
+    const channel = value / 255
+    return channel <= 0.03928 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4)
   })
+  return 0.2126 * mapped[0]! + 0.7152 * mapped[1]! + 0.0722 * mapped[2]!
+}
+
+function contrast(colorA: RGB, colorB: RGB): number {
+  const lumA = luminance(colorA)
+  const lumB = luminance(colorB)
+  const [maxLum, minLum] = lumA > lumB ? [lumA, lumB] : [lumB, lumA]
+  return (maxLum + 0.05) / (minLum + 0.05)
+}
+
+function pickUniqueColor(baseColor: RGB): RGB {
+  const complement: RGB = {
+    r: 255 - baseColor.r,
+    g: 255 - baseColor.g,
+    b: 255 - baseColor.b,
+  }
+
+  const vividSet: RGB[] = [
+    complement,
+    { r: 15, g: 120, b: 230 },
+    { r: 250, g: 120, b: 60 },
+    { r: 240, g: 80, b: 120 },
+    { r: 20, g: 180, b: 160 },
+    { r: 255, g: 255, b: 255 },
+    { r: 35, g: 35, b: 35 },
+  ]
+
+  const ranked = vividSet
+    .map((candidate) => ({ candidate, contrastRatio: contrast(candidate, baseColor) }))
+    .sort((a, b) => b.contrastRatio - a.contrastRatio)
+
+  const strongOption = ranked.find((entry) => entry.contrastRatio >= 6)
+  return (strongOption ?? ranked[0] ?? { candidate: { r: 30, g: 30, b: 30 } }).candidate
+}
+
+function randomShape(exclude?: Shape): Shape {
+  const pool = exclude ? SHAPE_TYPES.filter((shape) => shape !== exclude) : SHAPE_TYPES
+  return randomItem(pool)
+}
+
+function pickContrastingShape(base: Shape): Shape {
+  const preferred = CONTRASTING_SHAPES[base]
+  if (preferred?.length) {
+    return randomItem(preferred)
+  }
+
+  return randomShape(base)
 }
 
 function generateBoard(round: number): BoardState {
   const stage = Math.min(Math.floor(round / 3), 4)
-  const gridSize = 3 + stage
+  const requestedGridSize = 3 + stage
+  const gridSize = clamp(requestedGridSize, 1, MAX_GRID_SIZE)
   const totalCells = gridSize * gridSize
   const targetIndex = Math.floor(Math.random() * totalCells)
 
-  const baseShape = randomItem(SHAPE_TYPES)
-  const uniqueShape =
-    stage < 2 ? randomItem(SHAPE_TYPES.filter((shape) => shape !== baseShape)) : baseShape
+  const baseShape = randomShape()
+  const uniqueShape = pickContrastingShape(baseShape)
 
-  const baseColor = randomItem(SEA_TONES)
+  const baseHex = randomItem(SEA_TONES)
+  const baseColor = hexToRgb(baseHex)
   const variance = COLOR_VARIANCE[stage]
-  const contrastDirection = Math.random() > 0.5 ? 1 : -1
-  const uniqueColor = adjustColor(baseColor, variance * contrastDirection)
+  const uniqueColor = pickUniqueColor(baseColor)
   const baseAccent = adjustColor(baseColor, -0.3)
   const uniqueAccent = adjustColor(uniqueColor, -0.28)
   const scaleDelta = SCALE_VARIANCE[stage]
   const rotationVariance = stage >= 3 ? 6 : 10
+  const subtleVariance = variance * 0.35
+  const uniqueRotationOffset = stage >= 4 ? (Math.random() > 0.5 ? 8 : -8) : 0
 
   const cells: OddOneOutCell[] = []
 
   for (let index = 0; index < totalCells; index += 1) {
     const isTarget = index === targetIndex
     const rotation = (Math.random() * rotationVariance - rotationVariance / 2) * (stage >= 3 ? 0.5 : 1)
+    const nonUniqueAdjustment = (Math.random() * 2 - 1) * subtleVariance
+    const tileColor = isTarget
+      ? rgbToCss(uniqueColor)
+      : rgbToCss(adjustColor(baseColor, nonUniqueAdjustment))
+    const tileAccent = isTarget ? rgbToCss(uniqueAccent) : rgbToCss(baseAccent)
 
     cells.push({
       id: index,
       isTarget,
       type: isTarget ? uniqueShape : baseShape,
-      color: isTarget ? uniqueColor : baseColor,
-      accentColor: isTarget ? uniqueAccent : baseAccent,
-      scale: isTarget ? 1 - scaleDelta : 1,
-      rotation: isTarget && stage >= 4 ? rotation + (contrastDirection > 0 ? 6 : -6) : rotation,
+      color: tileColor,
+      accentColor: tileAccent,
+      scale: isTarget ? 1 + scaleDelta * 0.6 : 1,
+      rotation: isTarget ? rotation + uniqueRotationOffset : rotation,
       strokeWidth: stage >= 4 && isTarget ? 9 : 11,
+      outlineColor: isTarget ? '#000' : 'transparent',
+      outlineWidth: isTarget ? 4 : 0,
+      dropShadow: isTarget ? 'drop-shadow(0 0 10px rgba(0,0,0,0.35))' : 'none',
     })
   }
 
@@ -131,31 +208,57 @@ function renderShape(cell: OddOneOutCell): JSX.Element {
       transition: 'transform 0.25s ease',
       width: '100%',
       height: '100%',
+      filter: cell.dropShadow,
     },
   }
 
   switch (cell.type) {
-    case 'circle':
+    case 'CIRCLE':
       return (
         <svg viewBox="0 0 100 100" {...commonProps}>
-          <circle cx="50" cy="50" r="36" fill={cell.color} />
+          <circle
+            cx="50"
+            cy="50"
+            r="36"
+            fill={cell.color}
+            stroke={cell.outlineColor}
+            strokeWidth={cell.outlineWidth}
+          />
         </svg>
       )
-    case 'square':
+    case 'SQUARE':
       return (
         <svg viewBox="0 0 100 100" {...commonProps}>
-          <rect x="18" y="18" width="64" height="64" rx="18" fill={cell.color} />
+          <rect
+            x="18"
+            y="18"
+            width="64"
+            height="64"
+            rx="18"
+            fill={cell.color}
+            stroke={cell.outlineColor}
+            strokeWidth={cell.outlineWidth}
+          />
         </svg>
       )
-    case 'triangle':
+    case 'TRIANGLE':
       return (
         <svg viewBox="0 0 100 100" {...commonProps}>
-          <polygon points="50,16 84,82 16,82" fill={cell.color} />
+          <polygon
+            points="50,16 84,82 16,82"
+            fill={cell.color}
+            stroke={cell.outlineColor}
+            strokeWidth={cell.outlineWidth}
+            strokeLinejoin="round"
+          />
         </svg>
       )
-    case 'donut':
+    case 'DONUT':
       return (
         <svg viewBox="0 0 100 100" {...commonProps}>
+          {cell.outlineWidth > 0 ? (
+            <circle cx="50" cy="50" r="41" fill="none" stroke={cell.outlineColor} strokeWidth={cell.outlineWidth} />
+          ) : null}
           <circle
             cx="50"
             cy="50"
@@ -168,7 +271,7 @@ function renderShape(cell: OddOneOutCell): JSX.Element {
           <circle cx="50" cy="50" r="6" fill={cell.accentColor} />
         </svg>
       )
-    case 'cross':
+    case 'CROSS':
       return (
         <svg viewBox="0 0 100 100" {...commonProps}>
           <rect
@@ -178,6 +281,9 @@ function renderShape(cell: OddOneOutCell): JSX.Element {
             height="64"
             rx="6"
             fill={cell.color}
+            stroke={cell.outlineColor}
+            strokeWidth={cell.outlineWidth}
+            strokeLinejoin="round"
           />
           <rect
             x="18"
@@ -186,14 +292,33 @@ function renderShape(cell: OddOneOutCell): JSX.Element {
             height="12"
             rx="6"
             fill={cell.color}
+            stroke={cell.outlineColor}
+            strokeWidth={cell.outlineWidth}
+            strokeLinejoin="round"
           />
-          <rect x="46" y="42" width="8" height="16" rx="4" fill={cell.accentColor} />
+          <rect
+            x="46"
+            y="42"
+            width="8"
+            height="16"
+            rx="4"
+            fill={cell.accentColor}
+            stroke={cell.outlineColor}
+            strokeWidth={cell.outlineWidth > 0 ? 1.5 : 0}
+          />
         </svg>
       )
     default:
       return (
         <svg viewBox="0 0 100 100" {...commonProps}>
-          <circle cx="50" cy="50" r="36" fill={cell.color} />
+          <circle
+            cx="50"
+            cy="50"
+            r="36"
+            fill={cell.color}
+            stroke={cell.outlineColor}
+            strokeWidth={cell.outlineWidth}
+          />
         </svg>
       )
   }
@@ -459,6 +584,7 @@ export default function OddOneOutGame({
                 border: '1px solid rgba(14, 165, 233, 0.18)',
                 cursor: phase === 'running' ? 'pointer' : 'not-allowed',
               }}
+              aria-label={cell.isTarget ? 'unik figur' : undefined}
               whileHover={
                 phase === 'running'
                   ? { transform: 'translateY(-4px)', boxShadow: '0 18px 32px rgba(14, 165, 233, 0.18)' }
