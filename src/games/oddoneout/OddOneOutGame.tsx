@@ -1,0 +1,545 @@
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from 'react'
+import motion from 'framer-motion'
+import BrandLogo from '../../components/BrandLogo'
+import { postOddOneOutScore } from '../../utils/oddOneOutScores'
+
+type OddOneOutPhase = 'idle' | 'running' | 'finished'
+
+type ShapeType = 'circle' | 'square' | 'triangle' | 'donut' | 'cross'
+
+interface OddOneOutCell {
+  id: number
+  isTarget: boolean
+  type: ShapeType
+  color: string
+  accentColor: string
+  scale: number
+  rotation: number
+  strokeWidth: number
+}
+
+interface BoardState {
+  cells: OddOneOutCell[]
+  gridSize: number
+  stage: number
+}
+
+const GAME_DURATION_SECONDS = 60
+const SHAPE_TYPES: ShapeType[] = ['circle', 'square', 'triangle', 'donut', 'cross']
+const SEA_TONES = ['#bae6fd', '#7dd3fc', '#5eead4', '#99f6e4', '#67e8f9', '#c4b5fd']
+const COLOR_VARIANCE = [0.32, 0.24, 0.16, 0.11, 0.08]
+const SCALE_VARIANCE = [0, 0, 0.04, 0.08, 0.1]
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value))
+}
+
+function randomItem<T>(collection: readonly T[]): T {
+  return collection[Math.floor(Math.random() * collection.length)]
+}
+
+function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  const normalized = hex.replace('#', '')
+  const bigint = Number.parseInt(normalized.length === 3 ? normalized.repeat(2) : normalized, 16)
+  return {
+    r: (bigint >> 16) & 255,
+    g: (bigint >> 8) & 255,
+    b: bigint & 255,
+  }
+}
+
+function rgbToHex({ r, g, b }: { r: number; g: number; b: number }): string {
+  const toHex = (value: number) =>
+    clamp(Math.round(value), 0, 255)
+      .toString(16)
+      .padStart(2, '0')
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`
+}
+
+function adjustColor(hex: string, amount: number): string {
+  const base = hexToRgb(hex)
+  const mixTarget = amount >= 0 ? { r: 255, g: 255, b: 255 } : { r: 0, g: 0, b: 0 }
+  const ratio = clamp(Math.abs(amount), 0, 1)
+
+  return rgbToHex({
+    r: base.r + (mixTarget.r - base.r) * ratio,
+    g: base.g + (mixTarget.g - base.g) * ratio,
+    b: base.b + (mixTarget.b - base.b) * ratio,
+  })
+}
+
+function generateBoard(round: number): BoardState {
+  const stage = Math.min(Math.floor(round / 3), 4)
+  const gridSize = 3 + stage
+  const totalCells = gridSize * gridSize
+  const targetIndex = Math.floor(Math.random() * totalCells)
+
+  const baseShape = randomItem(SHAPE_TYPES)
+  const uniqueShape =
+    stage < 2 ? randomItem(SHAPE_TYPES.filter((shape) => shape !== baseShape)) : baseShape
+
+  const baseColor = randomItem(SEA_TONES)
+  const variance = COLOR_VARIANCE[stage]
+  const contrastDirection = Math.random() > 0.5 ? 1 : -1
+  const uniqueColor = adjustColor(baseColor, variance * contrastDirection)
+  const baseAccent = adjustColor(baseColor, -0.3)
+  const uniqueAccent = adjustColor(uniqueColor, -0.28)
+  const scaleDelta = SCALE_VARIANCE[stage]
+  const rotationVariance = stage >= 3 ? 6 : 10
+
+  const cells: OddOneOutCell[] = []
+
+  for (let index = 0; index < totalCells; index += 1) {
+    const isTarget = index === targetIndex
+    const rotation = (Math.random() * rotationVariance - rotationVariance / 2) * (stage >= 3 ? 0.5 : 1)
+
+    cells.push({
+      id: index,
+      isTarget,
+      type: isTarget ? uniqueShape : baseShape,
+      color: isTarget ? uniqueColor : baseColor,
+      accentColor: isTarget ? uniqueAccent : baseAccent,
+      scale: isTarget ? 1 - scaleDelta : 1,
+      rotation: isTarget && stage >= 4 ? rotation + (contrastDirection > 0 ? 6 : -6) : rotation,
+      strokeWidth: stage >= 4 && isTarget ? 9 : 11,
+    })
+  }
+
+  return { cells, gridSize, stage }
+}
+
+function formatSeconds(seconds: number): string {
+  const safeSeconds = Math.max(0, Math.ceil(seconds))
+  const minutes = Math.floor(safeSeconds / 60)
+  const rest = safeSeconds % 60
+  return `${minutes}:${rest.toString().padStart(2, '0')}`
+}
+
+function renderShape(cell: OddOneOutCell): JSX.Element {
+  const commonProps = {
+    role: 'presentation' as const,
+    style: {
+      transform: `scale(${cell.scale}) rotate(${cell.rotation}deg)`,
+      transition: 'transform 0.25s ease',
+      width: '100%',
+      height: '100%',
+    },
+  }
+
+  switch (cell.type) {
+    case 'circle':
+      return (
+        <svg viewBox="0 0 100 100" {...commonProps}>
+          <circle cx="50" cy="50" r="36" fill={cell.color} />
+        </svg>
+      )
+    case 'square':
+      return (
+        <svg viewBox="0 0 100 100" {...commonProps}>
+          <rect x="18" y="18" width="64" height="64" rx="18" fill={cell.color} />
+        </svg>
+      )
+    case 'triangle':
+      return (
+        <svg viewBox="0 0 100 100" {...commonProps}>
+          <polygon points="50,16 84,82 16,82" fill={cell.color} />
+        </svg>
+      )
+    case 'donut':
+      return (
+        <svg viewBox="0 0 100 100" {...commonProps}>
+          <circle
+            cx="50"
+            cy="50"
+            r="34"
+            fill="none"
+            stroke={cell.color}
+            strokeWidth={cell.strokeWidth}
+            strokeLinecap="round"
+          />
+          <circle cx="50" cy="50" r="6" fill={cell.accentColor} />
+        </svg>
+      )
+    case 'cross':
+      return (
+        <svg viewBox="0 0 100 100" {...commonProps}>
+          <rect
+            x="44"
+            y="18"
+            width="12"
+            height="64"
+            rx="6"
+            fill={cell.color}
+          />
+          <rect
+            x="18"
+            y="44"
+            width="64"
+            height="12"
+            rx="6"
+            fill={cell.color}
+          />
+          <rect x="46" y="42" width="8" height="16" rx="4" fill={cell.accentColor} />
+        </svg>
+      )
+    default:
+      return (
+        <svg viewBox="0 0 100 100" {...commonProps}>
+          <circle cx="50" cy="50" r="36" fill={cell.color} />
+        </svg>
+      )
+  }
+}
+
+interface OddOneOutGameProps {
+  onExit?: () => void
+  onGameFinished?: (score: number) => void
+  onScoreSubmitted?: () => void
+}
+
+export default function OddOneOutGame({
+  onExit,
+  onGameFinished,
+  onScoreSubmitted,
+}: OddOneOutGameProps) {
+  const [phase, setPhase] = useState<OddOneOutPhase>('idle')
+  const [board, setBoard] = useState<BoardState>(() => generateBoard(0))
+  const [timeLeft, setTimeLeft] = useState(GAME_DURATION_SECONDS)
+  const [score, setScore] = useState(0)
+  const [round, setRound] = useState(0)
+  const [playerName, setPlayerName] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+  const [hasSubmitted, setHasSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const timerRef = useRef<number | null>(null)
+  const endTimeRef = useRef<number>(0)
+  const phaseRef = useRef<OddOneOutPhase>(phase)
+  const scoreRef = useRef(score)
+  const roundRef = useRef(round)
+
+  useEffect(() => {
+    phaseRef.current = phase
+  }, [phase])
+
+  useEffect(() => {
+    scoreRef.current = score
+  }, [score])
+
+  useEffect(() => {
+    roundRef.current = round
+  }, [round])
+
+  const clearTimer = useCallback(() => {
+    if (timerRef.current !== null) {
+      window.clearInterval(timerRef.current)
+      timerRef.current = null
+    }
+  }, [])
+
+  const finishGame = useCallback(() => {
+    if (phaseRef.current === 'finished') {
+      return
+    }
+
+    clearTimer()
+    setPhase('finished')
+    setTimeLeft(0)
+    setHasSubmitted(false)
+    setError(null)
+    setPlayerName('')
+
+    onGameFinished?.(scoreRef.current)
+  }, [clearTimer, onGameFinished])
+
+  useEffect(() => {
+    if (phase !== 'running') {
+      clearTimer()
+      return
+    }
+
+    timerRef.current = window.setInterval(() => {
+      const remainingMs = Math.max(0, endTimeRef.current - Date.now())
+      const remainingSeconds = remainingMs / 1000
+      setTimeLeft(Math.max(0, Math.ceil(remainingSeconds)))
+
+      if (remainingMs <= 0) {
+        finishGame()
+      }
+    }, 200)
+
+    return () => {
+      clearTimer()
+    }
+  }, [clearTimer, finishGame, phase])
+
+  const handleStart = useCallback(() => {
+    clearTimer()
+    endTimeRef.current = Date.now() + GAME_DURATION_SECONDS * 1000
+    setPhase('running')
+    setBoard(generateBoard(0))
+    setTimeLeft(GAME_DURATION_SECONDS)
+    setScore(0)
+    setRound(0)
+    setPlayerName('')
+    setHasSubmitted(false)
+    setError(null)
+  }, [clearTimer])
+
+  const handleReset = useCallback(() => {
+    handleStart()
+  }, [handleStart])
+
+  const handleCellClick = useCallback(
+    (cell: OddOneOutCell) => {
+      if (!cell.isTarget || phaseRef.current !== 'running') {
+        return
+      }
+
+      const nextRound = roundRef.current + 1
+      setScore((value) => value + 1)
+      setRound(nextRound)
+      setBoard(generateBoard(nextRound))
+    },
+    [],
+  )
+
+  const handleNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setPlayerName(event.target.value)
+  }, [])
+
+  const handleSaveScore = useCallback(
+    async (event: FormEvent) => {
+      event.preventDefault()
+
+      const trimmedName = playerName.trim()
+
+      if (!trimmedName) {
+        setError('Skriv dit navn, før du gemmer din score.')
+        return
+      }
+
+      setIsSaving(true)
+      setError(null)
+
+      try {
+        await postOddOneOutScore(trimmedName.slice(0, 32), scoreRef.current)
+        setHasSubmitted(true)
+        onScoreSubmitted?.()
+      } catch (saveError) {
+        console.error('Kunne ikke gemme Odd One Out-scoren.', saveError)
+        setError('Noget gik galt under gemningen. Prøv igen.')
+      } finally {
+        setIsSaving(false)
+      }
+    },
+    [onScoreSubmitted, playerName],
+  )
+
+  const progressLabel = useMemo(() => {
+    if (phase === 'idle') {
+      return 'Klar til start'
+    }
+
+    if (phase === 'running') {
+      return `Runde ${round + 1}`
+    }
+
+    return 'Tiden er gået'
+  }, [phase, round])
+
+  const variantLabel = useMemo(() => {
+    if (phase === 'finished') {
+      return 'Skønt arbejde – skriv dit navn for at gemme scoren.'
+    }
+
+    if (phase === 'running') {
+      return 'Find figuren, der skiller sig subtilt ud fra de andre.'
+    }
+
+    return 'Klik på start for at teste dine øjne og dit fokus.'
+  }, [phase])
+
+  return (
+    <div className="mx-auto w-full max-w-4xl space-y-6">
+      <motion.div
+        className="rounded-3xl shadow-xl"
+        initial={{ opacity: 0, transform: 'translateY(12px)' }}
+        animate={{ opacity: 1, transform: 'translateY(0)' }}
+        transition={{ duration: 0.45 }}
+        style={{
+          background: 'linear-gradient(165deg, rgba(186, 230, 253, 0.9), rgba(45, 212, 191, 0.85))',
+          padding: '1.75rem',
+          backdropFilter: 'blur(6px)',
+        }}
+      >
+        <header className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <BrandLogo as="div" size={64} wordmarkText="Odd One Out" wordmarkSize="1.75rem" />
+            <div>
+              <p className="text-sm uppercase tracking-wide text-slate-600">{progressLabel}</p>
+              <h2 className="text-2xl font-semibold text-sky-900">{variantLabel}</h2>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <motion.div
+              className="rounded-2xl bg-white px-4 py-3 shadow-md"
+              initial={{ opacity: 0, transform: 'translateY(-6px)' }}
+              animate={{ opacity: 1, transform: 'translateY(0)' }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+            >
+              <p className="text-xs uppercase tracking-wide text-slate-500">Tid</p>
+              <p className="text-xl font-semibold text-sky-900">{formatSeconds(timeLeft)}</p>
+            </motion.div>
+            <motion.div
+              className="rounded-2xl bg-white px-4 py-3 shadow-md"
+              initial={{ opacity: 0, transform: 'translateY(-6px)' }}
+              animate={{ opacity: 1, transform: 'translateY(0)' }}
+              transition={{ duration: 0.4, delay: 0.15 }}
+            >
+              <p className="text-xs uppercase tracking-wide text-slate-500">Point</p>
+              <p className="text-xl font-semibold text-sky-900">{score}</p>
+            </motion.div>
+          </div>
+        </header>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-4">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              className="rounded-xl bg-sky-500 px-4 py-2 font-semibold text-white shadow-md"
+              onClick={phase === 'running' ? handleReset : handleStart}
+            >
+              {phase === 'running' ? 'Nulstil' : 'Start spil'}
+            </button>
+            {phase === 'running' && (
+              <p className="text-sm text-slate-600">
+                Grid-størrelse: {board.gridSize} × {board.gridSize}
+              </p>
+            )}
+          </div>
+          {onExit ? (
+            <button
+              type="button"
+              className="rounded-xl bg-teal-500 px-4 py-2 font-semibold text-white shadow-md"
+              onClick={onExit}
+            >
+              Tilbage til menu
+            </button>
+          ) : null}
+        </div>
+
+        <motion.div
+          className="grid gap-3 pt-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.45, delay: 0.1 }}
+          style={{
+            gridTemplateColumns: `repeat(${board.gridSize}, minmax(0, 1fr))`,
+          }}
+        >
+          {board.cells.map((cell) => (
+            <motion.button
+              key={cell.id}
+              type="button"
+              className="rounded-2xl bg-white shadow-md"
+              style={{
+                aspectRatio: '1 / 1',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px solid rgba(14, 165, 233, 0.18)',
+                cursor: phase === 'running' ? 'pointer' : 'not-allowed',
+              }}
+              whileHover={
+                phase === 'running'
+                  ? { transform: 'translateY(-4px)', boxShadow: '0 18px 32px rgba(14, 165, 233, 0.18)' }
+                  : undefined
+              }
+              whileTap={
+                phase === 'running'
+                  ? { transform: 'scale(0.96)' }
+                  : undefined
+              }
+              onClick={() => handleCellClick(cell)}
+              disabled={phase !== 'running'}
+            >
+              <span className="sr-only">
+                {cell.isTarget ? 'Unik figur' : 'Standardfigur'}
+              </span>
+              <div style={{ width: '72%', height: '72%' }}>{renderShape(cell)}</div>
+            </motion.button>
+          ))}
+        </motion.div>
+
+        {phase === 'idle' ? (
+          <motion.p
+            className="pt-6 text-center text-sm text-slate-600"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.35, delay: 0.2 }}
+          >
+            Du har 60 sekunder til at finde figuren, der skiller sig ud. Gridet vokser, og forskellene
+            bliver mere subtile undervejs.
+          </motion.p>
+        ) : null}
+
+        {phase === 'finished' ? (
+          <motion.form
+            className="mt-6 rounded-2xl bg-white px-6 py-5 shadow-lg"
+            initial={{ opacity: 0, transform: 'translateY(12px)' }}
+            animate={{ opacity: 1, transform: 'translateY(0)' }}
+            transition={{ duration: 0.45 }}
+            onSubmit={handleSaveScore}
+          >
+            <p className="text-lg font-semibold text-sky-900">Din score: {scoreRef.current}</p>
+            <p className="text-sm text-slate-600">
+              Tiden er ude – skriv dit navn, og gem dit resultat i den fælles highscore.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <label className="flex flex-col text-sm text-slate-600">
+                Navn
+                <input
+                  type="text"
+                  value={playerName}
+                  onChange={handleNameChange}
+                  className="mt-1 rounded-xl border border-sky-200 px-4 py-2 text-base text-sky-900 shadow-inner"
+                  placeholder="Skriv dit navn"
+                  maxLength={40}
+                />
+              </label>
+              <button
+                type="submit"
+                className="rounded-xl bg-sky-500 px-4 py-2 font-semibold text-white shadow-md"
+                disabled={isSaving || hasSubmitted}
+              >
+                {hasSubmitted ? 'Score gemt' : isSaving ? 'Gemmer…' : 'Gem score'}
+              </button>
+              <button
+                type="button"
+                className="rounded-xl bg-teal-500 px-4 py-2 font-semibold text-white shadow-md"
+                onClick={handleReset}
+              >
+                Spil igen
+              </button>
+            </div>
+            {error ? <p className="mt-3 text-sm text-rose-600">{error}</p> : null}
+            {hasSubmitted ? (
+              <p className="mt-3 text-sm text-emerald-600">
+                Highscoren er gemt! Scroll ned for at se topresultaterne.
+              </p>
+            ) : null}
+          </motion.form>
+        ) : null}
+      </motion.div>
+    </div>
+  )
+}
