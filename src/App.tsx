@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import './App.css'
 import Home from './screens/Home'
@@ -8,6 +9,7 @@ import MeditationHubScreen from './screens/MeditationHubScreen'
 import MeditationBoxBreathingScreen from './screens/MeditationBoxBreathingScreen'
 import MeditationYogaCandleScreen from './screens/MeditationYogaCandleScreen'
 import OddOneOutScreen from './screens/OddOneOutScreen'
+import LoginScreen from './screens/LoginScreen'
 
 function AppLayout() {
   return (
@@ -18,6 +20,19 @@ function AppLayout() {
 }
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  if (!isLoggedIn) {
+    return (
+      <main
+        className="app"
+        style={{ background: 'linear-gradient(135deg, #E6F4FA 0%, #FDFEFF 100%)' }}
+      >
+        <LoginScreen onSkip={() => setIsLoggedIn(true)} />
+      </main>
+    )
+  }
+
   return (
     <Routes>
       <Route element={<AppLayout />}>
