@@ -314,6 +314,7 @@ export default function OddOneOutGame({
   onScoreSubmitted,
 }: OddOneOutGameProps) {
   const [phase, setPhase] = useState<OddOneOutPhase>('idle')
+  const [gameInstance, setGameInstance] = useState(0)
   const [board, setBoard] = useState<BoardState>(() => generateBoard(0))
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION_SECONDS)
   const [score, setScore] = useState(0)
@@ -382,10 +383,11 @@ export default function OddOneOutGame({
     return () => {
       clearTimer()
     }
-  }, [clearTimer, finishGame, phase])
+  }, [clearTimer, finishGame, phase, gameInstance])
 
   const handleStart = useCallback(() => {
     clearTimer()
+    setGameInstance((value) => value + 1)
     endTimeRef.current = Date.now() + GAME_DURATION_SECONDS * 1000
     setPhase('running')
     setBoard(generateBoard(0))
