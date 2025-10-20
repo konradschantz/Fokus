@@ -28,7 +28,7 @@ function App() {
         className="app"
         style={{ background: 'linear-gradient(135deg, #E6F4FA 0%, #FDFEFF 100%)' }}
       >
-        <LoginScreen onSkip={() => setIsLoggedIn(true)} />
+        <LoginScreen onSkip={() => setIsLoggedIn(true)} onLogin={() => setIsLoggedIn(true)} />
       </main>
     )
   }
