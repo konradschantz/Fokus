@@ -3,15 +3,17 @@ import BrandLogo from '../components/BrandLogo'
 
 type LoginScreenProps = {
   onSkip: () => void
+  onLogin: () => void
 }
 
-export default function LoginScreen({ onSkip }: LoginScreenProps) {
+export default function LoginScreen({ onSkip, onLogin }: LoginScreenProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     // Placeholder for future authentication logic
+    onLogin()
   }
 
   return (
