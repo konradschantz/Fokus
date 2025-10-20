@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import BrandLogo from '../components/BrandLogo'
+import motion from 'framer-motion'
 import OddOneOutGame from '../games/oddoneout/OddOneOutGame'
 import {
   getOddOneOutScores,
   type OddOneOutScoreEntry,
 } from '../utils/oddOneOutScores'
-import './OddOneOutScreen.css'
 
 function formatScoreTimestamp(timestamp: number): string {
   const date = new Date(timestamp)
@@ -54,71 +53,72 @@ export default function OddOneOutScreen() {
   }, [refreshScores])
 
   return (
-    <section className="menu game-page odd-one-out">
-      <div className="menu__top-bar">
-        <BrandLogo size={64} wordmarkSize="1.75rem" wordmarkText="Odd One Out" />
-        <button type="button" className="menu__back-button" onClick={() => navigate('/')}>
-          Tilbage til menu
-        </button>
-      </div>
+    <div className="mx-auto w-full max-w-4xl space-y-6">
+      <OddOneOutGame
+        onExit={() => navigate('/')}
+        onGameFinished={handleGameFinished}
+        onScoreSubmitted={handleScoreSubmitted}
+      />
 
-      <header className="menu__header odd-one-out__header">
-        <h1>Odd One Out</h1>
-        <p>
-          Find figuren, der skiller sig ud fra mængden på tid. Spillet starter blødt og bliver gradvist
-          mere udfordrende, efterhånden som gridet vokser.
-        </p>
-      </header>
-
-      <div className="game-page__grid odd-one-out__layout">
-        <OddOneOutGame onGameFinished={handleGameFinished} onScoreSubmitted={handleScoreSubmitted} />
-
-        <aside className="game-scoreboard odd-one-out__scoreboard">
-          <div className="odd-one-out__scoreboard-header">
-            <h2 className="game-scoreboard__title">Top 5 Highscores</h2>
-            {lastScore !== null ? (
-              <span className="odd-one-out__last-score">Seneste score: {lastScore}</span>
-            ) : null}
-          </div>
-
-          {isLoading ? (
-            <p className="game-scoreboard__empty">Indlæser highscores…</p>
-          ) : !hasFinished ? (
-            <p className="game-scoreboard__empty">
-              Afslut et spil for at se de aktuelle placeringer og gemme din egen score.
+      <motion.section
+        className="rounded-3xl bg-white px-6 py-5 shadow-xl"
+        initial={{ opacity: 0, transform: 'translateY(12px)' }}
+        animate={{ opacity: 1, transform: 'translateY(0)' }}
+        transition={{ duration: 0.45, delay: 0.2 }}
+      >
+        <header className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h3 className="text-xl font-semibold text-sky-900">Odd One Out – Top 5</h3>
+            <p className="text-sm text-slate-600">
+              {hasFinished
+                ? 'De bedste resultater fra Fokus-fællesskabet opdateres automatisk her.'
+                : 'Afslut et spil for at se de aktuelle topresultater og gemme dit eget.'}
             </p>
+          </div>
+          {lastScore !== null ? (
+            <span className="rounded-xl bg-sky-500 px-4 py-2 text-sm font-semibold text-white shadow-md">
+              Din seneste score: {lastScore}
+            </span>
+          ) : null}
+        </header>
+
+        <div className="mt-4">
+          {isLoading ? (
+            <p className="text-sm text-slate-600">Indlæser highscores…</p>
           ) : scores.length === 0 ? (
-            <p className="game-scoreboard__empty">
-              Ingen resultater endnu. Vær den første til at sætte en rekord!
+            <p className="text-sm text-slate-600">
+              Ingen gemte resultater endnu. Vær den første til at sætte en rekord!
             </p>
           ) : (
-            <ol className="odd-one-out__scores">
+            <ol className="mt-3">
               {scores.map((entry, index) => (
-                <li key={`${entry.name}-${entry.ts}`} className="odd-one-out__score-row">
-                  <div className="odd-one-out__score-left">
-                    <span className="odd-one-out__score-rank">#{index + 1}</span>
-                    <span className="odd-one-out__score-name">{entry.name}</span>
+                <li
+                  key={`${entry.name}-${entry.ts}`}
+                  className="flex flex-wrap items-center justify-between gap-4 rounded-2xl"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(186, 230, 253, 0.35), rgba(125, 211, 252, 0.55))',
+                    padding: '0.85rem 1.2rem',
+                    boxShadow: '0 18px 28px rgba(15, 23, 42, 0.12)',
+                    border: '1px solid rgba(125, 211, 252, 0.45)',
+                    marginTop: index === 0 ? 0 : '0.85rem',
+                  }}
+                >
+                  <div className="flex items-center gap-3 text-sky-900">
+                    <span className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-sky-900 shadow-md">
+                      #{index + 1}
+                    </span>
+                    <span className="text-lg font-semibold text-sky-900">{entry.name}</span>
                   </div>
-                  <div className="odd-one-out__score-right">
-                    <span className="odd-one-out__score-points">{entry.score} point</span>
-                    <span className="odd-one-out__score-time">{formatScoreTimestamp(entry.ts)}</span>
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                    <span className="font-semibold text-sky-900">{entry.score} point</span>
+                    <span>{formatScoreTimestamp(entry.ts)}</span>
                   </div>
                 </li>
               ))}
             </ol>
           )}
-
-          <p className="game-scoreboard__footnote odd-one-out__scoreboard-footnote">
-            Highscores gemmes i Vercel KV ligesom de andre Fokus-spil, så holdet kan følge de bedste
-            resultater på tværs af enheder.
-          </p>
-          {hasFinished ? null : (
-            <p className="odd-one-out__scoreboard-hint">
-              Tip: Start spillet og gem din score for at låse op for highscorelisten.
-            </p>
-          )}
-        </aside>
-      </div>
-    </section>
+        </div>
+      </motion.section>
+    </div>
   )
 }
