@@ -17,7 +17,11 @@
     "jsx": "react-jsx",
     "composite": true,
     "tsBuildInfoFile": "./node_modules/.tsbuildinfo",
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    "baseUrl": ".",
+    "paths": {
+      "framer-motion": ["./src/vendor/framer-motion"]
+    }
   },
   "include": ["src"]
 }

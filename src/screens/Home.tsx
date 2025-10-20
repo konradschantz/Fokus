@@ -42,6 +42,13 @@ const games: GameDefinition[] = [
     path: '/sorting',
     startLabel: 'Start sorteringsspil',
   },
+  {
+    id: 'odd-one-out',
+    name: 'Odd One Out',
+    description: 'Find figuren der skiller sig ud fra mængden på tid.',
+    path: '/odd-one-out',
+    startLabel: 'Start Odd One Out',
+  },
 ]
 
 export default function Home() {
