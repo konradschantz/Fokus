@@ -1,0 +1,113 @@
+.odd-one-out__header h1 {
+  margin: 0 0 0.65rem;
+}
+
+.odd-one-out__header p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.7;
+}
+
+.odd-one-out__layout {
+  align-items: stretch;
+}
+
+.odd-one-out__scoreboard {
+  background: linear-gradient(160deg, rgba(226, 232, 255, 0.32), rgba(191, 219, 254, 0.32));
+  border: 1px solid rgba(37, 99, 235, 0.15);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 16px 32px rgba(15, 23, 42, 0.12);
+  gap: 1rem;
+}
+
+.odd-one-out__scoreboard-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.odd-one-out__last-score {
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 999px;
+  padding: 0.45rem 0.95rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #0f172a;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.odd-one-out__scores {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.odd-one-out__score-row {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 18px;
+  border: 1px solid rgba(125, 211, 252, 0.35);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.1);
+  padding: 0.85rem 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.odd-one-out__score-left {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: #0f172a;
+}
+
+.odd-one-out__score-rank {
+  background: linear-gradient(135deg, rgba(125, 211, 252, 0.9), rgba(56, 189, 248, 0.9));
+  border-radius: 14px;
+  padding: 0.4rem 0.85rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #0f172a;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.odd-one-out__score-name {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.odd-one-out__score-right {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: #475569;
+  flex-wrap: wrap;
+}
+
+.odd-one-out__score-points {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.odd-one-out__scoreboard-footnote {
+  margin-top: 0.5rem;
+}
+
+.odd-one-out__scoreboard-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+@media (max-width: 720px) {
+  .odd-one-out__layout {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1rem, 3vw, 1.5rem);
+  }
+}

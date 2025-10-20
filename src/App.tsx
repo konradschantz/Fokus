@@ -7,6 +7,7 @@ import SortingGameScreen from './screens/SortingGameScreen'
 import MeditationHubScreen from './screens/MeditationHubScreen'
 import MeditationBoxBreathingScreen from './screens/MeditationBoxBreathingScreen'
 import MeditationYogaCandleScreen from './screens/MeditationYogaCandleScreen'
+import OddOneOutScreen from './screens/OddOneOutScreen'
 
 function AppLayout() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route index element={<Home />} />
         <Route path="memory" element={<MemoryGame />} />
         <Route path="sorting" element={<SortingGameScreen />} />
+        <Route path="odd-one-out" element={<OddOneOutScreen />} />
         <Route path="reaction-test" element={<ReactionTestScreen />} />
         <Route path="meditation">
           <Route index element={<MeditationHubScreen />} />
