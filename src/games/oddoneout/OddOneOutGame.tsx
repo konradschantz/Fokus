@@ -121,12 +121,31 @@ function pickUniqueColor(baseColor: RGB): RGB {
     { r: 35, g: 35, b: 35 },
   ]
 
-  const ranked = vividSet
-    .map((candidate) => ({ candidate, contrastRatio: contrast(candidate, baseColor) }))
+  const evaluated = vividSet
+    .map((candidate) => ({
+      candidate,
+      contrastRatio: contrast(candidate, baseColor),
+      luminanceValue: luminance(candidate),
+    }))
     .sort((a, b) => b.contrastRatio - a.contrastRatio)
 
-  const strongOption = ranked.find((entry) => entry.contrastRatio >= 6)
-  return (strongOption ?? ranked[0] ?? { candidate: { r: 30, g: 30, b: 30 } }).candidate
+  const comfortableContrast = evaluated.find(
+    (entry) =>
+      entry.contrastRatio >= 4.8 && entry.luminanceValue >= 0.18 && entry.luminanceValue <= 0.82,
+  )
+  if (comfortableContrast) {
+    return comfortableContrast.candidate
+  }
+
+  const acceptableContrast = evaluated.find(
+    (entry) => entry.contrastRatio >= 4.5 && entry.luminanceValue >= 0.14 && entry.luminanceValue <= 0.88,
+  )
+  if (acceptableContrast) {
+    return acceptableContrast.candidate
+  }
+
+  const strongOption = evaluated.find((entry) => entry.contrastRatio >= 4.5)
+  return (strongOption ?? evaluated[0] ?? { candidate: { r: 30, g: 30, b: 30 } }).candidate
 }
 
 function randomShape(exclude?: Shape): Shape {
