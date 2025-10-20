@@ -38,13 +38,6 @@ interface BoardState {
 
 const GAME_DURATION_SECONDS = 60
 const SHAPE_TYPES: Shape[] = ['CIRCLE', 'SQUARE', 'TRIANGLE', 'DONUT', 'CROSS']
-const CONTRASTING_SHAPES: Record<Shape, readonly Shape[]> = {
-  CIRCLE: ['SQUARE', 'CROSS'],
-  SQUARE: ['CIRCLE', 'DONUT'],
-  TRIANGLE: ['DONUT', 'CROSS'],
-  DONUT: ['TRIANGLE', 'SQUARE'],
-  CROSS: ['CIRCLE', 'TRIANGLE'],
-}
 const SEA_TONES = ['#bae6fd', '#7dd3fc', '#5eead4', '#99f6e4', '#67e8f9', '#c4b5fd']
 const COLOR_VARIANCE = [0.32, 0.24, 0.16, 0.11, 0.08]
 const SCALE_VARIANCE = [0, 0, 0.04, 0.08, 0.1]
@@ -105,61 +98,27 @@ function contrast(colorA: RGB, colorB: RGB): number {
 }
 
 function pickUniqueColor(baseColor: RGB): RGB {
-  const complement: RGB = {
-    r: 255 - baseColor.r,
-    g: 255 - baseColor.g,
-    b: 255 - baseColor.b,
-  }
-
-  const vividSet: RGB[] = [
-    complement,
+  const candidates: RGB[] = [
+    { r: 20, g: 180, b: 160 },
     { r: 15, g: 120, b: 230 },
     { r: 250, g: 120, b: 60 },
     { r: 240, g: 80, b: 120 },
-    { r: 20, g: 180, b: 160 },
-    { r: 255, g: 255, b: 255 },
-    { r: 35, g: 35, b: 35 },
+    { r: 50, g: 50, b: 50 },
+    { r: 250, g: 250, b: 250 },
   ]
 
-  const evaluated = vividSet
-    .map((candidate) => ({
-      candidate,
-      contrastRatio: contrast(candidate, baseColor),
-      luminanceValue: luminance(candidate),
-    }))
-    .sort((a, b) => b.contrastRatio - a.contrastRatio)
-
-  const comfortableContrast = evaluated.find(
-    (entry) =>
-      entry.contrastRatio >= 4.8 && entry.luminanceValue >= 0.18 && entry.luminanceValue <= 0.82,
-  )
-  if (comfortableContrast) {
-    return comfortableContrast.candidate
+  for (const candidate of candidates) {
+    if (contrast(candidate, baseColor) >= 4.5) {
+      return candidate
+    }
   }
 
-  const acceptableContrast = evaluated.find(
-    (entry) => entry.contrastRatio >= 4.5 && entry.luminanceValue >= 0.14 && entry.luminanceValue <= 0.88,
-  )
-  if (acceptableContrast) {
-    return acceptableContrast.candidate
-  }
-
-  const strongOption = evaluated.find((entry) => entry.contrastRatio >= 4.5)
-  return (strongOption ?? evaluated[0] ?? { candidate: { r: 30, g: 30, b: 30 } }).candidate
+  return { r: 30, g: 30, b: 30 }
 }
 
 function randomShape(exclude?: Shape): Shape {
   const pool = exclude ? SHAPE_TYPES.filter((shape) => shape !== exclude) : SHAPE_TYPES
   return randomItem(pool)
-}
-
-function pickContrastingShape(base: Shape): Shape {
-  const preferred = CONTRASTING_SHAPES[base]
-  if (preferred?.length) {
-    return randomItem(preferred)
-  }
-
-  return randomShape(base)
 }
 
 function generateBoard(round: number): BoardState {
@@ -170,7 +129,7 @@ function generateBoard(round: number): BoardState {
   const targetIndex = Math.floor(Math.random() * totalCells)
 
   const baseShape = randomShape()
-  const uniqueShape = pickContrastingShape(baseShape)
+  const uniqueShape = randomShape(baseShape)
 
   const baseHex = randomItem(SEA_TONES)
   const baseColor = hexToRgb(baseHex)
@@ -200,12 +159,12 @@ function generateBoard(round: number): BoardState {
       type: isTarget ? uniqueShape : baseShape,
       color: tileColor,
       accentColor: tileAccent,
-      scale: isTarget ? 1 + scaleDelta * 0.6 : 1,
+      scale: isTarget ? 1 - scaleDelta : 1,
       rotation: isTarget ? rotation + uniqueRotationOffset : rotation,
       strokeWidth: stage >= 4 && isTarget ? 9 : 11,
       outlineColor: isTarget ? '#000' : 'transparent',
-      outlineWidth: isTarget ? 4 : 0,
-      dropShadow: isTarget ? 'drop-shadow(0 0 10px rgba(0,0,0,0.35))' : 'none',
+      outlineWidth: isTarget ? 3 : 0,
+      dropShadow: isTarget ? 'drop-shadow(0 0 8px rgba(0,0,0,0.25))' : 'none',
     })
   }
 
