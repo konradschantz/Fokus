@@ -8,7 +8,7 @@ import {
   type FormEvent,
 } from 'react'
 import motion from 'framer-motion'
-import './OddOneOutGame.css'
+import BrandLogo from '../../components/BrandLogo'
 import { postOddOneOutScore } from '../../utils/oddOneOutScores'
 
 type OddOneOutPhase = 'idle' | 'running' | 'finished'
@@ -34,9 +34,9 @@ interface BoardState {
 
 const GAME_DURATION_SECONDS = 60
 const SHAPE_TYPES: ShapeType[] = ['circle', 'square', 'triangle', 'donut', 'cross']
-const SEA_TONES = ['#e0f2fe', '#bae6fd', '#99f6e4', '#7dd3fc', '#a5f3fc', '#c4b5fd']
-const COLOR_VARIANCE = [0.32, 0.24, 0.18, 0.12, 0.08]
-const SCALE_VARIANCE = [0, 0, 0.05, 0.08, 0.1]
+const SEA_TONES = ['#bae6fd', '#7dd3fc', '#5eead4', '#99f6e4', '#67e8f9', '#c4b5fd']
+const COLOR_VARIANCE = [0.32, 0.24, 0.16, 0.11, 0.08]
+const SCALE_VARIANCE = [0, 0, 0.04, 0.08, 0.1]
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value))
@@ -76,20 +76,6 @@ function adjustColor(hex: string, amount: number): string {
   })
 }
 
-function ensureColorContrast(
-  baseColor: string,
-  candidate: string,
-  variance: number,
-  direction: 1 | -1,
-): string {
-  if (candidate.toLowerCase() !== baseColor.toLowerCase()) {
-    return candidate
-  }
-  const alternativeDirection = direction === 1 ? -1 : 1
-  const fallbackVariance = variance > 0 ? variance + 0.12 : 0.25
-  return adjustColor(baseColor, clamp(fallbackVariance, 0.05, 0.45) * alternativeDirection)
-}
-
 function generateBoard(round: number): BoardState {
   const stage = Math.min(Math.floor(round / 3), 4)
   const gridSize = 3 + stage
@@ -98,13 +84,12 @@ function generateBoard(round: number): BoardState {
 
   const baseShape = randomItem(SHAPE_TYPES)
   const uniqueShape =
-    stage < 3 ? randomItem(SHAPE_TYPES.filter((shape) => shape !== baseShape)) : baseShape
+    stage < 2 ? randomItem(SHAPE_TYPES.filter((shape) => shape !== baseShape)) : baseShape
 
   const baseColor = randomItem(SEA_TONES)
   const variance = COLOR_VARIANCE[stage]
-  const contrastDirection: 1 | -1 = Math.random() > 0.5 ? 1 : -1
-  const proposedUniqueColor = adjustColor(baseColor, variance * contrastDirection)
-  const uniqueColor = ensureColorContrast(baseColor, proposedUniqueColor, variance, contrastDirection)
+  const contrastDirection = Math.random() > 0.5 ? 1 : -1
+  const uniqueColor = adjustColor(baseColor, variance * contrastDirection)
   const baseAccent = adjustColor(baseColor, -0.3)
   const uniqueAccent = adjustColor(uniqueColor, -0.28)
   const scaleDelta = SCALE_VARIANCE[stage]
@@ -186,8 +171,22 @@ function renderShape(cell: OddOneOutCell): JSX.Element {
     case 'cross':
       return (
         <svg viewBox="0 0 100 100" {...commonProps}>
-          <rect x="44" y="18" width="12" height="64" rx="6" fill={cell.color} />
-          <rect x="18" y="44" width="64" height="12" rx="6" fill={cell.color} />
+          <rect
+            x="44"
+            y="18"
+            width="12"
+            height="64"
+            rx="6"
+            fill={cell.color}
+          />
+          <rect
+            x="18"
+            y="44"
+            width="64"
+            height="12"
+            rx="6"
+            fill={cell.color}
+          />
           <rect x="46" y="42" width="8" height="16" rx="4" fill={cell.accentColor} />
         </svg>
       )
@@ -201,11 +200,16 @@ function renderShape(cell: OddOneOutCell): JSX.Element {
 }
 
 interface OddOneOutGameProps {
+  onExit?: () => void
   onGameFinished?: (score: number) => void
   onScoreSubmitted?: () => void
 }
 
-export default function OddOneOutGame({ onGameFinished, onScoreSubmitted }: OddOneOutGameProps) {
+export default function OddOneOutGame({
+  onExit,
+  onGameFinished,
+  onScoreSubmitted,
+}: OddOneOutGameProps) {
   const [phase, setPhase] = useState<OddOneOutPhase>('idle')
   const [board, setBoard] = useState<BoardState>(() => generateBoard(0))
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION_SECONDS)
@@ -354,134 +358,188 @@ export default function OddOneOutGame({ onGameFinished, onScoreSubmitted }: OddO
 
   const variantLabel = useMemo(() => {
     if (phase === 'finished') {
-      return 'Flot fokus – gem din score og prøv igen for at slå den.'
+      return 'Skønt arbejde – skriv dit navn for at gemme scoren.'
     }
 
     if (phase === 'running') {
-      return 'Find figuren, der skiller sig ud fra de andre.'
+      return 'Find figuren, der skiller sig subtilt ud fra de andre.'
     }
 
-    return 'Klik på start for at teste dit blik for detaljer.'
+    return 'Klik på start for at teste dine øjne og dit fokus.'
   }, [phase])
 
   return (
-    <motion.div
-      className="odd-one-out-game__card"
-      initial={{ opacity: 0, transform: 'translateY(12px)' }}
-      animate={{ opacity: 1, transform: 'translateY(0)' }}
-      transition={{ duration: 0.45 }}
-    >
-      <div className="odd-one-out-game__header">
-        <div className="odd-one-out-game__heading">
-          <span className="odd-one-out-game__eyebrow">{progressLabel}</span>
-          <h2 className="odd-one-out-game__title">{variantLabel}</h2>
-        </div>
-        <div className="odd-one-out-game__metrics" aria-live="polite">
-          <div className="odd-one-out-game__metric">
-            <span className="odd-one-out-game__metric-label">Tid</span>
-            <span className="odd-one-out-game__metric-value">{formatSeconds(timeLeft)}</span>
-          </div>
-          <div className="odd-one-out-game__metric">
-            <span className="odd-one-out-game__metric-label">Point</span>
-            <span className="odd-one-out-game__metric-value">{score}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="odd-one-out-game__actions">
-        <button
-          type="button"
-          className="odd-one-out-game__primary-button"
-          onClick={phase === 'running' ? handleReset : handleStart}
-        >
-          {phase === 'running' ? 'Nulstil' : 'Start spil'}
-        </button>
-        <div className="odd-one-out-game__status-text" aria-live="polite">
-          <span>Grid-størrelse: {board.gridSize} × {board.gridSize}</span>
-        </div>
-      </div>
-
+    <div className="mx-auto w-full max-w-4xl space-y-6">
       <motion.div
-        className="odd-one-out-game__board"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.35, delay: 0.05 }}
+        className="rounded-3xl shadow-xl"
+        initial={{ opacity: 0, transform: 'translateY(12px)' }}
+        animate={{ opacity: 1, transform: 'translateY(0)' }}
+        transition={{ duration: 0.45 }}
         style={{
-          gridTemplateColumns: `repeat(${board.gridSize}, minmax(0, 1fr))`,
+          background: 'linear-gradient(165deg, rgba(186, 230, 253, 0.9), rgba(45, 212, 191, 0.85))',
+          padding: '1.75rem',
+          backdropFilter: 'blur(6px)',
         }}
       >
-        {board.cells.map((cell) => (
-          <motion.button
-            key={cell.id}
-            type="button"
-            className="odd-one-out-game__cell"
-            whileHover={
-              phase === 'running'
-                ? { transform: 'translateY(-4px)', boxShadow: '0 14px 32px rgba(14, 165, 233, 0.22)' }
-                : undefined
-            }
-            whileTap={phase === 'running' ? { transform: 'scale(0.96)' } : undefined}
-            onClick={() => handleCellClick(cell)}
-            disabled={phase !== 'running'}
-          >
-            <span className="sr-only">{cell.isTarget ? 'Unik figur' : 'Standardfigur'}</span>
-            <div className="odd-one-out-game__shape">{renderShape(cell)}</div>
-          </motion.button>
-        ))}
-      </motion.div>
-
-      {phase === 'idle' ? (
-        <p className="odd-one-out-game__hint">
-          Du har ét minut til at finde figuren, der skiller sig ud. Gridet vokser, og forskellene bliver
-          mere subtile undervejs.
-        </p>
-      ) : null}
-
-      {phase === 'finished' ? (
-        <motion.form
-          className="odd-one-out-game__form"
-          initial={{ opacity: 0, transform: 'translateY(10px)' }}
-          animate={{ opacity: 1, transform: 'translateY(0)' }}
-          transition={{ duration: 0.35 }}
-          onSubmit={handleSaveScore}
-        >
-          <p className="odd-one-out-game__result">Din score: {scoreRef.current}</p>
-          <p className="odd-one-out-game__result-text">
-            Tiden er gået – del dit resultat med holdet og se, om du kan slå det næste gang.
-          </p>
-          <div className="odd-one-out-game__form-row">
-            <label className="odd-one-out-game__label">
-              Navn
-              <input
-                type="text"
-                value={playerName}
-                onChange={handleNameChange}
-                className="odd-one-out-game__input"
-                placeholder="Skriv dit navn"
-                maxLength={40}
-              />
-            </label>
-            <button
-              type="submit"
-              className="odd-one-out-game__secondary-button"
-              disabled={isSaving || hasSubmitted}
+        <header className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <BrandLogo as="div" size={64} wordmarkText="Odd One Out" wordmarkSize="1.75rem" />
+            <div>
+              <p className="text-sm uppercase tracking-wide text-slate-600">{progressLabel}</p>
+              <h2 className="text-2xl font-semibold text-sky-900">{variantLabel}</h2>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <motion.div
+              className="rounded-2xl bg-white px-4 py-3 shadow-md"
+              initial={{ opacity: 0, transform: 'translateY(-6px)' }}
+              animate={{ opacity: 1, transform: 'translateY(0)' }}
+              transition={{ duration: 0.4, delay: 0.1 }}
             >
-              {hasSubmitted ? 'Score gemt' : isSaving ? 'Gemmer…' : 'Gem score'}
-            </button>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Tid</p>
+              <p className="text-xl font-semibold text-sky-900">{formatSeconds(timeLeft)}</p>
+            </motion.div>
+            <motion.div
+              className="rounded-2xl bg-white px-4 py-3 shadow-md"
+              initial={{ opacity: 0, transform: 'translateY(-6px)' }}
+              animate={{ opacity: 1, transform: 'translateY(0)' }}
+              transition={{ duration: 0.4, delay: 0.15 }}
+            >
+              <p className="text-xs uppercase tracking-wide text-slate-500">Point</p>
+              <p className="text-xl font-semibold text-sky-900">{score}</p>
+            </motion.div>
+          </div>
+        </header>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-4">
+          <div className="flex items-center gap-3">
             <button
               type="button"
-              className="odd-one-out-game__ghost-button"
-              onClick={handleReset}
+              className="rounded-xl bg-sky-500 px-4 py-2 font-semibold text-white shadow-md"
+              onClick={phase === 'running' ? handleReset : handleStart}
             >
-              Spil igen
+              {phase === 'running' ? 'Nulstil' : 'Start spil'}
             </button>
+            {phase === 'running' && (
+              <p className="text-sm text-slate-600">
+                Grid-størrelse: {board.gridSize} × {board.gridSize}
+              </p>
+            )}
           </div>
-          {error ? <p className="odd-one-out-game__error">{error}</p> : null}
-          {hasSubmitted ? (
-            <p className="odd-one-out-game__success">Highscoren er gemt. Se tavlen for de bedste resultater.</p>
+          {onExit ? (
+            <button
+              type="button"
+              className="rounded-xl bg-teal-500 px-4 py-2 font-semibold text-white shadow-md"
+              onClick={onExit}
+            >
+              Tilbage til menu
+            </button>
           ) : null}
-        </motion.form>
-      ) : null}
-    </motion.div>
+        </div>
+
+        <motion.div
+          className="grid gap-3 pt-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.45, delay: 0.1 }}
+          style={{
+            gridTemplateColumns: `repeat(${board.gridSize}, minmax(0, 1fr))`,
+          }}
+        >
+          {board.cells.map((cell) => (
+            <motion.button
+              key={cell.id}
+              type="button"
+              className="rounded-2xl bg-white shadow-md"
+              style={{
+                aspectRatio: '1 / 1',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px solid rgba(14, 165, 233, 0.18)',
+                cursor: phase === 'running' ? 'pointer' : 'not-allowed',
+              }}
+              whileHover={
+                phase === 'running'
+                  ? { transform: 'translateY(-4px)', boxShadow: '0 18px 32px rgba(14, 165, 233, 0.18)' }
+                  : undefined
+              }
+              whileTap={
+                phase === 'running'
+                  ? { transform: 'scale(0.96)' }
+                  : undefined
+              }
+              onClick={() => handleCellClick(cell)}
+              disabled={phase !== 'running'}
+            >
+              <span className="sr-only">
+                {cell.isTarget ? 'Unik figur' : 'Standardfigur'}
+              </span>
+              <div style={{ width: '72%', height: '72%' }}>{renderShape(cell)}</div>
+            </motion.button>
+          ))}
+        </motion.div>
+
+        {phase === 'idle' ? (
+          <motion.p
+            className="pt-6 text-center text-sm text-slate-600"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.35, delay: 0.2 }}
+          >
+            Du har 60 sekunder til at finde figuren, der skiller sig ud. Gridet vokser, og forskellene
+            bliver mere subtile undervejs.
+          </motion.p>
+        ) : null}
+
+        {phase === 'finished' ? (
+          <motion.form
+            className="mt-6 rounded-2xl bg-white px-6 py-5 shadow-lg"
+            initial={{ opacity: 0, transform: 'translateY(12px)' }}
+            animate={{ opacity: 1, transform: 'translateY(0)' }}
+            transition={{ duration: 0.45 }}
+            onSubmit={handleSaveScore}
+          >
+            <p className="text-lg font-semibold text-sky-900">Din score: {scoreRef.current}</p>
+            <p className="text-sm text-slate-600">
+              Tiden er ude – skriv dit navn, og gem dit resultat i den fælles highscore.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <label className="flex flex-col text-sm text-slate-600">
+                Navn
+                <input
+                  type="text"
+                  value={playerName}
+                  onChange={handleNameChange}
+                  className="mt-1 rounded-xl border border-sky-200 px-4 py-2 text-base text-sky-900 shadow-inner"
+                  placeholder="Skriv dit navn"
+                  maxLength={40}
+                />
+              </label>
+              <button
+                type="submit"
+                className="rounded-xl bg-sky-500 px-4 py-2 font-semibold text-white shadow-md"
+                disabled={isSaving || hasSubmitted}
+              >
+                {hasSubmitted ? 'Score gemt' : isSaving ? 'Gemmer…' : 'Gem score'}
+              </button>
+              <button
+                type="button"
+                className="rounded-xl bg-teal-500 px-4 py-2 font-semibold text-white shadow-md"
+                onClick={handleReset}
+              >
+                Spil igen
+              </button>
+            </div>
+            {error ? <p className="mt-3 text-sm text-rose-600">{error}</p> : null}
+            {hasSubmitted ? (
+              <p className="mt-3 text-sm text-emerald-600">
+                Highscoren er gemt! Scroll ned for at se topresultaterne.
+              </p>
+            ) : null}
+          </motion.form>
+        ) : null}
+      </motion.div>
+    </div>
   )
 }
