@@ -621,14 +621,14 @@ export default function OddOneOutGame({
               </label>
               <button
                 type="submit"
-                className="rounded-xl bg-sky-500 px-4 py-2 font-semibold text-white shadow-md"
+                className="menu__primary-button"
                 disabled={isSaving || hasSubmitted}
               >
                 {hasSubmitted ? 'Score gemt' : isSaving ? 'Gemmer…' : 'Gem score'}
               </button>
               <button
                 type="button"
-                className="rounded-xl bg-teal-500 px-4 py-2 font-semibold text-white shadow-md"
+                className="menu__primary-button"
                 onClick={handleReset}
               >
                 Spil igen
