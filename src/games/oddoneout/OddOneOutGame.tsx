@@ -11,6 +11,7 @@ import motion from 'framer-motion'
 import BrandLogo from '../../components/BrandLogo'
 import { postOddOneOutScore } from '../../utils/oddOneOutScores'
 import { MAX_GRID_SIZE } from './constants'
+import './OddOneOutGame.css'
 
 type OddOneOutPhase = 'idle' | 'running' | 'finished'
 
@@ -516,11 +517,11 @@ export default function OddOneOutGame({
           </div>
         </header>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-4">
+        <div className="odd-one-out-game__actions flex flex-wrap items-center justify-between gap-3 pt-4">
           <div className="flex items-center gap-3">
             <button
               type="button"
-              className="rounded-xl bg-sky-500 px-4 py-2 font-semibold text-white shadow-md"
+              className="menu__primary-button"
               onClick={phase === 'running' ? handleReset : handleStart}
             >
               {phase === 'running' ? 'Nulstil' : 'Start spil'}
@@ -532,11 +533,7 @@ export default function OddOneOutGame({
             )}
           </div>
           {onExit ? (
-            <button
-              type="button"
-              className="rounded-xl bg-teal-500 px-4 py-2 font-semibold text-white shadow-md"
-              onClick={onExit}
-            >
+            <button type="button" className="menu__back-button" onClick={onExit}>
               Tilbage til menu
             </button>
           ) : null}
@@ -624,14 +621,14 @@ export default function OddOneOutGame({
               </label>
               <button
                 type="submit"
-                className="rounded-xl bg-sky-500 px-4 py-2 font-semibold text-white shadow-md"
+                className="menu__primary-button"
                 disabled={isSaving || hasSubmitted}
               >
                 {hasSubmitted ? 'Score gemt' : isSaving ? 'Gemmer…' : 'Gem score'}
               </button>
               <button
                 type="button"
-                className="rounded-xl bg-teal-500 px-4 py-2 font-semibold text-white shadow-md"
+                className="menu__primary-button"
                 onClick={handleReset}
               >
                 Spil igen
