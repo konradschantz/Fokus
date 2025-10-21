@@ -528,35 +528,18 @@ export default function OddOneOutGame({ onGameFinished, onScoreSubmitted }: OddO
           gridTemplateColumns: `repeat(${board.gridSize}, minmax(0, 1fr))`,
         }}
       >
-        <header className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <BrandLogo as="div" size={64} wordmarkText="Odd One Out" wordmarkSize="1.75rem" />
-            <div>
-              <p className="text-sm uppercase tracking-wide text-slate-600">{progressLabel}</p>
-              <h2 className="text-2xl font-semibold text-sky-900">{variantLabel}</h2>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <motion.div
-              className="rounded-2xl bg-white px-4 py-3 shadow-md"
-              initial={{ opacity: 0, transform: 'translateY(-6px)' }}
-              animate={{ opacity: 1, transform: 'translateY(0)' }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-            >
-              <p className="text-xs uppercase tracking-wide text-slate-500">Tid</p>
-              <p className="text-xl font-semibold text-sky-900">{formatSeconds(timeLeft)}</p>
-            </motion.div>
-            <motion.div
-              className="rounded-2xl bg-white px-4 py-3 shadow-md"
-              initial={{ opacity: 0, transform: 'translateY(-6px)' }}
-              animate={{ opacity: 1, transform: 'translateY(0)' }}
-              transition={{ duration: 0.4, delay: 0.15 }}
-            >
-              <p className="text-xs uppercase tracking-wide text-slate-500">Point</p>
-              <p className="text-xl font-semibold text-sky-900">{score}</p>
-            </motion.div>
-          </div>
-        </header>
+        {/* Grid of clickable cells */}
+        {board.cells.map((cell) => (
+          <button
+            key={cell.id}
+            type="button"
+            className="odd-one-out-game__cell"
+            onClick={() => handleCellClick(cell)}
+            disabled={phase !== 'running'}
+          >
+            {renderShape(cell)}
+          </button>
+        ))}
 
         <div className="odd-one-out-game__actions flex flex-wrap items-center justify-between gap-3 pt-4">
           <div className="flex items-center gap-3">
@@ -573,11 +556,7 @@ export default function OddOneOutGame({ onGameFinished, onScoreSubmitted }: OddO
               </p>
             )}
           </div>
-          {onExit ? (
-            <button type="button" className="menu__back-button" onClick={onExit}>
-              Tilbage til menu
-            </button>
-          ) : null}
+          {/* Back button handled by parent screen */}
         </div>
 
       {phase === 'idle' ? (
@@ -635,6 +614,7 @@ export default function OddOneOutGame({ onGameFinished, onScoreSubmitted }: OddO
           ) : null}
         </motion.form>
       ) : null}
+      </motion.div>
     </motion.section>
   )
 }
