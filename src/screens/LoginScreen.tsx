@@ -38,7 +38,7 @@ export default function LoginScreen({ onSkip }: LoginScreenProps) {
         }}
       >
         <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <h1 style={{ margin: 0, fontSize: 'clamp(2rem, 5vw, 2.8rem)' }}>Velkommen tilbage</h1>
+          <h1 style={{ margin: 0, fontSize: 'clamp(2rem, 5vw, 2.8rem)' }}>Velkommen</h1>
           <p style={{ margin: 0, color: '#475569', fontSize: '1.05rem' }}>
             Log ind for at fortsætte din Fokus-oplevelse
           </p>
