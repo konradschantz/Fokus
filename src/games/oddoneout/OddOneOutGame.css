@@ -77,6 +77,43 @@
   flex-wrap: wrap;
 }
 
+.odd-one-out-game__primary-button {
+  align-items: center;
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+  border: none;
+  border-radius: 999px;
+  box-shadow: 0 18px 36px rgba(37, 99, 235, 0.25);
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  gap: 0.35rem;
+  justify-content: center;
+  padding: 0.85rem 2.2rem;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.odd-one-out-game__primary-button:hover,
+.odd-one-out-game__primary-button:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 46px rgba(37, 99, 235, 0.35);
+  outline: none;
+}
+
+.odd-one-out-game__primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.75;
+  box-shadow: none;
+}
+
+.odd-one-out-game__status-text {
+  font-size: 0.95rem;
+  color: #475569;
+}
+
 .odd-one-out-game__board {
   display: grid;
   gap: clamp(0.5rem, 1.5vw, 0.85rem);

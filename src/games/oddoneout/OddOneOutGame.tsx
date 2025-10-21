@@ -521,7 +521,7 @@ export default function OddOneOutGame({
           <div className="flex items-center gap-3">
             <button
               type="button"
-              className="menu__primary-button"
+              className="odd-one-out-game__primary-button"
               onClick={phase === 'running' ? handleReset : handleStart}
             >
               {phase === 'running' ? 'Nulstil' : 'Start spil'}
