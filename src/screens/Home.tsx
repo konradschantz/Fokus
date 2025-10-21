@@ -71,7 +71,7 @@ export default function Home() {
           <article key={game.id} className="menu__card">
             <h2>{game.name}</h2>
             <p>{game.description}</p>
-            <Link to={game.path}>
+            <Link to={game.path} className="menu__primary-button">
               {game.startLabel}
             </Link>
           </article>
