@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import motion from 'framer-motion'
+import BrandLogo from '../components/BrandLogo'
 import OddOneOutGame from '../games/oddoneout/OddOneOutGame'
 import {
   getOddOneOutScores,
   type OddOneOutScoreEntry,
 } from '../utils/oddOneOutScores'
+import './OddOneOutScreen.css'
 
 function formatScoreTimestamp(timestamp: number): string {
   const date = new Date(timestamp)
@@ -53,72 +55,73 @@ export default function OddOneOutScreen() {
   }, [refreshScores])
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6">
-      <OddOneOutGame
-        onExit={() => navigate('/')}
-        onGameFinished={handleGameFinished}
-        onScoreSubmitted={handleScoreSubmitted}
-      />
+    <section className="menu game-page odd-one-out">
+      <div className="menu__top-bar">
+        <BrandLogo size={64} wordmarkSize="1.75rem" />
+        <button type="button" className="menu__back-button" onClick={() => navigate('/')}>
+          Tilbage til menu
+        </button>
+      </div>
 
-      <motion.section
-        className="rounded-3xl bg-white px-6 py-5 shadow-xl"
-        initial={{ opacity: 0, transform: 'translateY(12px)' }}
-        animate={{ opacity: 1, transform: 'translateY(0)' }}
-        transition={{ duration: 0.45, delay: 0.2 }}
-      >
-        <header className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h3 className="text-xl font-semibold text-sky-900">Odd One Out – Top 5</h3>
-            <p className="text-sm text-slate-600">
-              {hasFinished
-                ? 'De bedste resultater fra Fokus-fællesskabet opdateres automatisk her.'
-                : 'Afslut et spil for at se de aktuelle topresultater og gemme dit eget.'}
-            </p>
+      <header className="menu__header odd-one-out__header">
+        <h1>Odd One Out</h1>
+        <p>Find figuren, der skiller sig subtilt ud fra de andre, før tiden løber ud.</p>
+      </header>
+
+      <div className="game-page__grid odd-one-out__layout">
+        <OddOneOutGame
+          onGameFinished={handleGameFinished}
+          onScoreSubmitted={handleScoreSubmitted}
+        />
+
+        <motion.aside
+          className="odd-one-out__scoreboard"
+          initial={{ opacity: 0, transform: 'translateY(12px)' }}
+          animate={{ opacity: 1, transform: 'translateY(0)' }}
+          transition={{ duration: 0.45, delay: 0.2 }}
+        >
+          <div className="odd-one-out__scoreboard-header">
+            <div>
+              <h2 className="odd-one-out__scoreboard-title">Highscore</h2>
+              <p className="odd-one-out__scoreboard-description">
+                {hasFinished
+                  ? 'De bedste resultater fra Fokus-fællesskabet opdateres automatisk her.'
+                  : 'Afslut et spil for at se de aktuelle topresultater og gemme dit eget.'}
+              </p>
+            </div>
+            {lastScore !== null ? (
+              <span className="odd-one-out__last-score">Din seneste score: {lastScore}</span>
+            ) : null}
           </div>
-          {lastScore !== null ? (
-            <span className="rounded-xl bg-sky-500 px-4 py-2 text-sm font-semibold text-white shadow-md">
-              Din seneste score: {lastScore}
-            </span>
-          ) : null}
-        </header>
 
-        <div className="mt-4">
           {isLoading ? (
-            <p className="text-sm text-slate-600">Indlæser highscores…</p>
+            <p className="odd-one-out__scoreboard-hint">Indlæser highscores…</p>
           ) : scores.length === 0 ? (
-            <p className="text-sm text-slate-600">
+            <p className="odd-one-out__scoreboard-hint">
               Ingen gemte resultater endnu. Vær den første til at sætte en rekord!
             </p>
           ) : (
-            <ol className="mt-3">
+            <ol className="odd-one-out__scores">
               {scores.map((entry, index) => (
-                <li
-                  key={`${entry.name}-${entry.ts}`}
-                  className="flex flex-wrap items-center justify-between gap-4 rounded-2xl"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(186, 230, 253, 0.35), rgba(125, 211, 252, 0.55))',
-                    padding: '0.85rem 1.2rem',
-                    boxShadow: '0 18px 28px rgba(15, 23, 42, 0.12)',
-                    border: '1px solid rgba(125, 211, 252, 0.45)',
-                    marginTop: index === 0 ? 0 : '0.85rem',
-                  }}
-                >
-                  <div className="flex items-center gap-3 text-sky-900">
-                    <span className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-sky-900 shadow-md">
-                      #{index + 1}
-                    </span>
-                    <span className="text-lg font-semibold text-sky-900">{entry.name}</span>
+                <li key={`${entry.name}-${entry.ts}`} className="odd-one-out__score-row">
+                  <div className="odd-one-out__score-left">
+                    <span className="odd-one-out__score-rank">#{index + 1}</span>
+                    <span className="odd-one-out__score-name">{entry.name}</span>
                   </div>
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
-                    <span className="font-semibold text-sky-900">{entry.score} point</span>
+                  <div className="odd-one-out__score-right">
+                    <span className="odd-one-out__score-points">{entry.score} point</span>
                     <span>{formatScoreTimestamp(entry.ts)}</span>
                   </div>
                 </li>
               ))}
             </ol>
           )}
-        </div>
-      </motion.section>
-    </div>
+
+          <p className="odd-one-out__scoreboard-footnote">
+            Highscoren opdateres automatisk, når du gemmer et resultat.
+          </p>
+        </motion.aside>
+      </div>
+    </section>
   )
 }
