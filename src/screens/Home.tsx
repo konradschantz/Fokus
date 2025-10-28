@@ -49,6 +49,14 @@ const games: GameDefinition[] = [
     path: '/odd-one-out',
     startLabel: 'Start Odd One Out',
   },
+  {
+    id: 'puzzle-blox',
+    name: 'Puzzle Blox',
+    description:
+      'Fjern de overskydende klodser i hovedgridden, lad dem falde med tyngdekraften og genskab målfiguren niveau for niveau.',
+    path: '/puzzle-blox',
+    startLabel: 'Start Puzzle Blox',
+  },
 ]
 
 export default function Home() {

@@ -10,12 +10,19 @@ import {
   type Ref,
 } from 'react'
 
-type MotionStyle = CSSProperties
+type MotionStyle = CSSProperties & {
+  x?: number | string
+  y?: number | string
+  scale?: number | string
+}
 
 interface MotionTransition {
   duration?: number
   delay?: number
   easing?: string
+  stiffness?: number
+  damping?: number
+  type?: string
 }
 
 type BaseMotionProps<T extends keyof JSX.IntrinsicElements> = Omit<
@@ -23,8 +30,10 @@ type BaseMotionProps<T extends keyof JSX.IntrinsicElements> = Omit<
   'style'
 > & {
   style?: CSSProperties
+  layoutId?: string
   initial?: MotionStyle
   animate?: MotionStyle
+  exit?: MotionStyle
   whileHover?: MotionStyle
   whileTap?: MotionStyle
   transition?: MotionTransition
@@ -62,6 +71,7 @@ function createMotionComponent<T extends keyof JSX.IntrinsicElements>(tag: T) {
       whileHover,
       whileTap,
       transition,
+      layoutId: _layoutId,
       style,
       onMouseEnter,
       onMouseLeave,
