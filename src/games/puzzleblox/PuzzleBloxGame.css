@@ -120,6 +120,16 @@
   position: relative;
 }
 
+.puzzle-blox__cell--violation::after {
+  content: '';
+  position: absolute;
+  inset: -6%;
+  border-radius: 1rem;
+  border: 2px solid rgba(248, 113, 113, 0.95);
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.4);
+  pointer-events: none;
+}
+
 .puzzle-blox__placeholder {
   border-radius: 0.85rem;
   border: 1px dashed rgba(148, 163, 184, 0.3);
@@ -225,4 +235,49 @@
   content: 'ℹ️';
   font-size: 1.2rem;
   line-height: 1;
+}
+
+.puzzle-blox__regenerating {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  text-align: center;
+  color: #0f172a;
+}
+
+.puzzle-blox__regenerating > p {
+  margin: 0;
+  font-size: 0.98rem;
+}
+
+.puzzle-blox__debug-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  background: rgba(15, 23, 42, 0.05);
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  align-self: flex-start;
+}
+
+.puzzle-blox__debug-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.9rem;
+  color: #334155;
+  font-weight: 600;
+}
+
+.puzzle-blox__debug-toggle input {
+  accent-color: #f97316;
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.puzzle-blox__debug-warning {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #dc2626;
 }

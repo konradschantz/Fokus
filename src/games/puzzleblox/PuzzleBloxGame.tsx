@@ -1,6 +1,12 @@
-import { useCallback, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { LevelManager } from './components/LevelManager'
-import { puzzleBloxLevels } from './levels'
+import { TargetBoard } from './components/TargetBoard'
+import {
+  PUZZLE_BLOX_DEFAULT_SEED,
+  generatePuzzleBloxLevels,
+  type PuzzleBloxLevel,
+} from './levels'
+import { findGravityViolations } from './logic'
 import './PuzzleBloxGame.css'
 
 interface PuzzleBloxGameProps {
@@ -9,6 +15,35 @@ interface PuzzleBloxGameProps {
 
 export default function PuzzleBloxGame({ onExit }: PuzzleBloxGameProps) {
   const audioContextRef = useRef<AudioContext | null>(null)
+  const [showDebug, setShowDebug] = useState(false)
+  const [attempt, setAttempt] = useState(0)
+
+  const [levelSeed] = useState(() => {
+    if (typeof window === 'undefined') {
+      return PUZZLE_BLOX_DEFAULT_SEED
+    }
+
+    const params = new URLSearchParams(window.location.search)
+    return params.get('puzzlebloxSeed') ?? PUZZLE_BLOX_DEFAULT_SEED
+  })
+
+  const generationResult = useMemo(
+    () => generatePuzzleBloxLevels(`${levelSeed}-${attempt}`),
+    [levelSeed, attempt],
+  )
+
+  const hasInvalidLevels = generationResult.invalidLevels.length > 0
+  const invalidLevel: PuzzleBloxLevel | null = hasInvalidLevels
+    ? generationResult.levels[generationResult.invalidLevels[0]!] ?? null
+    : null
+
+  useEffect(() => {
+    const MAX_GENERATION_ATTEMPTS = 5
+
+    if (hasInvalidLevels && attempt < MAX_GENERATION_ATTEMPTS) {
+      setAttempt((previous) => previous + 1)
+    }
+  }, [attempt, hasInvalidLevels])
 
   const ensureAudioContext = useCallback(() => {
     if (typeof window === 'undefined') {
@@ -82,7 +117,11 @@ export default function PuzzleBloxGame({ onExit }: PuzzleBloxGameProps) {
     oscillator.stop(now + 0.6)
   }, [ensureAudioContext])
 
-  const levels = useMemo(() => puzzleBloxLevels, [])
+  const activeLevels = hasInvalidLevels ? [] : generationResult.levels
+  const invalidMask = useMemo(
+    () => (invalidLevel && showDebug ? findGravityViolations(invalidLevel.target) : null),
+    [invalidLevel, showDebug],
+  )
 
   return (
     <div className="puzzle-blox">
@@ -100,10 +139,47 @@ export default function PuzzleBloxGame({ onExit }: PuzzleBloxGameProps) {
         <h1>Puzzle Blox</h1>
       </header>
 
-      <LevelManager levels={levels} onClickSound={playClickSound} onWinSound={playWinSound} />
+      {hasInvalidLevels ? (
+        <div
+          className="puzzle-blox__panel puzzle-blox__panel--compact puzzle-blox__regenerating"
+          role="status"
+          aria-live="polite"
+        >
+          <p>Generatoren arbejder på et reachbart niveau…</p>
+          {showDebug && invalidLevel ? (
+            <TargetBoard
+              pattern={invalidLevel.target}
+              showDebug
+              debugMask={invalidMask ?? undefined}
+            />
+          ) : null}
+        </div>
+      ) : (
+        <LevelManager
+          levels={activeLevels}
+          onClickSound={playClickSound}
+          onWinSound={playWinSound}
+          showDebug={showDebug}
+        />
+      )}
 
       <div className="puzzle-blox__instructions">
         Lav samme figur som vist øverst. Fjern overflødige blokke ved at trykke på dem.
+      </div>
+
+      <div className="puzzle-blox__debug-controls">
+        <label className="puzzle-blox__debug-toggle">
+          <input
+            type="checkbox"
+            checked={showDebug}
+            onChange={(event) => setShowDebug(event.target.checked)}
+          />
+          Vis reachability debug
+        </label>
+
+        {showDebug && hasInvalidLevels ? (
+          <div className="puzzle-blox__debug-warning">Ikke reach-bar – regenererer…</div>
+        ) : null}
       </div>
     </div>
   )
