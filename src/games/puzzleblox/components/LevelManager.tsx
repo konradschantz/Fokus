@@ -11,6 +11,11 @@ interface LevelManagerProps {
   onClickSound?: () => void
   onWinSound?: () => void
   showDebug?: boolean
+  isLocked?: boolean
+  onLevelComplete?: (payload: {
+    completedLevelIndex: number
+    nextLevelIndex: number
+  }) => void
 }
 
 interface GravityResult {
@@ -96,7 +101,14 @@ function boardMatchesTarget(board: BlockMatrix, target: number[][]): boolean {
   return true
 }
 
-export function LevelManager({ levels, onClickSound, onWinSound, showDebug }: LevelManagerProps) {
+export function LevelManager({
+  levels,
+  onClickSound,
+  onWinSound,
+  showDebug,
+  isLocked = false,
+  onLevelComplete,
+}: LevelManagerProps) {
   const idCounter = useRef(0)
   const [levelIndex, setLevelIndex] = useState(0)
   const [board, setBoard] = useState<BlockMatrix>(() =>
@@ -141,31 +153,36 @@ export function LevelManager({ levels, onClickSound, onWinSound, showDebug }: Le
     }
   }, [])
 
-  const advanceLevel = useCallback(() => {
-    setLevelIndex((previous) => {
-      const nextIndex = (previous + 1) % levels.length
+  const advanceLevel = useCallback(
+    (currentIndex: number) => {
+      const nextIndex = Math.min(currentIndex + 1, levels.length - 1)
       const nextBoard = createBoardFromStart(levels[nextIndex]!.start, nextIndex, idCounter)
       setBoard(nextBoard)
       boardRef.current = nextBoard
-      return nextIndex
-    })
-  }, [levels])
+      setLevelIndex(nextIndex)
+    },
+    [levels],
+  )
 
   const handleVictory = useCallback(() => {
     setIsTransitioning(true)
     setShowCelebration(true)
     onWinSound?.()
 
+    const completedIndex = levelIndex
+    const nextIndex = Math.min(levelIndex + 1, levels.length - 1)
+    onLevelComplete?.({ completedLevelIndex: completedIndex, nextLevelIndex: nextIndex })
+
     window.setTimeout(() => {
       setShowCelebration(false)
-      advanceLevel()
+      advanceLevel(levelIndex)
       setIsTransitioning(false)
     }, 1200)
-  }, [advanceLevel, onWinSound])
+  }, [advanceLevel, levelIndex, levels.length, onLevelComplete, onWinSound])
 
   const handleRemove = useCallback(
     (row: number, col: number) => {
-      if (isTransitioning) {
+      if (isTransitioning || isLocked) {
         return
       }
 
@@ -195,21 +212,29 @@ export function LevelManager({ levels, onClickSound, onWinSound, showDebug }: Le
         scheduleFloatingReset(withGravity)
       }
     },
-    [boardRef, currentLevel.target, handleVictory, isTransitioning, onClickSound, scheduleFloatingReset],
+    [
+      boardRef,
+      currentLevel.target,
+      handleVictory,
+      isLocked,
+      isTransitioning,
+      onClickSound,
+      scheduleFloatingReset,
+    ],
   )
 
   useEffect(() => {
     const matches = boardMatchesTarget(board, currentLevel.target)
-    if (matches && !isTransitioning) {
+    if (matches && !isTransitioning && !isLocked) {
       handleVictory()
     }
-  }, [board, currentLevel.target, handleVictory, isTransitioning])
+  }, [board, currentLevel.target, handleVictory, isLocked, isTransitioning])
 
   return (
     <div className="puzzle-blox__layout">
       <div className="puzzle-blox__boards">
         <TargetBoard pattern={currentLevel.target} showDebug={showDebug} debugMask={debugMask ?? undefined} />
-        <PuzzleBoard board={board} onRemove={handleRemove} disabled={isTransitioning} />
+        <PuzzleBoard board={board} onRemove={handleRemove} disabled={isTransitioning || isLocked} />
       </div>
 
       <div className="puzzle-blox__level-indicator" role="status" aria-live="polite">
