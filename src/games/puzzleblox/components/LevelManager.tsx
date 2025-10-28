@@ -4,11 +4,13 @@ import type { PuzzleBloxLevel } from '../levels'
 import { TargetBoard } from './TargetBoard'
 import { PuzzleBoard } from './PuzzleBoard'
 import type { BlockMatrix } from '../types'
+import { findGravityViolations } from '../logic'
 
 interface LevelManagerProps {
   levels: PuzzleBloxLevel[]
   onClickSound?: () => void
   onWinSound?: () => void
+  showDebug?: boolean
 }
 
 interface GravityResult {
@@ -94,7 +96,7 @@ function boardMatchesTarget(board: BlockMatrix, target: number[][]): boolean {
   return true
 }
 
-export function LevelManager({ levels, onClickSound, onWinSound }: LevelManagerProps) {
+export function LevelManager({ levels, onClickSound, onWinSound, showDebug }: LevelManagerProps) {
   const idCounter = useRef(0)
   const [levelIndex, setLevelIndex] = useState(0)
   const [board, setBoard] = useState<BlockMatrix>(() =>
@@ -110,6 +112,10 @@ export function LevelManager({ levels, onClickSound, onWinSound }: LevelManagerP
   }, [board])
 
   const currentLevel = useMemo(() => levels[levelIndex]!, [levels, levelIndex])
+  const debugMask = useMemo(
+    () => (showDebug ? findGravityViolations(currentLevel.target) : null),
+    [currentLevel.target, showDebug],
+  )
 
   const scheduleFloatingReset = useCallback((nextBoard: BlockMatrix) => {
     const hasFloating = nextBoard.some((row) => row.some((cell) => cell?.wasFloating))
@@ -202,7 +208,7 @@ export function LevelManager({ levels, onClickSound, onWinSound }: LevelManagerP
   return (
     <div className="puzzle-blox__layout">
       <div className="puzzle-blox__boards">
-        <TargetBoard pattern={currentLevel.target} />
+        <TargetBoard pattern={currentLevel.target} showDebug={showDebug} debugMask={debugMask ?? undefined} />
         <PuzzleBoard board={board} onRemove={handleRemove} disabled={isTransitioning} />
       </div>
 
