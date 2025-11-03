@@ -14,19 +14,19 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/brand-logo.png",
-      "sizes": "192x192",
-      "type": "image/png",
+      "src": "/Fokus/dist/brand-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "/brand-logo.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "/Fokus/dist/brand-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "/brand-logo.svg",
+      "src": "/Fokus/dist/brand-logo.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     }

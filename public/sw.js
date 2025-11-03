@@ -4,8 +4,7 @@ const CORE_ASSETS = [
   '/',
   '/index.html',
   '/manifest.webmanifest',
-  '/brand-logo.png',
-  '/brand-logo.svg',
+  '/Fokus/dist/brand-logo.svg',
   '/vite.svg',
 ]
 const NAVIGATION_FALLBACK = '/index.html'
