@@ -9,6 +9,15 @@ interface GameDefinition {
   startLabel: string
 }
 
+const puzzleBloxGame: GameDefinition = {
+  id: 'puzzle-blox',
+  name: 'Puzzle Blox',
+  description:
+    'Fjern de overskydende klodser i hovedgridden, lad dem falde med tyngdekraften og genskab målfiguren niveau for niveau.',
+  path: '/puzzle-blox',
+  startLabel: 'Start Puzzle Blox',
+}
+
 const games: GameDefinition[] = [
   {
     id: 'reaction-test',
@@ -49,6 +58,7 @@ const games: GameDefinition[] = [
     path: '/odd-one-out',
     startLabel: 'Start Odd One Out',
   },
+  puzzleBloxGame,
 ]
 
 export default function Home() {

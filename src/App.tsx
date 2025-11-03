@@ -10,6 +10,7 @@ import MeditationBoxBreathingScreen from './screens/MeditationBoxBreathingScreen
 import MeditationYogaCandleScreen from './screens/MeditationYogaCandleScreen'
 import OddOneOutScreen from './screens/OddOneOutScreen'
 import LoginScreen from './screens/LoginScreen'
+import PuzzleBloxScreen from './screens/PuzzleBloxScreen'
 
 function AppLayout() {
   return (
@@ -40,6 +41,7 @@ function App() {
         <Route path="memory" element={<MemoryGame />} />
         <Route path="sorting" element={<SortingGameScreen />} />
         <Route path="odd-one-out" element={<OddOneOutScreen />} />
+        <Route path="puzzle-blox" element={<PuzzleBloxScreen />} />
         <Route path="reaction-test" element={<ReactionTestScreen />} />
         <Route path="meditation">
           <Route index element={<MeditationHubScreen />} />
