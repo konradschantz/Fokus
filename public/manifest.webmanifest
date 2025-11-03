@@ -14,19 +14,19 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/Fokus/dist/brand-logo.svg",
+      "src": "/brand-logo.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "/Fokus/dist/brand-logo.svg",
+      "src": "/brand-logo.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "/Fokus/dist/brand-logo.svg",
+      "src": "/brand-logo.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     }
