@@ -2,12 +2,12 @@
 
   
   <!-- Ydre cirkler -->
-  <circle cx="200" cy="200" r="180" fill="none" stroke="#e8f4f8" stroke-width="3" opacity="0.4"/>
+  <circle cx="200" cy="200" r="180" fill="none" stroke="#e8f4f8" stroke-width="8" opacity="0.4"/>
   
-  <circle cx="200" cy="200" r="160" fill="none" stroke="#d4e8f0" stroke-width="3" opacity="0.5"/>
+  <circle cx="200" cy="200" r="160" fill="none" stroke="#d4e8f0" stroke-width="10" opacity="0.5"/>
   
   <!-- Mellemste lag -->
-  <circle cx="200" cy="200" r="140" fill="none" stroke="#c0dce8" stroke-width="4" opacity="0.6"/>
+  <circle cx="200" cy="200" r="140" fill="none" stroke="#c0dce8" stroke-width="12" opacity="0.6"/>
   
   <!-- Indre lysende cirkler -->
   <circle cx="200" cy="200" r="120" fill="none" stroke="#a8cfe0" stroke-width="4" opacity="0.7"/>

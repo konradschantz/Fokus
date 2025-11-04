@@ -1,31 +1,30 @@
 <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-  <!-- Baggrund -->
-  <rect width="400" height="400" fill="#0a0a1a"/>
+
   
   <!-- Ydre cirkler -->
-  <circle cx="200" cy="200" r="180" fill="none" stroke="#4a90e2" stroke-width="1" opacity="0.2"/>
+  <circle cx="200" cy="200" r="180" fill="none" stroke="#e8f4f8" stroke-width="8" opacity="0.4"/>
   
-  <circle cx="200" cy="200" r="160" fill="none" stroke="#6ab4ff" stroke-width="1" opacity="0.3"/>
+  <circle cx="200" cy="200" r="160" fill="none" stroke="#d4e8f0" stroke-width="10" opacity="0.5"/>
   
   <!-- Mellemste lag -->
-  <circle cx="200" cy="200" r="140" fill="none" stroke="#8fc9ff" stroke-width="2" opacity="0.4"/>
+  <circle cx="200" cy="200" r="140" fill="none" stroke="#c0dce8" stroke-width="12" opacity="0.6"/>
   
   <!-- Indre lysende cirkler -->
-  <circle cx="200" cy="200" r="120" fill="none" stroke="#5fb1ff" stroke-width="3" opacity="0.6"/>
+  <circle cx="200" cy="200" r="120" fill="none" stroke="#a8cfe0" stroke-width="4" opacity="0.7"/>
   
-  <circle cx="200" cy="200" r="100" fill="none" stroke="#3da3ff" stroke-width="4" opacity="0.7"/>
+  <circle cx="200" cy="200" r="100" fill="none" stroke="#90c2d8" stroke-width="5" opacity="0.8"/>
   
   <!-- Kernecirkel med gradient -->
   <defs>
     <radialGradient id="coreGradient">
-      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9"/>
-      <stop offset="50%" style="stop-color:#4a90e2;stop-opacity:0.8"/>
-      <stop offset="100%" style="stop-color:#2962ff;stop-opacity:0.6"/>
+      <stop offset="0%" style="stop-color:#f5f9fb;stop-opacity:0.9"/>
+      <stop offset="50%" style="stop-color:#d4e8f0;stop-opacity:0.8"/>
+      <stop offset="100%" style="stop-color:#a8cfe0;stop-opacity:0.6"/>
     </radialGradient>
   </defs>
   
   <circle cx="200" cy="200" r="80" fill="url(#coreGradient)"/>
   
   <!-- Centralt punkt -->
-  <circle cx="200" cy="200" r="5" fill="#ffffff" opacity="0.9"/>
+  <circle cx="200" cy="200" r="5" fill="#90c2d8" opacity="0.9"/>
 </svg>
