@@ -14,19 +14,19 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/brand-logo.svg",
+      "src": "fokus-logo.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "/brand-logo.svg",
+      "src": "fokus-logo.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "/brand-logo.svg",
+      "src": "fokus-logo.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     }
