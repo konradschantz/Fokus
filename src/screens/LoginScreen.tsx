@@ -22,8 +22,9 @@ export default function LoginScreen({ onSkip }: LoginScreenProps) {
           <span className="landing-eyebrow">Mindful productivity</span>
           <h1 className="landing-title">Stay focused on what matters</h1>
           <p className="landing-subtitle">
-            Fokus hjælper dig med at skabe rolige rammer, minimere distraktioner og forankre dine daglige
-            vaner. Inspireret af skandinavisk ro, designet til at give dig mentalt overskud.
+            Fokus er udviklet til at styrke og træne dine kognitive evner gennem målrettede øvelser, der
+            forbedrer hukommelse, koncentration og mental fleksibilitet. Appen kombinerer moderne neurovidenskab
+            med enkel skandinavisk ro – så du kan skabe et klart sind i en travl hverdag.
           </p>
           <div className="landing-cta">
             <button type="button" className="landing-button landing-button--primary" onClick={onSkip}>
@@ -40,16 +41,6 @@ export default function LoginScreen({ onSkip }: LoginScreenProps) {
             <span className="landing-pill">Guidede fokusøvelser</span>
             <span className="landing-pill">Afspændende lydlandskaber</span>
             <span className="landing-pill">Personlige rutiner</span>
-          </div>
-          <div className="landing-pill-row" id="rituals">
-            <span className="landing-pill">Daglige påmindelser</span>
-            <span className="landing-pill">Støttende community</span>
-            <span className="landing-pill">Skræddersyet til dit tempo</span>
-          </div>
-          <div className="landing-pill-row" id="pricing">
-            <span className="landing-pill">Gratis introduktion</span>
-            <span className="landing-pill">Premium meditationer</span>
-            <span className="landing-pill">Pause når som helst</span>
           </div>
         </section>
       </div>
