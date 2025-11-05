@@ -43,7 +43,7 @@ function App() {
         className="app"
         style={{ background: 'linear-gradient(135deg, #E6F4FA 0%, #FDFEFF 100%)' }}
       >
-        <LoginScreen onSkip={() => handleLogin('/')} onGoToRoutine={() => handleLogin('/focus')} />
+        <LoginScreen onSkip={() => handleLogin('/')} onGoToRoutine={() => handleLogin('/rutines')} />
       </main>
     )
   }
@@ -53,7 +53,7 @@ function App() {
       <Route element={<AppLayout />}>
         <Route index element={<Home />} />
         <Route path="memory" element={<MemoryGame />} />
-        <Route path="focus" element={<FocusRoutineScreen />} />
+        <Route path="rutines" element={<FocusRoutineScreen />} />
         <Route path="sorting" element={<SortingGameScreen />} />
         <Route path="odd-one-out" element={<OddOneOutScreen />} />
         <Route path="puzzle-blox" element={<PuzzleBloxScreen />} />
