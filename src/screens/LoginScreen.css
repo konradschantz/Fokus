@@ -34,14 +34,22 @@
   font-size: 1rem;
 }
 
-.landing-nav a {
+.landing-nav__link {
   color: #0f172a;
   text-decoration: none;
   position: relative;
   transition: color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
 }
 
-.landing-nav a::after {
+.landing-nav__link::after {
   content: '';
   position: absolute;
   left: 0;
@@ -54,13 +62,13 @@
   transition: transform 0.2s ease;
 }
 
-.landing-nav a:hover,
-.landing-nav a:focus-visible {
+.landing-nav__link:hover,
+.landing-nav__link:focus-visible {
   color: #334155;
 }
 
-.landing-nav a:hover::after,
-.landing-nav a:focus-visible::after {
+.landing-nav__link:hover::after,
+.landing-nav__link:focus-visible::after {
   transform: scaleX(1);
 }
 
