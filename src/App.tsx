@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Navigate, Outlet, Route, Routes, useNavigate } from 'react-router-dom'
 import './App.css'
 import Home from './screens/Home'
@@ -23,18 +23,11 @@ function AppLayout() {
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [nextRoute, setNextRoute] = useState('/')
   const navigate = useNavigate()
 
-  useEffect(() => {
-    if (isLoggedIn) {
-      navigate(nextRoute, { replace: true })
-    }
-  }, [isLoggedIn, nextRoute, navigate])
-
   const handleLogin = (route = '/') => {
-    setNextRoute(route)
     setIsLoggedIn(true)
+    navigate(route, { replace: true })
   }
 
   if (!isLoggedIn) {
