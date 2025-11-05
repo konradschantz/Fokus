@@ -16,9 +16,9 @@ export default function LoginScreen({ onSkip, onGoToRoutine }: LoginScreenProps)
             <button type="button" className="landing-nav__link" onClick={onSkip}>
               Fokus spil
             </button>
-            <a className="landing-nav__link" href="https://fokus-mu-snowy.vercel.app/rutines">
+            <button type="button" className="landing-nav__link" onClick={onGoToRoutine}>
               Fokus Rutiner
-            </a>
+            </button>
             <a className="landing-nav__link" href="https://fokus-mu-snowy.vercel.app/meditation">
               Fokus meditation
             </a>
