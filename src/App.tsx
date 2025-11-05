@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Navigate, Outlet, Route, Routes, useNavigate } from 'react-router-dom'
 import './App.css'
 import Home from './screens/Home'
 import MemoryGame from './screens/MemoryGame'
@@ -11,6 +11,7 @@ import MeditationYogaCandleScreen from './screens/MeditationYogaCandleScreen'
 import OddOneOutScreen from './screens/OddOneOutScreen'
 import LoginScreen from './screens/LoginScreen'
 import PuzzleBloxScreen from './screens/PuzzleBloxScreen'
+import FocusRoutineScreen from './screens/FocusRoutineScreen'
 
 function AppLayout() {
   return (
@@ -22,6 +23,19 @@ function AppLayout() {
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [nextRoute, setNextRoute] = useState('/')
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate(nextRoute, { replace: true })
+    }
+  }, [isLoggedIn, nextRoute, navigate])
+
+  const handleLogin = (route = '/') => {
+    setNextRoute(route)
+    setIsLoggedIn(true)
+  }
 
   if (!isLoggedIn) {
     return (
@@ -29,7 +43,7 @@ function App() {
         className="app"
         style={{ background: 'linear-gradient(135deg, #E6F4FA 0%, #FDFEFF 100%)' }}
       >
-        <LoginScreen onSkip={() => setIsLoggedIn(true)} />
+        <LoginScreen onSkip={() => handleLogin('/')} onGoToRoutine={() => handleLogin('/focus')} />
       </main>
     )
   }
@@ -39,6 +53,7 @@ function App() {
       <Route element={<AppLayout />}>
         <Route index element={<Home />} />
         <Route path="memory" element={<MemoryGame />} />
+        <Route path="focus" element={<FocusRoutineScreen />} />
         <Route path="sorting" element={<SortingGameScreen />} />
         <Route path="odd-one-out" element={<OddOneOutScreen />} />
         <Route path="puzzle-blox" element={<PuzzleBloxScreen />} />

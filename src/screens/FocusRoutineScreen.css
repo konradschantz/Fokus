@@ -1,0 +1,485 @@
+.focus-page {
+  background: linear-gradient(160deg, #fdf6ee 0%, #e9f4fb 45%, #ffffff 100%);
+  color: #0f172a;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.focus-hero {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(4rem, 10vw, 6rem) clamp(1.5rem, 8vw, 6rem);
+  display: grid;
+  gap: clamp(2rem, 6vw, 4rem);
+  align-items: center;
+}
+
+.focus-hero__background {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(253, 246, 238, 0.95) 0%, rgba(233, 244, 251, 0.9) 65%, rgba(255, 255, 255, 0.95) 100%);
+  overflow: hidden;
+  z-index: 0;
+}
+
+.focus-hero__sun {
+  position: absolute;
+  width: clamp(320px, 40vw, 460px);
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.9) 0%, #f9d69a 40%, #f4b38f 70%, rgba(249, 196, 139, 0) 100%);
+  bottom: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: focus-sunrise 12s ease-in-out infinite alternate;
+}
+
+.focus-hero__horizon {
+  position: absolute;
+  bottom: 22%;
+  left: -10%;
+  width: 120%;
+  height: clamp(140px, 18vw, 200px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(226, 232, 240, 0.6) 100%);
+  filter: blur(12px);
+}
+
+.focus-hero__ocean {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: clamp(220px, 30vw, 300px);
+  background: linear-gradient(180deg, rgba(224, 242, 254, 0.9) 0%, rgba(186, 230, 253, 0.9) 50%, rgba(14, 165, 233, 0.25) 100%);
+  transform: translateY(20px);
+}
+
+.focus-hero__content {
+  position: relative;
+  z-index: 1;
+  max-width: min(680px, 90vw);
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.focus-hero__eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+  font-size: 0.85rem;
+  color: rgba(15, 23, 42, 0.55);
+}
+
+.focus-hero__title {
+  margin: 0;
+  font-size: clamp(2.8rem, 6vw, 4.6rem);
+  line-height: 1.08;
+}
+
+.focus-hero__subtitle {
+  margin: 0;
+  font-size: clamp(1.05rem, 2.8vw, 1.4rem);
+  line-height: 1.7;
+  color: rgba(30, 41, 59, 0.82);
+}
+
+.focus-hero__cta {
+  align-self: flex-start;
+  padding: 1rem 2.3rem;
+  border-radius: 999px;
+  border: none;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #0f172a;
+  cursor: pointer;
+  background: linear-gradient(135deg, #a5f3fc 0%, #38bdf8 100%);
+  box-shadow: 0 24px 54px rgba(45, 212, 191, 0.22);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.focus-hero__cta:hover,
+.focus-hero__cta:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 36px 72px rgba(56, 189, 248, 0.32);
+}
+
+.focus-section-header {
+  max-width: min(760px, 90vw);
+  margin: 0 auto;
+  text-align: center;
+  display: grid;
+  gap: 0.85rem;
+  place-items: center;
+}
+
+.focus-section-header h2 {
+  margin: 0;
+  font-size: clamp(2.1rem, 4vw, 3rem);
+}
+
+.focus-section-header p {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.65;
+  color: rgba(30, 41, 59, 0.78);
+}
+
+.focus-section-eyebrow {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: rgba(15, 23, 42, 0.55);
+}
+
+.focus-routine {
+  padding: clamp(3rem, 10vw, 6rem) clamp(1.5rem, 8vw, 6rem);
+  display: grid;
+  gap: clamp(2.5rem, 8vw, 4.5rem);
+}
+
+.focus-timeline {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: clamp(1.8rem, 4vw, 2.5rem);
+  position: relative;
+}
+
+.focus-timeline::before {
+  content: '';
+  position: absolute;
+  inset: 15% 0 auto;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0) 0%, rgba(148, 163, 184, 0.35) 50%, rgba(148, 163, 184, 0) 100%);
+  pointer-events: none;
+}
+
+.focus-timeline__card {
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 28px;
+  padding: 2rem;
+  display: grid;
+  gap: 1.1rem;
+  position: relative;
+  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(10px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.focus-timeline__card.is-expanded {
+  transform: translateY(-8px);
+  box-shadow: 0 36px 72px rgba(15, 23, 42, 0.16);
+}
+
+.focus-timeline__toggle {
+  border: none;
+  background: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.focus-timeline__toggle:focus-visible {
+  outline: 2px solid rgba(56, 189, 248, 0.5);
+  outline-offset: 6px;
+  border-radius: 16px;
+}
+
+.focus-timeline__icon {
+  width: 60px;
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(125, 211, 252, 0.32) 0%, rgba(255, 237, 213, 0.7) 100%);
+}
+
+.focus-timeline__label {
+  margin: 0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: rgba(30, 41, 59, 0.6);
+}
+
+.focus-timeline__toggle h3 {
+  margin: 0.35rem 0 0;
+  font-size: 1.6rem;
+  line-height: 1.3;
+}
+
+.focus-timeline__chevron {
+  width: 12px;
+  height: 12px;
+  border-right: 2px solid rgba(15, 23, 42, 0.35);
+  border-bottom: 2px solid rgba(15, 23, 42, 0.35);
+  transform: rotate(45deg);
+  transition: transform 0.3s ease;
+}
+
+.focus-timeline__card.is-expanded .focus-timeline__chevron {
+  transform: rotate(-135deg);
+}
+
+.focus-timeline__summary {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(30, 41, 59, 0.78);
+}
+
+.focus-timeline__details {
+  display: grid;
+  gap: 0.75rem;
+  animation: focus-fade-in 0.35s ease;
+}
+
+.focus-timeline__details[hidden] {
+  display: none;
+}
+
+.focus-timeline__details-title {
+  font-weight: 600;
+  margin: 0;
+}
+
+.focus-timeline__details ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.focus-timeline__bubble {
+  margin: 0;
+  padding: 1rem 1.4rem;
+  border-radius: 20px;
+  background: rgba(224, 242, 254, 0.65);
+  display: grid;
+  gap: 0.5rem;
+  color: rgba(15, 23, 42, 0.75);
+  font-size: 0.95rem;
+}
+
+.focus-timeline__bubble figcaption {
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.focus-notifications {
+  padding: clamp(3rem, 10vw, 6rem) clamp(1.5rem, 8vw, 6rem);
+  display: grid;
+  gap: clamp(2.5rem, 8vw, 4.5rem);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(226, 232, 240, 0.5) 100%);
+}
+
+.focus-notifications__switcher {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.focus-notifications__chip {
+  border: none;
+  border-radius: 20px;
+  padding: 0.9rem 1.5rem;
+  background: rgba(241, 245, 249, 0.75);
+  color: rgba(15, 23, 42, 0.75);
+  font-weight: 600;
+  display: grid;
+  gap: 0.2rem;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.focus-notifications__chip small {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(30, 41, 59, 0.6);
+}
+
+.focus-notifications__chip.is-active {
+  background: linear-gradient(135deg, rgba(224, 242, 254, 0.95) 0%, rgba(186, 230, 253, 0.95) 100%);
+  box-shadow: 0 24px 48px rgba(125, 211, 252, 0.25);
+  transform: translateY(-4px);
+}
+
+.focus-notifications__mockup {
+  display: flex;
+  justify-content: center;
+}
+
+.focus-phone {
+  width: clamp(260px, 40vw, 320px);
+  border-radius: 36px;
+  padding: 1.5rem 1.25rem;
+  background: linear-gradient(160deg, rgba(148, 163, 184, 0.1) 0%, rgba(148, 163, 184, 0.25) 100%);
+  box-shadow: 0 28px 64px rgba(15, 23, 42, 0.18);
+  position: relative;
+}
+
+.focus-phone__notch {
+  position: absolute;
+  top: 0.65rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40%;
+  height: 14px;
+  background: rgba(15, 23, 42, 0.35);
+  border-radius: 0 0 12px 12px;
+}
+
+.focus-phone__screen {
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  border-radius: 24px;
+  padding: 1.4rem 1rem;
+  display: grid;
+  gap: 1rem;
+  min-height: 360px;
+}
+
+.focus-phone__status {
+  font-weight: 600;
+  color: rgba(15, 23, 42, 0.65);
+  text-align: center;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.focus-phone__messages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.focus-phone__message {
+  padding: 0.85rem 1rem;
+  border-radius: 18px;
+  background: rgba(224, 242, 254, 0.85);
+  color: rgba(15, 23, 42, 0.85);
+  font-size: 0.95rem;
+  line-height: 1.4;
+  box-shadow: 0 16px 32px rgba(125, 211, 252, 0.25);
+  animation: focus-pop 0.4s ease;
+}
+
+.focus-science {
+  position: relative;
+  margin: clamp(3rem, 10vw, 6rem) clamp(1.5rem, 8vw, 6rem) clamp(4rem, 10vw, 8rem);
+  border-radius: 36px;
+  overflow: hidden;
+  background: url('https://images.unsplash.com/photo-1525182008055-f88b95ff7980?auto=format&fit=crop&w=1600&q=80') center/cover;
+  color: #fff;
+}
+
+.focus-science__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(15, 23, 42, 0.78) 0%, rgba(15, 23, 42, 0.6) 40%, rgba(15, 23, 42, 0.35) 100%);
+}
+
+.focus-science__content {
+  position: relative;
+  padding: clamp(3rem, 8vw, 5rem);
+  display: grid;
+  gap: 1rem;
+  max-width: min(720px, 90vw);
+}
+
+.focus-science__content p {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.75;
+  color: rgba(241, 245, 249, 0.9);
+}
+
+@keyframes focus-sunrise {
+  from {
+    transform: translateX(-50%) translateY(12px);
+  }
+  to {
+    transform: translateX(-50%) translateY(-12px);
+  }
+}
+
+@keyframes focus-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes focus-pop {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 900px) {
+  .focus-timeline {
+    grid-template-columns: 1fr;
+  }
+
+  .focus-timeline::before {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .focus-hero {
+    padding-bottom: clamp(4rem, 12vw, 6rem);
+  }
+
+  .focus-hero__background {
+    background: linear-gradient(180deg, rgba(253, 246, 238, 1) 0%, rgba(233, 244, 251, 0.95) 65%, rgba(255, 255, 255, 0.95) 100%);
+  }
+
+  .focus-hero__sun {
+    width: clamp(240px, 70vw, 320px);
+  }
+
+  .focus-hero__ocean {
+    height: clamp(200px, 40vw, 280px);
+  }
+}
+
+@media (max-width: 580px) {
+  .focus-hero__content {
+    gap: 1.4rem;
+  }
+
+  .focus-hero__cta {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .focus-timeline__card {
+    padding: 1.5rem;
+  }
+
+  .focus-phone {
+    width: 100%;
+    max-width: 320px;
+  }
+}

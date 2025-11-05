@@ -3,9 +3,10 @@ import './LoginScreen.css'
 
 type LoginScreenProps = {
   onSkip: () => void
+  onGoToRoutine: () => void
 }
 
-export default function LoginScreen({ onSkip }: LoginScreenProps) {
+export default function LoginScreen({ onSkip, onGoToRoutine }: LoginScreenProps) {
   return (
     <div className="landing-wrapper">
       <div className="landing-overlay">
@@ -29,6 +30,13 @@ export default function LoginScreen({ onSkip }: LoginScreenProps) {
           <div className="landing-cta">
             <button type="button" className="landing-button landing-button--primary" onClick={onSkip}>
               Kom i gang
+            </button>
+            <button
+              type="button"
+              className="landing-button landing-button--secondary"
+              onClick={onGoToRoutine}
+            >
+              Gå til rutine
             </button>
             <a className="landing-button landing-button--ghost" href="#learn-more">
               Læs mere
