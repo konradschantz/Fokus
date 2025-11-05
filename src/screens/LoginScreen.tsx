@@ -13,9 +13,15 @@ export default function LoginScreen({ onSkip, onGoToRoutine }: LoginScreenProps)
         <header className="landing-header">
           <BrandLogo align="left" size={64} wordmarkSize="2rem" />
           <nav className="landing-nav" aria-label="Primary navigation">
-            <a href="https://fokus-mu-snowy.vercel.app/">Fokus spil</a>
-            <a href="https://fokus-mu-snowy.vercel.app/rutines">Fokus Rutiner</a>
-            <a href="https://fokus-mu-snowy.vercel.app/meditation">Fokus meditation</a>
+            <button type="button" className="landing-nav__link" onClick={onSkip}>
+              Fokus spil
+            </button>
+            <a className="landing-nav__link" href="https://fokus-mu-snowy.vercel.app/rutines">
+              Fokus Rutiner
+            </a>
+            <a className="landing-nav__link" href="https://fokus-mu-snowy.vercel.app/meditation">
+              Fokus meditation
+            </a>
           </nav>
         </header>
 
