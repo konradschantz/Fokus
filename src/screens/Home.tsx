@@ -1,64 +1,55 @@
 import { Link } from 'react-router-dom'
 import BrandLogo from '../components/BrandLogo'
 
-interface GameDefinition {
+type SectionLink = {
+  to: string
+  label: string
+}
+
+type HomeSection = {
   id: string
-  name: string
+  title: string
   description: string
-  path: string
-  startLabel: string
+  cta: SectionLink
+  icon: string
+  links?: SectionLink[]
 }
 
-const puzzleBloxGame: GameDefinition = {
-  id: 'puzzle-blox',
-  name: 'Puzzle Blox',
-  description:
-    'Fjern de overskydende klodser i hovedgridden, lad dem falde med tyngdekraften og genskab målfiguren niveau for niveau.',
-  path: '/puzzle-blox',
-  startLabel: 'Start Puzzle Blox',
-}
-
-const games: GameDefinition[] = [
+const sections: HomeSection[] = [
   {
-    id: 'reaction-test',
-    name: 'Reaktionstest',
+    id: 'cognitive-games',
+    title: 'Cognitive Games',
     description:
-      'Hvor hurtigt kan du reagere? Klik, så snart skærmen skifter farve, og se dine bedste tider.',
-    path: '/reaction-test',
-    startLabel: 'Start reaktionstest',
+      'Boost hukommelsen og koncentrationen med hurtige, videnskabeligt inspirerede mini-udfordringer.',
+    cta: { to: '/memory', label: 'Udforsk spil' },
+    icon: '🧠',
+    links: [
+      { to: '/reaction-test', label: 'Reaktionstest' },
+      { to: '/sorting', label: 'Sorteringsspillet' },
+      { to: '/odd-one-out', label: 'Odd One Out' },
+      { to: '/puzzle-blox', label: 'Puzzle Blox' },
+    ],
   },
   {
-    id: 'meditation',
-    name: 'Meditation',
+    id: 'meditation-breathing',
+    title: 'Meditation & Breathing',
     description:
-      'Hop direkte ind i Box Breathing øvelsen og lad åndedrættet finde en rolig rytme. Du kan altid udforske flere meditationer fra spillet.',
-    path: '/meditation/box-breathing',
-    startLabel: 'Start meditation',
+      'Find ro og rytme i åndedrættet med guidede meditationer og visuelle vejrtrækningsøvelser.',
+    cta: { to: '/meditation/box-breathing', label: 'Start meditation' },
+    icon: '🧘',
+    links: [
+      { to: '/meditation/box-breathing', label: 'Box Breathing' },
+      { to: '/meditation/yoga-candle', label: 'Candle Breathing' },
+    ],
   },
   {
-    id: 'memory',
-    name: 'Memory',
+    id: 'routine-builder',
+    title: 'Rutiner & Vaner',
     description:
-      'Vend to kort ad gangen og find alle par hurtigst muligt. Flere sværhedsgrader og highscores.',
-    path: '/memory',
-    startLabel: 'Start memory',
+      'Byg holdbare vaner med daglige fokusområder og inspiration til dine egne rutiner.',
+    cta: { to: '/rutines', label: 'Åbn rutinebygger' },
+    icon: '🗓️',
   },
-  {
-    id: 'sorting',
-    name: 'Sorteringsspillet',
-    description:
-      'Sortér figurerne til venstre eller højre efter reglerne. Brug piletasterne, hold tempoet og jag din bedste score.',
-    path: '/sorting',
-    startLabel: 'Start sorteringsspil',
-  },
-  {
-    id: 'odd-one-out',
-    name: 'Odd One Out',
-    description: 'Find figuren der skiller sig ud fra mængden på tid.',
-    path: '/odd-one-out',
-    startLabel: 'Start Odd One Out',
-  },
-  puzzleBloxGame,
 ]
 
 export default function Home() {
@@ -73,16 +64,30 @@ export default function Home() {
           wordmarkText="Fokus 2.0"
           style={{ marginBottom: '0.5rem' }}
         />
-        <p>Vælg et spil for at komme i gang.</p>
+        <p>Everything you need for mental clarity.</p>
       </header>
 
-      <section className="menu__grid">
-        {games.map((game) => (
-          <article key={game.id} className="menu__card">
-            <h2>{game.name}</h2>
-            <p>{game.description}</p>
-            <Link to={game.path} className="menu__primary-button">
-              {game.startLabel}
+      <section className="menu__grid menu__grid--home">
+        {sections.map((section) => (
+          <article key={section.id} className="menu__card menu__card--home">
+            <span aria-hidden="true" className="menu__card-icon">
+              {section.icon}
+            </span>
+            <div className="menu__card-content">
+              <h2>{section.title}</h2>
+              <p>{section.description}</p>
+            </div>
+            {section.links && (
+              <ul className="menu__card-links">
+                {section.links.map((link) => (
+                  <li key={link.to}>
+                    <Link to={link.to}>{link.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <Link to={section.cta.to} className="menu__primary-button">
+              {section.cta.label}
             </Link>
           </article>
         ))}
