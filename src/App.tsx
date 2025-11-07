@@ -36,7 +36,11 @@ function App() {
         className="app"
         style={{ background: 'linear-gradient(135deg, #E6F4FA 0%, #FDFEFF 100%)' }}
       >
-        <LoginScreen onSkip={() => handleLogin('/')} onGoToRoutine={() => handleLogin('/rutines')} />
+        <LoginScreen
+          onSkip={() => handleLogin('/')}
+          onGoToRoutine={() => handleLogin('/rutines')}
+          onGoToMeditation={() => handleLogin('/meditation/box-breathing')}
+        />
       </main>
     )
   }

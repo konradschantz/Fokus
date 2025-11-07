@@ -31,8 +31,8 @@ const games: GameDefinition[] = [
     id: 'meditation',
     name: 'Meditation',
     description:
-      'Fordyb dig i guidede øvelser som Box Breathing og Yoga Meditation med levende lys. Find ro og fokus gennem vejrtrækning og nærvær.',
-    path: '/meditation',
+      'Hop direkte ind i Box Breathing øvelsen og lad åndedrættet finde en rolig rytme. Du kan altid udforske flere meditationer fra spillet.',
+    path: '/meditation/box-breathing',
     startLabel: 'Start meditation',
   },
   {
