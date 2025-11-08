@@ -210,16 +210,6 @@ export default function PuzzleBloxGame({ onExit }: PuzzleBloxGameProps) {
   return (
     <div className="puzzle-blox">
       <header className="puzzle-blox__header">
-        <button
-          type="button"
-          className="puzzle-blox__back-button"
-          onClick={onExit}
-          aria-label="Tilbage til forsiden"
-          disabled={!onExit}
-        >
-          <span aria-hidden="true">←</span>
-          Tilbage
-        </button>
         <h1>Puzzle Blox</h1>
       </header>
 
