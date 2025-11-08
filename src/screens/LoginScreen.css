@@ -4,8 +4,7 @@
   flex-direction: column;
   justify-content: center;
   color: #0f172a;
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.68) 40%, rgba(255, 255, 255, 0.45) 100%),
-    url('/landingpage_bg.jpg');
+  background-image: url('/landingpage_bg.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
