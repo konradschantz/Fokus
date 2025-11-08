@@ -1,5 +1,13 @@
-import { useState } from 'react'
-import { Navigate, Outlet, Route, Routes, useNavigate } from 'react-router-dom'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
+import {
+  Link,
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom'
 import './App.css'
 import OverviewScreen from './screens/OverviewScreen'
 import MemoryGame from './screens/MemoryGame'
@@ -13,18 +21,206 @@ import LoginScreen from './screens/LoginScreen'
 import PuzzleBloxScreen from './screens/PuzzleBloxScreen'
 import FocusRoutineScreen from './screens/FocusRoutineScreen'
 import OverviewGamesScreen from './screens/OverviewGamesScreen'
+import BrandLogo from './components/BrandLogo'
 
-function AppLayout() {
+type ThemeMode = 'calm' | 'focus'
+
+type AppChromeProps = {
+  mode: ThemeMode
+  onSetMode: (mode: ThemeMode) => void
+  children: ReactNode
+  onBack?: () => void
+  canGoBack?: boolean
+}
+
+const navLinks = [
+  { to: '/overview', label: 'Forside' },
+  { to: '/overview/games', label: 'Games' },
+  { to: '/meditation', label: 'Meditationer' },
+  { to: '/rutines', label: 'Rutiner' },
+]
+
+function AppChrome({ mode, onSetMode, children, onBack, canGoBack = true }: AppChromeProps) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const location = useLocation()
+
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [location.pathname])
+
+  const handleOverlayClick = () => {
+    setMenuOpen(false)
+  }
+
+  const handleModeSelect = (nextMode: ThemeMode) => {
+    onSetMode(nextMode)
+  }
+
+  const modeLabel = useMemo(
+    () => (mode === 'focus' ? 'Focus Mode' : 'Calm Mode'),
+    [mode],
+  )
+
   return (
-    <main className="app">
-      <Outlet />
+    <main className={`app app--${mode}`}>
+      <div className="app__inner">
+        <header className="app-shell__top" aria-label="Global navigation">
+          <div className="app-shell__left">
+            {onBack ? (
+              <button
+                type="button"
+                className="app-shell__back"
+                onClick={onBack}
+                disabled={!canGoBack}
+                aria-disabled={!canGoBack}
+                aria-label="Gå tilbage"
+              >
+                <span aria-hidden="true">←</span>
+                Tilbage
+              </button>
+            ) : (
+              <span className="app-shell__back-placeholder" aria-hidden="true" />
+            )}
+            <BrandLogo
+              as="span"
+              align="left"
+              size={48}
+              wordmarkSize="clamp(1.5rem, 3vw, 2rem)"
+              wordmarkText="Fokus 2.0"
+            />
+          </div>
+
+          <div className="app-shell__actions">
+            <div className="app-shell__mode-switch" role="group" aria-label="Skift tema">
+              <button
+                type="button"
+                className={`app-shell__mode-option ${mode === 'calm' ? 'is-active' : ''}`}
+                onClick={() => handleModeSelect('calm')}
+                aria-pressed={mode === 'calm'}
+              >
+                Calm
+              </button>
+              <button
+                type="button"
+                className={`app-shell__mode-option ${mode === 'focus' ? 'is-active' : ''}`}
+                onClick={() => handleModeSelect('focus')}
+                aria-pressed={mode === 'focus'}
+              >
+                Focus
+              </button>
+            </div>
+
+            <button
+              type="button"
+              className="app-shell__burger"
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-expanded={menuOpen}
+              aria-controls="app-shell-menu"
+              aria-label="Åbn hovedmenu"
+            >
+              <span />
+              <span />
+              <span />
+            </button>
+          </div>
+        </header>
+
+        <div className="app-shell__content" aria-live="polite">
+          <div className="app-shell__mode-indicator" aria-hidden="true">
+            {modeLabel}
+          </div>
+          {children}
+        </div>
+      </div>
+
+      <nav
+        id="app-shell-menu"
+        className={`app-shell__drawer ${menuOpen ? 'is-open' : ''}`}
+        aria-label="Sekundær navigation"
+      >
+        <div className="app-shell__drawer-header">
+          <p className="app-shell__drawer-title">Quick Access</p>
+          <div className="app-shell__drawer-switch" role="group" aria-label="Skift tema">
+            <button
+              type="button"
+              className={`app-shell__mode-option ${mode === 'calm' ? 'is-active' : ''}`}
+              onClick={() => handleModeSelect('calm')}
+              aria-pressed={mode === 'calm'}
+            >
+              Calm Mode
+            </button>
+            <button
+              type="button"
+              className={`app-shell__mode-option ${mode === 'focus' ? 'is-active' : ''}`}
+              onClick={() => handleModeSelect('focus')}
+              aria-pressed={mode === 'focus'}
+            >
+              Focus Mode
+            </button>
+          </div>
+        </div>
+        <ul className="app-shell__nav-list">
+          {navLinks.map((link) => (
+            <li key={link.to}>
+              <Link to={link.to} className="app-shell__nav-link">
+                {link.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <button
+        type="button"
+        className={`app-shell__overlay ${menuOpen ? 'is-visible' : ''}`}
+        aria-hidden={!menuOpen}
+        tabIndex={menuOpen ? 0 : -1}
+        onClick={handleOverlayClick}
+      >
+        <span className="sr-only">Luk menu</span>
+      </button>
     </main>
+  )
+}
+
+function AppLayout({ mode, onSetMode }: { mode: ThemeMode; onSetMode: (mode: ThemeMode) => void }) {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const handleBack = () => {
+    if (location.pathname === '/overview') {
+      return
+    }
+
+    if (window.history.length > 1) {
+      navigate(-1)
+    } else {
+      navigate('/overview', { replace: true })
+    }
+  }
+
+  return (
+    <AppChrome mode={mode} onSetMode={onSetMode} onBack={handleBack} canGoBack={location.pathname !== '/overview'}>
+      <Outlet />
+    </AppChrome>
   )
 }
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [mode, setMode] = useState<ThemeMode>('calm')
   const navigate = useNavigate()
+
+  useEffect(() => {
+    document.body.dataset.theme = mode
+    return () => {
+      document.body.removeAttribute('data-theme')
+    }
+  }, [mode])
+
+  const handleToggleMode = (nextMode: ThemeMode) => {
+    setMode(nextMode)
+  }
 
   const handleLogin = (route = '/') => {
     setIsLoggedIn(true)
@@ -33,22 +229,19 @@ function App() {
 
   if (!isLoggedIn) {
     return (
-      <main
-        className="app"
-        style={{ background: 'linear-gradient(135deg, #E6F4FA 0%, #FDFEFF 100%)' }}
-      >
+      <AppChrome mode={mode} onSetMode={handleToggleMode}>
         <LoginScreen
           onSkip={() => handleLogin('/')}
           onGoToRoutine={() => handleLogin('/rutines')}
           onGoToMeditation={() => handleLogin('/meditation/box-breathing')}
         />
-      </main>
+      </AppChrome>
     )
   }
 
   return (
     <Routes>
-      <Route element={<AppLayout />}>
+      <Route element={<AppLayout mode={mode} onSetMode={handleToggleMode} />}>
         <Route index element={<Navigate to="/overview" replace />} />
         <Route path="overview" element={<OverviewScreen />} />
         <Route path="overview/games" element={<OverviewGamesScreen />} />
