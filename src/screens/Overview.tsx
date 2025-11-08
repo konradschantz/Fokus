@@ -6,7 +6,7 @@ type SectionLink = {
   label: string
 }
 
-type HomeSection = {
+type OverviewSection = {
   id: string
   title: string
   description: string
@@ -15,13 +15,13 @@ type HomeSection = {
   links?: SectionLink[]
 }
 
-const sections: HomeSection[] = [
+const sections: OverviewSection[] = [
   {
     id: 'cognitive-games',
     title: 'Cognitive Games',
     description:
       'Boost hukommelsen og koncentrationen med hurtige, videnskabeligt inspirerede mini-udfordringer.',
-    cta: { to: '/memory', label: 'Udforsk spil' },
+    cta: { to: '/overview/games', label: 'Udforsk spil' },
     icon: '🧠',
     links: [
       { to: '/reaction-test', label: 'Reaktionstest' },
@@ -52,7 +52,7 @@ const sections: HomeSection[] = [
   },
 ]
 
-export default function Home() {
+export default function Overview() {
   return (
     <div className="menu">
       <header className="menu__header">
