@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import BrandLogo from '../components/BrandLogo'
+import './OverviewScreen.css'
 
 type SectionLink = {
   to: string
@@ -54,43 +54,76 @@ const sections: OverviewSection[] = [
 
 export default function OverviewScreen() {
   return (
-    <div className="menu menu--overview">
-      <header className="menu__header">
-        <BrandLogo
-          as="h1"
-          align="center"
-          size={96}
-          wordmarkSize="clamp(2.4rem, 6vw, 3.4rem)"
-          wordmarkText="Fokus 2.0"
-          style={{ marginBottom: '0.5rem' }}
-        />
-        <p>Everything you need for mental clarity.</p>
-      </header>
-
-      <section className="menu__grid menu__grid--home">
-        {sections.map((section) => (
-          <article key={section.id} className="menu__card menu__card--home">
-            <span aria-hidden="true" className="menu__card-icon">
-              {section.icon}
+    <div className="overview">
+      <section className="overview__hero">
+        <div className="overview__hero-copy">
+          <div className="overview__hero-badge">
+            <span className="overview__hero-badge-text overview__hero-badge-text--calm">
+              Calm Mode
             </span>
-            <div className="menu__card-content">
-              <h2>{section.title}</h2>
-              <p>{section.description}</p>
-            </div>
-            {section.links && (
-              <ul className="menu__card-links">
-                {section.links.map((link) => (
-                  <li key={link.to}>
-                    <Link to={link.to}>{link.label}</Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <Link to={section.cta.to} className="menu__primary-button">
-              {section.cta.label}
+            <span className="overview__hero-badge-text overview__hero-badge-text--focus">
+              Focus Mode
+            </span>
+          </div>
+          <h1>Train Your Mind</h1>
+          <p>
+            Games, meditations, and routines to help you focus better every day. Strengthen your
+            mental clarity and emotional balance through personalized daily practices.
+          </p>
+          <div className="overview__actions">
+            <Link to="/overview/games" className="button--primary">
+              Start Training
             </Link>
-          </article>
-        ))}
+            <Link to="/rutines" className="button--ghost">
+              Learn More
+            </Link>
+          </div>
+        </div>
+
+        <div className="overview__visual" aria-hidden="true">
+          <div className="overview__planet">
+            <span className="overview__orbit overview__orbit--one" />
+            <span className="overview__orbit overview__orbit--two" />
+            <span className="overview__orbit overview__orbit--three" />
+          </div>
+        </div>
+      </section>
+
+      <section className="overview__sections">
+        <div className="overview__section-header">
+          <h2>Explore Fokus</h2>
+          <p className="overview__section-description">
+            Games, meditationer og rutiner samlet ét sted.
+          </p>
+        </div>
+
+        <div className="overview__cards">
+          {sections.map((section) => (
+            <article key={section.id} className="overview__card">
+              <span aria-hidden="true" className="overview__card-icon">
+                {section.icon}
+              </span>
+              <div className="overview__card-content">
+                <h3>{section.title}</h3>
+                <p>{section.description}</p>
+              </div>
+              {section.links && (
+                <ul className="overview__card-links">
+                  {section.links.map((link) => (
+                    <li key={link.to}>
+                      <Link to={link.to}>{link.label}</Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <div className="overview__card-cta">
+                <Link to={section.cta.to} className="button--primary">
+                  {section.cta.label}
+                </Link>
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
     </div>
   )
