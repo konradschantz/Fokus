@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Navigate, Outlet, Route, Routes, useNavigate } from 'react-router-dom'
 import './App.css'
-import Home from './screens/Home'
+import OverviewScreen from './screens/Overview'
+import OverviewGamesScreen from './screens/OverviewGames'
 import MemoryGame from './screens/MemoryGame'
 import ReactionTestScreen from './screens/ReactionTestScreen'
 import SortingGameScreen from './screens/SortingGameScreen'
@@ -25,7 +26,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const navigate = useNavigate()
 
-  const handleLogin = (route = '/') => {
+  const handleLogin = (route = '/overview') => {
     setIsLoggedIn(true)
     navigate(route, { replace: true })
   }
@@ -37,7 +38,7 @@ function App() {
         style={{ background: 'linear-gradient(135deg, #E6F4FA 0%, #FDFEFF 100%)' }}
       >
         <LoginScreen
-          onSkip={() => handleLogin('/')}
+          onSkip={() => handleLogin('/overview')}
           onGoToRoutine={() => handleLogin('/rutines')}
           onGoToMeditation={() => handleLogin('/meditation/box-breathing')}
         />
@@ -48,7 +49,9 @@ function App() {
   return (
     <Routes>
       <Route element={<AppLayout />}>
-        <Route index element={<Home />} />
+        <Route index element={<Navigate to="/overview" replace />} />
+        <Route path="overview" element={<OverviewScreen />} />
+        <Route path="overview/games" element={<OverviewGamesScreen />} />
         <Route path="memory" element={<MemoryGame />} />
         <Route path="rutines" element={<FocusRoutineScreen />} />
         <Route path="sorting" element={<SortingGameScreen />} />
