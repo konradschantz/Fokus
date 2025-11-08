@@ -84,6 +84,17 @@ body[data-theme='focus'] {
   z-index: 1;
 }
 
+@media (max-width: 768px) {
+  .app {
+    align-items: flex-start;
+  }
+
+  .app__inner {
+    width: 100%;
+    align-self: stretch;
+  }
+}
+
 .app-shell__top {
   display: flex;
   align-items: center;
