@@ -1,4 +1,3 @@
-import BrandLogo from '../components/BrandLogo'
 import './LoginScreen.css'
 
 type LoginScreenProps = {
@@ -11,21 +10,6 @@ export default function LoginScreen({ onSkip, onGoToRoutine, onGoToMeditation }:
   return (
     <div className="landing-wrapper">
       <div className="landing-overlay">
-        <header className="landing-header">
-          <BrandLogo align="left" size={64} wordmarkSize="2rem" />
-          <nav className="landing-nav" aria-label="Primary navigation">
-            <button type="button" className="landing-nav__link" onClick={onSkip}>
-              Fokus spil
-            </button>
-            <button type="button" className="landing-nav__link" onClick={onGoToRoutine}>
-              Fokus Rutiner
-            </button>
-            <a className="landing-nav__link" href="https://fokus-mu-snowy.vercel.app/meditation">
-              Fokus meditation
-            </a>
-          </nav>
-        </header>
-
         <main className="landing-content">
           <span className="landing-eyebrow">Mindful productivity</span>
           <h1 className="landing-title">Stay focused on what matters</h1>
