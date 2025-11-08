@@ -25,6 +25,7 @@ body {
   height: 100%;
   isolation: isolate;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 #root > * {
