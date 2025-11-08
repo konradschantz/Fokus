@@ -91,25 +91,6 @@ function AppChrome({ mode, onSetMode, children, onBack, canGoBack = true }: AppC
           </div>
 
           <div className="app-shell__actions">
-            <div className="app-shell__mode-switch" role="group" aria-label="Skift tema">
-              <button
-                type="button"
-                className={`app-shell__mode-option ${mode === 'calm' ? 'is-active' : ''}`}
-                onClick={() => handleModeSelect('calm')}
-                aria-pressed={mode === 'calm'}
-              >
-                Calm
-              </button>
-              <button
-                type="button"
-                className={`app-shell__mode-option ${mode === 'focus' ? 'is-active' : ''}`}
-                onClick={() => handleModeSelect('focus')}
-                aria-pressed={mode === 'focus'}
-              >
-                Focus
-              </button>
-            </div>
-
             <button
               type="button"
               className="app-shell__burger"
