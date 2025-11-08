@@ -54,7 +54,7 @@ const sections: OverviewSection[] = [
 
 export default function OverviewScreen() {
   return (
-    <div className="menu">
+    <div className="menu menu--overview">
       <header className="menu__header">
         <BrandLogo
           as="h1"

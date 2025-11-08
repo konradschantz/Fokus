@@ -66,6 +66,19 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+}
+
+.menu--overview {
+  touch-action: pan-y;
+}
+
+.menu--overview .menu__card {
+  min-width: 0;
+}
+
+.menu--overview .menu__primary-button {
+  max-width: 100%;
 }
 
 .menu__header {
@@ -345,6 +358,11 @@
     box-shadow: 0 20px 45px rgba(15, 23, 42, 0.18);
   }
 
+  .menu--overview {
+    overflow: visible;
+    touch-action: auto;
+  }
+
   .menu__header {
     text-align: left;
     margin-bottom: clamp(1.25rem, 6vw, 1.75rem);
@@ -400,6 +418,10 @@
   .menu__primary-button {
     width: 100%;
     justify-content: center;
+  }
+
+  .menu--overview .menu__primary-button {
+    align-self: stretch;
   }
 }
 
