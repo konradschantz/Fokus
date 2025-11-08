@@ -154,6 +154,7 @@ const dailyFocus = {
 
 export default function FocusRoutineScreen() {
   const routineSectionRef = useRef<HTMLElement | null>(null)
+  const notificationsSectionRef = useRef<HTMLElement | null>(null)
   const celebrationTimeoutRef = useRef<number | null>(null)
   const storedProgressRef = useRef<StoredProgress | null>(null)
   const [expandedPhase, setExpandedPhase] = useState<RoutinePhase['id'] | null>('morning')
@@ -205,6 +206,10 @@ export default function FocusRoutineScreen() {
 
   const handleScrollToRoutine = () => {
     routineSectionRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const handleScrollToNotifications = () => {
+    notificationsSectionRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
   const selectedQuickStart =
@@ -319,23 +324,67 @@ export default function FocusRoutineScreen() {
   return (
     <div className="focus-page">
       <header className="focus-hero">
-        <div className="focus-hero__background" aria-hidden="true">
-          <div className="focus-hero__sun" />
-          <div className="focus-hero__horizon" />
-          <div className="focus-hero__ocean" />
-        </div>
+        <div className="focus-hero__background" aria-hidden="true" />
 
         <div className="focus-hero__content">
-          <BrandLogo as="div" align="left" size={56} wordmarkSize="2.4rem" wordmarkText="Fokus" />
-          <span className="focus-hero__eyebrow">Din dag med Fokus</span>
-          <h1 className="focus-hero__title">Skab balance i din hverdag med personlige rutiner</h1>
-          <p className="focus-hero__subtitle">
-            Fokus guider dig gennem dagen med små øjeblikke af ro og klarhed. Fra solopgang til nat ro hjælper vi dig
-            med at skabe rytme, nærvær og fornyet energi.
-          </p>
-          <button type="button" className="focus-hero__cta" onClick={handleScrollToRoutine}>
-            Se din daglige rutine
-          </button>
+          <div className="focus-hero__topbar">
+            <BrandLogo as="div" align="left" size={56} wordmarkSize="2.4rem" wordmarkText="Fokus" />
+            <button type="button" className="focus-hero__mode-toggle" aria-label="Aktivér Calm Mode">
+              <span aria-hidden="true" className="focus-hero__mode-icon">
+                🍃
+              </span>
+              Calm Mode
+            </button>
+          </div>
+
+          <div className="focus-hero__body">
+            <div className="focus-hero__text">
+              <span className="focus-hero__eyebrow">Train Your Mind</span>
+              <h1 className="focus-hero__title">
+                Games, meditations, and routines to help you focus better every day.
+              </h1>
+              <p className="focus-hero__subtitle">
+                Strengthen your mental clarity and emotional balance through personalized daily practices.
+              </p>
+              <div className="focus-hero__actions">
+                <button
+                  type="button"
+                  className="focus-hero__cta focus-hero__cta--primary"
+                  onClick={handleScrollToRoutine}
+                >
+                  Start Training
+                </button>
+                <button
+                  type="button"
+                  className="focus-hero__cta focus-hero__cta--ghost"
+                  onClick={handleScrollToNotifications}
+                >
+                  Learn More
+                </button>
+              </div>
+            </div>
+
+            <div className="focus-hero__visual" aria-hidden="true">
+              <div className="focus-hero__visual-core">
+                <span />
+              </div>
+              <div className="focus-hero__orbit focus-hero__orbit--outer">
+                <span />
+                <span />
+                <span />
+              </div>
+              <div className="focus-hero__orbit">
+                <span />
+                <span />
+                <span />
+              </div>
+              <div className="focus-hero__orbit focus-hero__orbit--inner">
+                <span />
+                <span />
+                <span />
+              </div>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -508,7 +557,11 @@ export default function FocusRoutineScreen() {
         </div>
       </section>
 
-      <section className="focus-notifications" aria-labelledby="notifications-heading">
+      <section
+        className="focus-notifications"
+        aria-labelledby="notifications-heading"
+        ref={notificationsSectionRef}
+      >
         <header className="focus-section-header">
           <span className="focus-section-eyebrow">🔔 Små påmindelser, stor effekt</span>
           <h2 id="notifications-heading">Se hvordan Fokus guider dig gennem dagen</h2>
@@ -548,22 +601,6 @@ export default function FocusRoutineScreen() {
               </ul>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="focus-science" aria-labelledby="science-heading">
-        <div className="focus-science__overlay" />
-        <div className="focus-science__content">
-          <span className="focus-section-eyebrow">🌊 Videnskaben bag Fokus</span>
-          <h2 id="science-heading">Ro, evidens og nærvær i samme oplevelse</h2>
-          <p>
-            Fokus bygger på principper fra kognitiv træning, søvnforskning og mindfulness. Små daglige vaner – som lys,
-            bevægelse og taknemmelighed – har dokumenteret effekt på koncentration og velvære.
-          </p>
-          <p>
-            Med en rytme, der følger naturens tempo, hjælper Fokus dig med at skabe varige vaner. Resultatet er en hverdag
-            med mere klarhed, overskud og ro.
-          </p>
         </div>
       </section>
     </div>
