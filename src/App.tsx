@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Navigate, Outlet, Route, Routes, useNavigate } from 'react-router-dom'
 import './App.css'
-import Home from './screens/Home'
+import OverviewScreen from './screens/OverviewScreen'
 import MemoryGame from './screens/MemoryGame'
 import ReactionTestScreen from './screens/ReactionTestScreen'
 import SortingGameScreen from './screens/SortingGameScreen'
@@ -12,6 +12,7 @@ import OddOneOutScreen from './screens/OddOneOutScreen'
 import LoginScreen from './screens/LoginScreen'
 import PuzzleBloxScreen from './screens/PuzzleBloxScreen'
 import FocusRoutineScreen from './screens/FocusRoutineScreen'
+import OverviewGamesScreen from './screens/OverviewGamesScreen'
 
 function AppLayout() {
   return (
@@ -48,7 +49,9 @@ function App() {
   return (
     <Routes>
       <Route element={<AppLayout />}>
-        <Route index element={<Home />} />
+        <Route index element={<Navigate to="/overview" replace />} />
+        <Route path="overview" element={<OverviewScreen />} />
+        <Route path="overview/games" element={<OverviewGamesScreen />} />
         <Route path="memory" element={<MemoryGame />} />
         <Route path="rutines" element={<FocusRoutineScreen />} />
         <Route path="sorting" element={<SortingGameScreen />} />
