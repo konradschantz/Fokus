@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import './OverviewScreen.css'
 
@@ -53,41 +54,53 @@ const sections: OverviewSection[] = [
 ]
 
 export default function OverviewScreen() {
+  const [isHeroVisible, setHeroVisible] = useState(true)
+
   return (
     <div className="overview">
-      <section className="overview__hero">
-        <div className="overview__hero-copy">
-          <div className="overview__hero-badge">
-            <span className="overview__hero-badge-text overview__hero-badge-text--calm">
-              Calm Mode
-            </span>
-            <span className="overview__hero-badge-text overview__hero-badge-text--focus">
-              Focus Mode
-            </span>
+      {isHeroVisible && (
+        <section className="overview__hero">
+          <button
+            type="button"
+            className="overview__hero-close"
+            aria-label="Skjul introduktion"
+            onClick={() => setHeroVisible(false)}
+          >
+            ×
+          </button>
+          <div className="overview__hero-copy">
+            <div className="overview__hero-badge">
+              <span className="overview__hero-badge-text overview__hero-badge-text--calm">
+                Calm Mode
+              </span>
+              <span className="overview__hero-badge-text overview__hero-badge-text--focus">
+                Focus Mode
+              </span>
+            </div>
+            <h1>Train Your Mind</h1>
+            <p>
+              Games, meditations, and routines to help you focus better every day. Strengthen
+              your mental clarity and emotional balance through personalized daily practices.
+            </p>
+            <div className="overview__actions">
+              <Link to="/overview/games" className="button--primary">
+                Start Training
+              </Link>
+              <Link to="/rutines" className="button--ghost">
+                Learn More
+              </Link>
+            </div>
           </div>
-          <h1>Train Your Mind</h1>
-          <p>
-            Games, meditations, and routines to help you focus better every day. Strengthen your
-            mental clarity and emotional balance through personalized daily practices.
-          </p>
-          <div className="overview__actions">
-            <Link to="/overview/games" className="button--primary">
-              Start Training
-            </Link>
-            <Link to="/rutines" className="button--ghost">
-              Learn More
-            </Link>
-          </div>
-        </div>
 
-        <div className="overview__visual" aria-hidden="true">
-          <div className="overview__planet">
-            <span className="overview__orbit overview__orbit--one" />
-            <span className="overview__orbit overview__orbit--two" />
-            <span className="overview__orbit overview__orbit--three" />
+          <div className="overview__visual" aria-hidden="true">
+            <div className="overview__planet">
+              <span className="overview__orbit overview__orbit--one" />
+              <span className="overview__orbit overview__orbit--two" />
+              <span className="overview__orbit overview__orbit--three" />
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="overview__sections">
         <div className="overview__section-header">
