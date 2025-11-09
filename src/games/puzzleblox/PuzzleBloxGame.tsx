@@ -211,6 +211,18 @@ export default function PuzzleBloxGame({ onExit }: PuzzleBloxGameProps) {
     <div className="puzzle-blox">
       <header className="puzzle-blox__header">
         <h1>Puzzle Blox</h1>
+        <div className="puzzle-blox__header-controls">
+          <span className="puzzle-blox__timer" aria-live="polite">{scoreboardTime}</span>
+          {phase !== 'running' ? (
+            <button
+              type="button"
+              className="puzzle-blox__primary-button puzzle-blox__start-button"
+              onClick={handleStartGame}
+            >
+              {phase === 'idle' ? 'Start' : 'Start igen'}
+            </button>
+          ) : null}
+        </div>
       </header>
 
       <div className="puzzle-blox__content">

@@ -181,7 +181,12 @@ function AppLayout({ mode, onSetMode }: { mode: ThemeMode; onSetMode: (mode: The
   }
 
   return (
-    <AppChrome mode={mode} onSetMode={onSetMode} onBack={handleBack} canGoBack={location.pathname !== '/overview'}>
+    <AppChrome
+      mode={mode}
+      onSetMode={onSetMode}
+      onBack={location.pathname !== '/overview' ? handleBack : undefined}
+      canGoBack={location.pathname !== '/overview'}
+    >
       <Outlet />
     </AppChrome>
   )
