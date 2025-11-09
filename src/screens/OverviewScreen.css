@@ -210,6 +210,43 @@ body[data-theme='focus'] .overview__hero-close:focus-visible {
   }
 }
 
+/* Responsive tweaks to keep hero content from crowding header on small widths */
+@media (max-width: 770px) {
+  .overview__hero {
+    grid-template-columns: 1fr;
+    gap: clamp(0.9rem, 3vw, 1.25rem);
+    padding: clamp(1rem, 3.5vw, 1.75rem);
+  }
+
+  .overview__hero-copy {
+    gap: clamp(0.75rem, 2.5vw, 1.1rem);
+  }
+
+  .overview__hero h1 {
+    font-size: clamp(1.5rem, 6vw, 2.1rem);
+    line-height: 1.1;
+  }
+
+  .overview__hero p {
+    font-size: clamp(0.95rem, 3.5vw, 1rem);
+  }
+
+  .overview__planet {
+    width: clamp(140px, 38vw, 200px);
+    height: clamp(140px, 38vw, 200px);
+  }
+}
+
+@media (max-width: 480px) {
+  .overview__hero h1 {
+    font-size: clamp(1.3rem, 7vw, 1.75rem);
+  }
+
+  .overview__hero p {
+    font-size: clamp(0.9rem, 4vw, 0.98rem);
+  }
+}
+
 .overview__sections {
   display: grid;
   gap: clamp(1.5rem, 4vw, 2.5rem);

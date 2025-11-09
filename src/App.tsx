@@ -31,6 +31,7 @@ type AppChromeProps = {
   children: ReactNode
   onBack?: () => void
   canGoBack?: boolean
+  onNavigate?: (to: string) => void
 }
 
 const navLinks = [
@@ -40,7 +41,7 @@ const navLinks = [
   { to: '/rutines', label: 'Rutiner' },
 ]
 
-function AppChrome({ mode, onSetMode, children, onBack, canGoBack = true }: AppChromeProps) {
+function AppChrome({ mode, onSetMode, children, onBack, canGoBack = true, onNavigate }: AppChromeProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
 
@@ -140,15 +141,25 @@ function AppChrome({ mode, onSetMode, children, onBack, canGoBack = true }: AppC
             </button>
           </div>
         </div>
-        <ul className="app-shell__nav-list">
-          {navLinks.map((link) => (
+          <ul className="app-shell__nav-list">
+            {navLinks.map((link) => (
             <li key={link.to}>
-              <Link to={link.to} className="app-shell__nav-link">
+              <Link
+                to={link.to}
+                className="app-shell__nav-link"
+                onClick={(event) => {
+                  if (onNavigate) {
+                    event.preventDefault()
+                    onNavigate(link.to)
+                  }
+                  setMenuOpen(false)
+                }}
+              >
                 {link.label}
               </Link>
             </li>
-          ))}
-        </ul>
+            ))}
+          </ul>
       </nav>
 
       <button
@@ -160,6 +171,10 @@ function AppChrome({ mode, onSetMode, children, onBack, canGoBack = true }: AppC
       >
         <span className="sr-only">Luk menu</span>
       </button>
+      {/* Brand watermark in left corner using SVG logo */}
+      <div className="brand-watermark" aria-hidden="true">
+        <BrandLogo as="div" align="left" size={72} showWordmark={false} />
+      </div>
     </main>
   )
 }
@@ -215,7 +230,7 @@ function App() {
 
   if (!isLoggedIn) {
     return (
-      <AppChrome mode={mode} onSetMode={handleToggleMode}>
+      <AppChrome mode={mode} onSetMode={handleToggleMode} onNavigate={handleLogin}>
         <LoginScreen
           onSkip={() => handleLogin('/')}
           onGoToRoutine={() => handleLogin('/rutines')}

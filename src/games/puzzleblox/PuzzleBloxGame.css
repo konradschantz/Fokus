@@ -115,6 +115,8 @@
   align-items: center;
   justify-content: center;
   padding: 0.25rem 0 0.5rem;
+  /* Reserve space so right-side controls don't overlap title */
+  padding-right: clamp(88px, 25vw, 160px);
   color: inherit;
   text-align: center;
 }
@@ -149,6 +151,21 @@
 .puzzle-blox__start-button {
   padding: 0.45rem 0.9rem;
   font-size: 0.95rem;
+}
+
+/* Small screens: place controls inline and avoid absolute overlap */
+@media (max-width: 420px) {
+  .puzzle-blox__header {
+    justify-content: space-between;
+    padding-right: 0;
+    text-align: left;
+  }
+
+  .puzzle-blox__header-controls {
+    position: static;
+    transform: none;
+    margin-left: auto;
+  }
 }
 
 .puzzle-blox__layout {

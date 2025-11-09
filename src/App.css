@@ -100,12 +100,16 @@ body[data-theme='focus'] {
   align-items: center;
   justify-content: space-between;
   gap: clamp(1rem, 3vw, 1.75rem);
+  flex-wrap: nowrap; /* keep items on one line */
+  position: relative;
 }
 
 .app-shell__left {
   display: flex;
   align-items: center;
   gap: clamp(0.75rem, 2.5vw, 1.5rem);
+  flex: 1 1 auto; /* allow left side to take remaining space */
+  min-width: 0; /* avoid overflow pushing actions */
 }
 
 .app-shell__back {
@@ -168,10 +172,32 @@ body[data-theme='focus'] {
   letter-spacing: -0.02em;
 }
 
+/* Fixed brand watermark in left corner */
+.brand-watermark {
+  position: fixed;
+  left: max(env(safe-area-inset-left, 12px), clamp(12px, 2vw, 24px));
+  bottom: max(env(safe-area-inset-bottom, 12px), clamp(12px, 2vw, 24px));
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.075;
+}
+
+/* Responsive logo sizing for watermark */
+.brand-watermark .brand-logo {
+  --logo-size: clamp(40px, 10vw, 72px);
+}
+
+/* Subtle theme-aware tweak for dark mode */
+body[data-theme='focus'] .brand-watermark {
+  opacity: 0.12;
+}
+
 .app-shell__actions {
   display: flex;
   align-items: center;
   gap: clamp(0.75rem, 3vw, 1.5rem);
+  margin-left: auto; /* force to right edge */
+  flex-shrink: 0;   /* prevent shrinking off-screen */
 }
 
 .app-shell__mode-switch,
@@ -290,7 +316,8 @@ body[data-theme='focus'] .app-shell__burger {
   display: flex;
   flex-direction: column;
   gap: clamp(1.5rem, 3vw, 2rem);
-  z-index: 8;
+  z-index: 1009; /* ensure above any overlay/content */
+  pointer-events: auto;
   color: inherit;
 }
 
@@ -605,18 +632,18 @@ body[data-theme='focus'] .game-scoreboard {
   }
 
   .app-shell__top {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row; /* keep header items in one row */
+    align-items: center;
   }
 
   .app-shell__left {
-    width: 100%;
-    justify-content: space-between;
+    width: auto; /* avoid forcing actions to next row */
+    justify-content: flex-start;
   }
 
   .app-shell__actions {
-    width: 100%;
-    justify-content: space-between;
+    width: auto;
+    justify-content: flex-end; /* stay pinned right */
   }
 
   .app-shell__mode-indicator {
@@ -633,5 +660,35 @@ body[data-theme='focus'] .game-scoreboard {
   .app-shell__mode-option {
     flex: 1 1 auto;
     text-align: center;
+  }
+}
+
+/* Ensure burger stays pinned right under ~770px */
+@media (max-width: 770px) {
+  .app-shell__top {
+    position: relative;
+  }
+
+  .app-shell__actions {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: auto;
+    justify-content: flex-end;
+  }
+
+  .app-shell__left {
+    padding-right: 72px; /* reserve space for burger */
+  }
+
+  /* Free space on small screens */
+  .app-shell__back-placeholder {
+    width: 0;
+  }
+
+  /* Hide long wordmark to avoid wrapping */
+  .brand-logo__wordmark {
+    display: none;
   }
 }
