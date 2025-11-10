@@ -84,7 +84,7 @@ body[data-theme='focus'] {
   z-index: 1;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 300px) {
   .app {
     align-items: flex-start;
   }
