@@ -271,7 +271,7 @@ body[data-theme='focus'] .overview__hero-close:focus-visible {
 
 .overview__cards {
   display: grid;
-  gap: clamp(1.25rem, 3vw, 2rem);
+  gap: clamp(4rem, 3vw, 2rem);
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
 

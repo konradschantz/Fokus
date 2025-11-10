@@ -108,9 +108,7 @@ function AppChrome({ mode, onSetMode, children, onBack, canGoBack = true, onNavi
         </header>
 
         <div className="app-shell__content" aria-live="polite">
-          <div className="app-shell__mode-indicator" aria-hidden="true">
-            {modeLabel}
-          </div>
+          
           {children}
         </div>
       </div>
@@ -121,7 +119,20 @@ function AppChrome({ mode, onSetMode, children, onBack, canGoBack = true, onNavi
         aria-label="Sekundær navigation"
       >
         <div className="app-shell__drawer-header">
-          <p className="app-shell__drawer-title">Quick Access</p>
+          <div className="app-shell__drawer-title-row">
+            <p className="app-shell__drawer-title">Quick Access</p>
+            <button
+              type="button"
+              className="app-shell__drawer-burger app-shell__burger"
+              onClick={() => setMenuOpen(false)}
+              aria-label="Luk Quick Access-menu"
+              aria-expanded={menuOpen}
+            >
+              <span />
+              <span />
+              <span />
+            </button>
+          </div>
           <div className="app-shell__drawer-switch" role="group" aria-label="Skift tema">
             <button
               type="button"

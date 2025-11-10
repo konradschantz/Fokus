@@ -14,9 +14,7 @@ export default function LoginScreen({ onSkip, onGoToRoutine, onGoToMeditation }:
           <span className="landing-eyebrow">Mindful productivity</span>
           <h1 className="landing-title">Stay focused on what matters</h1>
           <p className="landing-subtitle">
-            Fokus er udviklet til at styrke og træne dine kognitive evner gennem målrettede øvelser, der
-            forbedrer hukommelse, koncentration og mental fleksibilitet. Appen kombinerer moderne neurovidenskab
-            med enkel skandinavisk ro – så du kan skabe et klart sind i en travl hverdag.
+            Fokus er udviklet til at styrke og træne dine kognitive evner gennem målrettede øvelser
           </p>
           <div className="landing-cta">
             <button type="button" className="landing-button landing-button--primary" onClick={onSkip}>
@@ -41,8 +39,8 @@ export default function LoginScreen({ onSkip, onGoToRoutine, onGoToMeditation }:
 
         <section className="landing-footer" aria-label="Highlights" id="learn-more">
           <div className="landing-pill-row" id="features">
-            <span className="landing-pill">Guidede fokusøvelser</span>
-            <span className="landing-pill">Afspændende lydlandskaber</span>
+            <span className="landing-pill">Guidede Meditationer</span>
+            <span className="landing-pill">Kognetive spil</span>
             <span className="landing-pill">Personlige rutiner</span>
           </div>
         </section>

@@ -102,6 +102,7 @@ body[data-theme='focus'] {
   gap: clamp(1rem, 3vw, 1.75rem);
   flex-wrap: nowrap; /* keep items on one line */
   position: relative;
+  z-index: 1010;
 }
 
 .app-shell__left {
@@ -197,7 +198,9 @@ body[data-theme='focus'] .brand-watermark {
   align-items: center;
   gap: clamp(0.75rem, 3vw, 1.5rem);
   margin-left: auto; /* force to right edge */
-  flex-shrink: 0;   /* prevent shrinking off-screen */
+  flex-shrink: 0; /* prevent shrinking off-screen */
+  position: relative;
+  z-index: 1011;
 }
 
 .app-shell__mode-switch,
@@ -331,6 +334,24 @@ body[data-theme='focus'] .app-shell__burger {
   gap: 1rem;
 }
 
+.app-shell__drawer-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(0.5rem, 2vw, 1rem);
+}
+
+.app-shell__drawer-burger {
+  flex-shrink: 0;
+  background: rgba(15, 23, 42, 0.08);
+  border-color: rgba(15, 23, 42, 0.2);
+}
+
+body[data-theme='focus'] .app-shell__drawer-burger {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(226, 232, 240, 0.6);
+}
+
 .app-shell__drawer-title {
   margin: 0;
   font-size: 0.95rem;
@@ -390,7 +411,7 @@ body[data-theme='focus'] .app-shell__nav-link {
 }
 
 .menu {
-  width: min(960px, 100%);
+ 
   background-color: var(--surface-color);
   border-radius: 1.75rem;
   box-shadow: var(--surface-shadow);
@@ -453,6 +474,8 @@ body[data-theme='focus'] .app-shell__nav-link {
   color: inherit;
   text-decoration: none;
   font-weight: 600;
+
+  box-shadow: var(--surface-glow);
   transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
@@ -463,26 +486,29 @@ body[data-theme='focus'] .app-shell__nav-link {
 
 .menu__grid {
   display: grid;
-  gap: clamp(1rem, 3vw, 1.75rem);
+  gap: clamp(4rem, 3vw, 1.75rem);
+
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
 
 .menu__card {
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(237, 237, 237, 0.4);
   border-radius: 1.35rem;
+   backdrop-filter: blur(8px);
   padding: clamp(1.25rem, 3vw, 1.75rem);
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 1rem;
   border: 1px solid rgba(148, 163, 184, 0.18);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
   min-height: 100%;
+  
 }
 
 .menu__card-content {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 body[data-theme='focus'] .menu__card {
@@ -494,6 +520,7 @@ body[data-theme='focus'] .menu__card {
 .menu__card h2 {
   margin: 0;
   font-size: 1.35rem;
+  gap:1.5rem
 }
 
 .menu__card p {
@@ -506,7 +533,7 @@ body[data-theme='focus'] .menu__card {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.45rem;
+  gap: 0.5rem;
 }
 
 .menu__card-links a {
@@ -534,7 +561,7 @@ body[data-theme='focus'] .menu__card {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.1rem;
   box-shadow: 0 20px 35px rgba(15, 23, 42, 0.18);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }

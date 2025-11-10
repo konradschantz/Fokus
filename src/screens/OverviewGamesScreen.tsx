@@ -62,12 +62,10 @@ export default function OverviewGamesScreen() {
           size={72}
           wordmarkSize="clamp(2rem, 5vw, 2.8rem)"
           wordmarkText="Cognitive Games"
-          style={{ marginBottom: '0.75rem' }}
+          style={{ marginBottom: '1rem' }}
         />
         <p>Udforsk vores samling af spil designet til at styrke fokus, hukommelse og reaktionsevne.</p>
-        <Link to="/overview" className="menu__secondary-button">
-          Tilbage til overview
-        </Link>
+       
       </header>
 
       <section className="menu__grid menu__grid--home">
