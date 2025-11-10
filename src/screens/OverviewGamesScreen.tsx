@@ -7,6 +7,7 @@ type GameCard = {
   description: string
   ctaLabel: string
   to: string
+  icon: string
 }
 
 const games: GameCard[] = [
@@ -17,6 +18,7 @@ const games: GameCard[] = [
       'Vend kortene og find parrene på tid for at styrke din korttidshukommelse og mønstergenkendelse.',
     ctaLabel: 'Spil Memory Matrix',
     to: '/memory',
+    icon: '/gameIcons_svg/memory_game_svg.svg',
   },
   {
     id: 'reaction-test',
@@ -25,6 +27,7 @@ const games: GameCard[] = [
       'Test din reaktionsevne og forbedr dit fokus ved at reagere lynhurtigt på visuelle signaler.',
     ctaLabel: 'Start reaktionstest',
     to: '/reaction-test',
+    icon: '/gameIcons_svg/reaction_game_svg.svg',
   },
   {
     id: 'sorting',
@@ -33,6 +36,7 @@ const games: GameCard[] = [
       'Skærp din kognitive fleksibilitet ved at sortere elementer i de rigtige kategorier så hurtigt som muligt.',
     ctaLabel: 'Åbn sorteringsspillet',
     to: '/sorting',
+    icon: '/gameIcons_svg/sorting_game_svg.svg',
   },
   {
     id: 'odd-one-out',
@@ -41,6 +45,7 @@ const games: GameCard[] = [
       'Find elementet der skiller sig ud for at træne mønstergenkendelse og analytisk tænkning.',
     ctaLabel: 'Spil Odd One Out',
     to: '/odd-one-out',
+    icon: '/gameIcons_svg/odd_one_out_game_svg.svg',
   },
   {
     id: 'puzzle-blox',
@@ -49,6 +54,7 @@ const games: GameCard[] = [
       'Løs rumlige puslespil og udfordr din problemløsningsevne med farverige byggeklodser.',
     ctaLabel: 'Gå til Puzzle Blox',
     to: '/puzzle-blox',
+    icon: '/gameIcons_svg/puzzle_blocks_game_svg.svg',
   },
 ]
 
@@ -71,6 +77,9 @@ export default function OverviewGamesScreen() {
       <section className="menu__grid menu__grid--home">
         {games.map((game) => (
           <article key={game.id} className="menu__card menu__card--home">
+            <div className="menu__card-media">
+              <img src={game.icon} alt={`${game.title} ikon`} className="menu__card-icon" />
+            </div>
             <div className="menu__card-content">
               <h2>{game.title}</h2>
               <p>{game.description}</p>

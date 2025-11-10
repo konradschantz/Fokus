@@ -505,6 +505,23 @@ body[data-theme='focus'] .app-shell__nav-link {
   
 }
 
+.menu__card-media {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 0.5rem;
+}
+
+.menu__card-icon {
+  width: clamp(84px, 12vw, 128px);
+  height: auto;
+  background: transparent;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+  filter: drop-shadow(0 12px 22px rgba(15, 23, 42, 0.25));
+  padding: 0.75rem;
+}
+
 .menu__card-content {
   display: flex;
   flex-direction: column;
