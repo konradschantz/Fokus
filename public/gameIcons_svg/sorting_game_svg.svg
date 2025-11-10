@@ -1,0 +1,24 @@
+<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Baggrund -->
+  <rect width="300" height="300" fill="#E8E8E8" rx="15"/>
+  
+  <!-- Stor cirkel (baggrund) -->
+  <circle cx="150" cy="150" r="80" fill="#4A90E2" stroke="#2C3E50" stroke-width="4"/>
+  
+  <!-- Venstre transportbånd -->
+  <rect x="110" y="100" width="20" height="100" fill="#F5F5F5" stroke="#2C3E50" stroke-width="2" rx="3"/>
+  
+  <!-- Venstre: Cirkler og firkanter -->
+  <circle cx="120" cy="115" r="6" fill="#4A90E2" stroke="#2C3E50" stroke-width="2"/>
+  <rect x="114" y="134" width="12" height="12" fill="#4A90E2" stroke="#2C3E50" stroke-width="2"/>
+  <circle cx="120" cy="165" r="6" fill="#4A90E2" stroke="#2C3E50" stroke-width="2"/>
+  <rect x="114" y="179" width="12" height="12" fill="#4A90E2" stroke="#2C3E50" stroke-width="2"/>
+  
+  <!-- Højre transportbånd -->
+  <rect x="170" y="100" width="20" height="100" fill="#F5F5F5" stroke="#2C3E50" stroke-width="2" rx="3"/>
+  
+  <!-- Højre: Trekanter -->
+  <polygon points="180,115 175,125 185,125" fill="#4A90E2" stroke="#2C3E50" stroke-width="2"/>
+  <polygon points="180,145 175,155 185,155" fill="#4A90E2" stroke="#2C3E50" stroke-width="2"/>
+  <polygon points="180,175 175,185 185,185" fill="#4A90E2" stroke="#2C3E50" stroke-width="2"/>
+</svg>
