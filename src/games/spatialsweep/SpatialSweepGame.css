@@ -1,0 +1,89 @@
+.spatial-sweep-game {
+  display: grid;
+  gap: clamp(1.25rem, 3vw, 1.75rem);
+}
+
+@media (min-width: 1024px) {
+  .spatial-sweep-game {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    align-items: start;
+  }
+}
+
+.spatial-sweep-game__stage {
+  background: linear-gradient(155deg, rgba(129, 140, 248, 0.12), rgba(226, 232, 240, 0.08));
+  border: 1px solid rgba(99, 102, 241, 0.16);
+  border-radius: 1.25rem;
+  padding: clamp(1.2rem, 3vw, 1.8rem);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2.5vw, 1.5rem);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.spatial-sweep-game__status {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.spatial-sweep-game__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(0.65rem, 2vw, 1rem);
+}
+
+.spatial-sweep-game__grid.is-locked {
+  pointer-events: none;
+}
+
+.spatial-sweep-game__cell {
+  aspect-ratio: 1 / 1;
+  border-radius: 0.85rem;
+  border: none;
+  background: rgba(148, 163, 184, 0.25);
+  transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.spatial-sweep-game__cell.is-active {
+  background: rgba(59, 130, 246, 0.85);
+  box-shadow: 0 12px 24px rgba(59, 130, 246, 0.35);
+  transform: scale(1.05);
+}
+
+.spatial-sweep-game__cell.is-selected {
+  background: rgba(59, 130, 246, 0.65);
+  box-shadow: inset 0 0 0 2px rgba(30, 64, 175, 0.45);
+}
+
+.spatial-sweep-game__cell.is-wrong {
+  background: rgba(239, 68, 68, 0.7);
+  box-shadow: inset 0 0 0 2px rgba(185, 28, 28, 0.4);
+}
+
+.spatial-sweep-game__cell:disabled {
+  cursor: default;
+}
+
+.spatial-sweep-game__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.spatial-sweep-game__scoreboard {
+  min-height: 100%;
+}
+
+.spatial-sweep-game__hint {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 0.95rem;
+}
+
+body[data-theme='focus'] .spatial-sweep-game__stage {
+  background: linear-gradient(155deg, rgba(56, 189, 248, 0.18), rgba(165, 180, 252, 0.12));
+  border-color: rgba(129, 140, 248, 0.26);
+}

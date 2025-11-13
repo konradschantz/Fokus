@@ -21,6 +21,11 @@ import LoginScreen from './screens/LoginScreen'
 import PuzzleBloxScreen from './screens/PuzzleBloxScreen'
 import FocusRoutineScreen from './screens/FocusRoutineScreen'
 import OverviewGamesScreen from './screens/OverviewGamesScreen'
+import PatternPulseScreen from './screens/PatternPulseScreen'
+import SpatialSweepScreen from './screens/SpatialSweepScreen'
+import MindMathScreen from './screens/MindMathScreen'
+import FocusFlowScreen from './screens/FocusFlowScreen'
+import WordWeaveScreen from './screens/WordWeaveScreen'
 import BrandLogo from './components/BrandLogo'
 
 type ThemeMode = 'calm' | 'focus'
@@ -262,6 +267,11 @@ function App() {
         <Route path="sorting" element={<SortingGameScreen />} />
         <Route path="odd-one-out" element={<OddOneOutScreen />} />
         <Route path="puzzle-blox" element={<PuzzleBloxScreen />} />
+        <Route path="pattern-pulse" element={<PatternPulseScreen />} />
+        <Route path="spatial-sweep" element={<SpatialSweepScreen />} />
+        <Route path="mind-math" element={<MindMathScreen />} />
+        <Route path="focus-flow" element={<FocusFlowScreen />} />
+        <Route path="word-weave" element={<WordWeaveScreen />} />
         <Route path="reaction-test" element={<ReactionTestScreen />} />
         <Route path="meditation">
           <Route index element={<MeditationHubScreen />} />

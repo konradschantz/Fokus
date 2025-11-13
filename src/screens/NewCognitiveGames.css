@@ -1,0 +1,74 @@
+.pattern-pulse__layout,
+.spatial-sweep__layout,
+.mind-math__layout,
+.focus-flow__layout,
+.word-weave__layout {
+  display: grid;
+  gap: clamp(1.25rem, 3vw, 1.75rem);
+}
+
+@media (min-width: 1080px) {
+  .pattern-pulse__layout,
+  .spatial-sweep__layout,
+  .mind-math__layout,
+  .focus-flow__layout,
+  .word-weave__layout {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.1fr);
+    align-items: start;
+  }
+}
+
+.pattern-pulse__header h1,
+.spatial-sweep__header h1,
+.mind-math__header h1,
+.focus-flow__header h1,
+.word-weave__header h1 {
+  margin-bottom: 0.5rem;
+}
+
+.pattern-pulse__header p,
+.spatial-sweep__header p,
+.mind-math__header p,
+.focus-flow__header p,
+.word-weave__header p {
+  margin: 0;
+  color: var(--app-muted);
+}
+
+.pattern-pulse .menu__top-bar,
+.spatial-sweep .menu__top-bar,
+.mind-math .menu__top-bar,
+.focus-flow .menu__top-bar,
+.word-weave .menu__top-bar {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.pattern-pulse .menu__back-button,
+.spatial-sweep .menu__back-button,
+.mind-math .menu__back-button,
+.focus-flow .menu__back-button,
+.word-weave .menu__back-button {
+  min-width: max-content;
+}
+
+@media (max-width: 640px) {
+  .pattern-pulse .menu__top-bar,
+  .spatial-sweep .menu__top-bar,
+  .mind-math .menu__top-bar,
+  .focus-flow .menu__top-bar,
+  .word-weave .menu__top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pattern-pulse .menu__back-button,
+  .spatial-sweep .menu__back-button,
+  .mind-math .menu__back-button,
+  .focus-flow .menu__back-button,
+  .word-weave .menu__back-button {
+    width: 100%;
+  }
+}

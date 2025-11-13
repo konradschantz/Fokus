@@ -1,0 +1,95 @@
+.focus-flow-game {
+  display: grid;
+  gap: clamp(1.25rem, 3vw, 1.75rem);
+}
+
+@media (min-width: 1024px) {
+  .focus-flow-game {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    align-items: start;
+  }
+}
+
+.focus-flow-game__stage {
+  background: linear-gradient(155deg, rgba(59, 130, 246, 0.12), rgba(147, 197, 253, 0.08));
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  border-radius: 1.25rem;
+  padding: clamp(1.2rem, 3vw, 1.8rem);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2.5vw, 1.5rem);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.focus-flow-game__status {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.focus-flow-game__grid {
+  display: grid;
+  gap: clamp(0.5rem, 1.8vw, 0.85rem);
+}
+
+.focus-flow-game__grid--cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.focus-flow-game__grid--cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.focus-flow-game__grid--cols-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.focus-flow-game__grid--cols-6 {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.focus-flow-game__cell {
+  border: none;
+  border-radius: 0.85rem;
+  background: rgba(191, 219, 254, 0.5);
+  color: rgba(30, 64, 175, 0.85);
+  font-weight: 700;
+  font-size: clamp(1.25rem, 3vw, 1.6rem);
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.focus-flow-game__cell.is-cleared {
+  background: rgba(96, 165, 250, 0.9);
+  color: white;
+  transform: scale(0.96);
+}
+
+.focus-flow-game__cell:disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+
+.focus-flow-game__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.focus-flow-game__scoreboard {
+  min-height: 100%;
+}
+
+.focus-flow-game__hint {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 0.95rem;
+}
+
+body[data-theme='focus'] .focus-flow-game__stage {
+  background: linear-gradient(155deg, rgba(34, 197, 94, 0.14), rgba(74, 222, 128, 0.12));
+  border-color: rgba(34, 197, 94, 0.25);
+}
