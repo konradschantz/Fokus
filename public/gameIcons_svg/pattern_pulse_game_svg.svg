@@ -1,0 +1,23 @@
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="12" y="12" width="136" height="136" rx="32" fill="url(#pulseGradient)" />
+  <g fill="none" stroke-width="10" stroke-linecap="round">
+    <path d="M42 80H64L74 52L88 116L100 80H118" stroke="url(#pulseStroke1)" />
+    <path d="M42 106H58L68 74L84 128L96 96H118" stroke="url(#pulseStroke2)" stroke-opacity="0.7" />
+  </g>
+  <circle cx="42" cy="80" r="9" fill="#38bdf8" />
+  <circle cx="118" cy="80" r="9" fill="#22d3ee" />
+  <defs>
+    <linearGradient id="pulseGradient" x1="12" y1="12" x2="148" y2="148" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#312e81" />
+      <stop offset="1" stop-color="#0ea5e9" />
+    </linearGradient>
+    <linearGradient id="pulseStroke1" x1="42" y1="52" x2="118" y2="116" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#bfdbfe" />
+      <stop offset="1" stop-color="#38bdf8" />
+    </linearGradient>
+    <linearGradient id="pulseStroke2" x1="42" y1="74" x2="118" y2="128" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#c084fc" />
+      <stop offset="1" stop-color="#22d3ee" />
+    </linearGradient>
+  </defs>
+</svg>
