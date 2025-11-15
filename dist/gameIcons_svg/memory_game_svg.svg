@@ -1,0 +1,21 @@
+<svg viewBox="0 0 300 250" xmlns="http://www.w3.org/2000/svg">
+  <!-- Baggrundskort (bagerste kort) -->
+  <g transform="translate(120, 30)">
+    <rect width="150" height="180" fill="#E8E8E8" rx="10" stroke="#2C3E50" stroke-width="3"/>
+    <text x="75" y="95" font-size="60" fill="#A0A0A0" text-anchor="middle" font-family="Arial, sans-serif" font-weight="bold">?</text>
+  </g>
+  
+  <!-- Forreste kort med stjerne -->
+  <g transform="translate(30, 40)">
+    <rect width="150" height="180" fill="#FFE4B5" rx="10" stroke="#2C3E50" stroke-width="3"/>
+    
+    <!-- Stjerne -->
+    <polygon points="75,50 87,80 120,84 97,107 103,140 75,123 47,140 53,107 30,84 63,80" 
+             fill="#FF6B6B" 
+             stroke="#2C3E50" 
+             stroke-width="2"/>
+    
+    <!-- Cirkel i midten -->
+    <circle cx="75" cy="95" r="12" fill="#FFD93D" stroke="#2C3E50" stroke-width="2"/>
+  </g>
+</svg>

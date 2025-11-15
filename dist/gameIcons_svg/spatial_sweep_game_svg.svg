@@ -1,0 +1,22 @@
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="12" y="12" width="136" height="136" rx="28" fill="url(#gridGradient)" />
+  <g stroke="rgba(255,255,255,0.22)" stroke-width="2">
+    <path d="M44 44H116" />
+    <path d="M44 76H116" />
+    <path d="M44 108H116" />
+    <path d="M44 44V140" />
+    <path d="M76 44V140" />
+    <path d="M108 44V140" />
+  </g>
+  <rect x="48" y="48" width="24" height="24" rx="6" fill="#60a5fa" />
+  <rect x="80" y="48" width="24" height="24" rx="6" fill="#38bdf8" opacity="0.6" />
+  <rect x="112" y="80" width="24" height="24" rx="6" fill="#a855f7" />
+  <rect x="48" y="112" width="24" height="24" rx="6" fill="#34d399" />
+  <rect x="80" y="80" width="24" height="24" rx="6" fill="#22d3ee" opacity="0.8" />
+  <defs>
+    <linearGradient id="gridGradient" x1="12" y1="12" x2="148" y2="148" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0f172a" />
+      <stop offset="1" stop-color="#312e81" />
+    </linearGradient>
+  </defs>
+</svg>

@@ -1,0 +1,18 @@
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="12" y="12" width="136" height="136" rx="30" fill="url(#mathGradient)" />
+  <g fill="#f8fafc" fill-opacity="0.9" font-family="'Inter', 'Segoe UI', sans-serif" font-weight="700">
+    <text font-size="38" x="34" y="70">8×4</text>
+    <text font-size="28" x="98" y="70">= 32</text>
+    <text font-size="32" x="40" y="112">19−7</text>
+    <text font-size="24" x="118" y="112">= 12</text>
+  </g>
+  <circle cx="124" cy="40" r="14" fill="#0ea5e9" />
+  <path d="M124 32V48" stroke="#f8fafc" stroke-width="3" stroke-linecap="round" />
+  <path d="M116 40H132" stroke="#f8fafc" stroke-width="3" stroke-linecap="round" />
+  <defs>
+    <linearGradient id="mathGradient" x1="12" y1="12" x2="148" y2="148" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0f766e" />
+      <stop offset="1" stop-color="#0ea5e9" />
+    </linearGradient>
+  </defs>
+</svg>

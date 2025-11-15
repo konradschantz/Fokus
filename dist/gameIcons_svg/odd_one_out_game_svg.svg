@@ -1,0 +1,15 @@
+<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Baggrund -->
+  <rect width="300" height="300" fill="#E8E8E8" rx="15"/>
+  
+  <!-- Stor cirkel (baggrund) -->
+  <circle cx="150" cy="150" r="80" fill="#4A90E2" stroke="#2C3E50" stroke-width="4"/>
+  
+  <!-- Tre ens cirkler -->
+  <circle cx="130" cy="130" r="15" fill="#F5F5F5" stroke="#2C3E50" stroke-width="2"/>
+  <circle cx="170" cy="130" r="15" fill="#F5F5F5" stroke="#2C3E50" stroke-width="2"/>
+  <circle cx="130" cy="170" r="15" fill="#F5F5F5" stroke="#2C3E50" stroke-width="2"/>
+  
+  <!-- Den forskellige - en firkant -->
+  <rect x="155" y="155" width="30" height="30" fill="#F5F5F5" stroke="#2C3E50" stroke-width="2"/>
+</svg>

@@ -1,0 +1,21 @@
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="12" y="12" width="136" height="136" rx="30" fill="url(#wordGradient)" />
+  <path d="M46 52H114M46 80H114M46 108H114" stroke="rgba(255,255,255,0.25)" stroke-width="4" stroke-linecap="round" />
+  <rect x="38" y="44" width="84" height="24" rx="8" fill="rgba(255,255,255,0.18)" />
+  <rect x="38" y="72" width="84" height="24" rx="8" fill="rgba(255,255,255,0.24)" />
+  <rect x="38" y="100" width="84" height="24" rx="8" fill="rgba(255,255,255,0.18)" />
+  <g font-family="'Inter', 'Segoe UI', sans-serif" font-size="16" font-weight="600" fill="#f8fafc">
+    <text x="46" y="61">Adaptiv</text>
+    <text x="46" y="89">Strategisk</text>
+    <text x="46" y="117">Syntese</text>
+  </g>
+  <circle cx="120" cy="44" r="14" fill="#a855f7" />
+  <path d="M120 38V50" stroke="#f8fafc" stroke-width="3" stroke-linecap="round" />
+  <path d="M114 44H126" stroke="#f8fafc" stroke-width="3" stroke-linecap="round" />
+  <defs>
+    <linearGradient id="wordGradient" x1="12" y1="12" x2="148" y2="148" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4c1d95" />
+      <stop offset="1" stop-color="#a855f7" />
+    </linearGradient>
+  </defs>
+</svg>
