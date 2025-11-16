@@ -29,6 +29,11 @@ const sections: OverviewSection[] = [
       { to: '/sorting', label: 'Sorteringsspillet' },
       { to: '/odd-one-out', label: 'Odd One Out' },
       { to: '/puzzle-blox', label: 'Puzzle Blox' },
+      { to: '/pattern-pulse', label: 'Pattern Pulse' },
+      { to: '/spatial-sweep', label: 'Spatial Sweep' },
+      { to: '/mind-math', label: 'Mind Math' },
+      { to: '/focus-flow', label: 'Focus Flow' },
+      { to: '/word-weave', label: 'Word Weave' },
     ],
   },
   {
@@ -77,7 +82,7 @@ export default function OverviewScreen() {
                 Focus Mode
               </span>
             </div>
-            <h1>Train Your Mind</h1>
+            <h1>Styrk din hjerne</h1>
             <p>
               Games, meditations, and routines to help you focus better every day. Strengthen
               your mental clarity and emotional balance through personalized daily practices.
