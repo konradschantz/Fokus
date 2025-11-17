@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { MouseEvent, ReactNode, useEffect, useMemo, useState } from 'react'
 import {
   Link,
   Navigate,
@@ -39,11 +39,17 @@ type AppChromeProps = {
   onNavigate?: (to: string) => void
 }
 
-const navLinks = [
-  { to: '/overview', label: 'Forside' },
-  { to: '/overview/games', label: 'Games' },
-  { to: '/meditation', label: 'Meditationer' },
-  { to: '/rutines', label: 'Rutiner' },
+type NavLink = {
+  to: string
+  label: string
+  description?: string
+}
+
+const navLinks: NavLink[] = [
+  { to: '/overview', label: 'Forside', description: 'Din fokus-hub' },
+  { to: '/overview/games', label: 'Games', description: 'Mini udfordringer' },
+  { to: '/meditation', label: 'Meditationer', description: 'Åndedræt & ro' },
+  { to: '/rutines', label: 'Rutiner', description: 'Hverdagsvaner' },
 ]
 
 function AppChrome({ mode, onSetMode, children, onBack, canGoBack = true, onNavigate }: AppChromeProps) {
@@ -67,11 +73,28 @@ function AppChrome({ mode, onSetMode, children, onBack, canGoBack = true, onNavi
     [mode],
   )
 
+  const isLinkActive = (to: string) => {
+    if (to === '/overview') {
+      return location.pathname === to
+    }
+    return location.pathname === to || location.pathname.startsWith(`${to}/`)
+  }
+
+  const createLinkHandler = (to: string) => (event: MouseEvent<HTMLAnchorElement>) => {
+    if (onNavigate) {
+      event.preventDefault()
+      onNavigate(to)
+    }
+    setMenuOpen(false)
+  }
+
   return (
     <main className={`app app--${mode}`}>
+      <span className="app__halo app__halo--one" aria-hidden="true" />
+      <span className="app__halo app__halo--two" aria-hidden="true" />
       <div className="app__inner">
         <header className="app-shell__top" aria-label="Global navigation">
-          <div className="app-shell__left">
+          <div className="app-shell__brand-row">
             {onBack ? (
               <button
                 type="button"
@@ -87,33 +110,76 @@ function AppChrome({ mode, onSetMode, children, onBack, canGoBack = true, onNavi
             ) : (
               <span className="app-shell__back-placeholder" aria-hidden="true" />
             )}
-            <BrandLogo
-              as="span"
-              align="left"
-              size={48}
-              wordmarkSize="clamp(1.5rem, 3vw, 2rem)"
-              wordmarkText="Fokus 2.0"
-            />
+            <div className="app-shell__brand">
+              <BrandLogo
+                as="div"
+                align="left"
+                size={48}
+                wordmarkSize="clamp(1.35rem, 3vw, 1.85rem)"
+                wordmarkText="Fokus"
+              />
+              <p className="app-shell__tagline">Mental performance studio</p>
+            </div>
+            <div className="app-shell__mode-chip" role="status">
+              <span className="app-shell__mode-dot" aria-hidden="true" />
+              {modeLabel}
+            </div>
           </div>
 
-          <div className="app-shell__actions">
-            <button
-              type="button"
-              className="app-shell__burger"
-              onClick={() => setMenuOpen((open) => !open)}
-              aria-expanded={menuOpen}
-              aria-controls="app-shell-menu"
-              aria-label="Åbn hovedmenu"
-            >
-              <span />
-              <span />
-              <span />
-            </button>
+          <div className="app-shell__primary">
+            <nav className="app-shell__primary-nav" aria-label="Primær navigation">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`app-shell__nav-link ${isLinkActive(link.to) ? 'is-active' : ''}`}
+                  onClick={createLinkHandler(link.to)}
+                >
+                  <span>{link.label}</span>
+                  {link.description ? (
+                    <span className="app-shell__nav-sublabel">{link.description}</span>
+                  ) : null}
+                </Link>
+              ))}
+            </nav>
+
+            <div className="app-shell__actions">
+              <div className="app-shell__mode-switch" role="group" aria-label="Skift tema">
+                <button
+                  type="button"
+                  className={`app-shell__mode-option ${mode === 'calm' ? 'is-active' : ''}`}
+                  onClick={() => handleModeSelect('calm')}
+                  aria-pressed={mode === 'calm'}
+                >
+                  Calm
+                </button>
+                <button
+                  type="button"
+                  className={`app-shell__mode-option ${mode === 'focus' ? 'is-active' : ''}`}
+                  onClick={() => handleModeSelect('focus')}
+                  aria-pressed={mode === 'focus'}
+                >
+                  Focus
+                </button>
+              </div>
+              <button
+                type="button"
+                className={`app-shell__burger ${menuOpen ? 'is-open' : ''}`}
+                onClick={() => setMenuOpen((open) => !open)}
+                aria-expanded={menuOpen}
+                aria-controls="app-shell-menu"
+                aria-label={menuOpen ? 'Luk hovedmenu' : 'Åbn hovedmenu'}
+              >
+                <span />
+                <span />
+                <span />
+              </button>
+            </div>
           </div>
         </header>
 
         <div className="app-shell__content" aria-live="polite">
-          
+
           {children}
         </div>
       </div>
@@ -123,59 +189,64 @@ function AppChrome({ mode, onSetMode, children, onBack, canGoBack = true, onNavi
         className={`app-shell__drawer ${menuOpen ? 'is-open' : ''}`}
         aria-label="Sekundær navigation"
       >
-        <div className="app-shell__drawer-header">
-          <div className="app-shell__drawer-title-row">
-            <p className="app-shell__drawer-title">Quick Access</p>
-            <button
-              type="button"
-              className="app-shell__drawer-burger app-shell__burger"
-              onClick={() => setMenuOpen(false)}
-              aria-label="Luk Quick Access-menu"
-              aria-expanded={menuOpen}
-            >
-              <span />
-              <span />
-              <span />
-            </button>
-          </div>
-          <div className="app-shell__drawer-switch" role="group" aria-label="Skift tema">
-            <button
-              type="button"
-              className={`app-shell__mode-option ${mode === 'calm' ? 'is-active' : ''}`}
-              onClick={() => handleModeSelect('calm')}
-              aria-pressed={mode === 'calm'}
-            >
-              Calm Mode
-            </button>
-            <button
-              type="button"
-              className={`app-shell__mode-option ${mode === 'focus' ? 'is-active' : ''}`}
-              onClick={() => handleModeSelect('focus')}
-              aria-pressed={mode === 'focus'}
-            >
-              Focus Mode
-            </button>
-          </div>
-        </div>
-          <ul className="app-shell__nav-list">
-            {navLinks.map((link) => (
-            <li key={link.to}>
-              <Link
-                to={link.to}
-                className="app-shell__nav-link"
-                onClick={(event) => {
-                  if (onNavigate) {
-                    event.preventDefault()
-                    onNavigate(link.to)
-                  }
-                  setMenuOpen(false)
-                }}
+        <div className="app-shell__drawer-inner">
+          <div className="app-shell__drawer-header">
+            <div className="app-shell__drawer-title-row">
+              <p className="app-shell__drawer-title">Quick Access</p>
+              <button
+                type="button"
+                className="app-shell__drawer-burger app-shell__burger"
+                onClick={() => setMenuOpen(false)}
+                aria-label="Luk Quick Access-menu"
+                aria-expanded={menuOpen}
               >
-                {link.label}
-              </Link>
-            </li>
+                <span />
+                <span />
+                <span />
+              </button>
+            </div>
+            <div className="app-shell__drawer-switch" role="group" aria-label="Skift tema">
+              <button
+                type="button"
+                className={`app-shell__mode-option ${mode === 'calm' ? 'is-active' : ''}`}
+                onClick={() => handleModeSelect('calm')}
+                aria-pressed={mode === 'calm'}
+              >
+                Calm Mode
+              </button>
+              <button
+                type="button"
+                className={`app-shell__mode-option ${mode === 'focus' ? 'is-active' : ''}`}
+                onClick={() => handleModeSelect('focus')}
+                aria-pressed={mode === 'focus'}
+              >
+                Focus Mode
+              </button>
+            </div>
+          </div>
+
+          <ul className="app-shell__drawer-list">
+            {navLinks.map((link) => (
+              <li key={link.to}>
+                <Link
+                  to={link.to}
+                  className={`app-shell__drawer-link ${isLinkActive(link.to) ? 'is-active' : ''}`}
+                  onClick={createLinkHandler(link.to)}
+                >
+                  <span className="app-shell__drawer-link-label">{link.label}</span>
+                  {link.description ? (
+                    <span className="app-shell__drawer-link-description">{link.description}</span>
+                  ) : null}
+                </Link>
+              </li>
             ))}
           </ul>
+
+          <div className="app-shell__drawer-meta">
+            <p>Én samlet verden til fokus, ro og styrke.</p>
+            <span className="app-shell__drawer-pill">Always-on beta</span>
+          </div>
+        </div>
       </nav>
 
       <button
