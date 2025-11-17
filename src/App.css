@@ -86,8 +86,7 @@ body[data-theme='focus'] {
   box-sizing: border-box;
   color: var(--app-foreground);
   transition: color 0.3s ease;
-  overflow-x: hidden;
-  overflow-y: visible;
+  overflow: hidden;
   isolation: isolate;
 }
 
