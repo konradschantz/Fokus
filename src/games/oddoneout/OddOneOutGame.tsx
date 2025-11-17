@@ -503,20 +503,15 @@ export default function OddOneOutGame({ onGameFinished, onScoreSubmitted }: OddO
       </header>
 
       <div className="odd-one-out-game__actions">
-        <div className="odd-one-out-game__actions-group">
-          <button
-            type="button"
-            className="menu__primary-button"
-            onClick={phase === 'running' ? handleReset : handleStart}
-          >
-            {phase === 'running' ? 'Nulstil' : 'Start spil'}
+        {phase !== 'running' ? (
+          <button type="button" className="menu__primary-button" onClick={handleStart}>
+            Start spil
           </button>
-          {phase === 'running' ? (
-            <p className="odd-one-out-game__status-text">
-              Grid-størrelse: {board.gridSize} × {board.gridSize}
-            </p>
-          ) : null}
-        </div>
+        ) : (
+          <p className="odd-one-out-game__status-text">
+            Find figuren der bryder mønsteret og hold fokus i hele minuttet.
+          </p>
+        )}
       </div>
 
       <motion.div
@@ -540,24 +535,6 @@ export default function OddOneOutGame({ onGameFinished, onScoreSubmitted }: OddO
             {renderShape(cell)}
           </button>
         ))}
-
-        <div className="odd-one-out-game__actions flex flex-wrap items-center justify-between gap-3 pt-4">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              className="odd-one-out-game__primary-button"
-              onClick={phase === 'running' ? handleReset : handleStart}
-            >
-              {phase === 'running' ? 'Nulstil' : 'Start spil'}
-            </button>
-            {phase === 'running' && (
-              <p className="text-sm text-slate-600">
-                Grid-størrelse: {board.gridSize} × {board.gridSize}
-              </p>
-            )}
-          </div>
-          {/* Back button handled by parent screen */}
-        </div>
 
       {phase === 'idle' ? (
         <motion.p
