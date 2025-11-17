@@ -21,7 +21,7 @@ export default function WordWeaveScreen() {
 
       <header className="menu__header word-weave__header">
         <h1>Word Weave</h1>
-        <p>Match ord med den præcise definition og opbyg en stærkere semantisk intuition.</p>
+        <p>Match nøgleord med det mest præcise synonym og byg et mere fleksibelt ordforråd.</p>
       </header>
 
       <div className="game-page__grid word-weave__layout">

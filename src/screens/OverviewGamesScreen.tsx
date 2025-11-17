@@ -9,6 +9,7 @@ type GameCard = {
   to: string
   icon: string
   badge?: string
+  focus: string
 }
 
 type GameSection = {
@@ -19,121 +20,147 @@ type GameSection = {
   games: GameCard[]
 }
 
-const classicGames: GameCard[] = [
-  {
-    id: 'memory',
-    title: 'Memory Matrix',
-    description:
-      'Vend kortene og find parrene pǾ tid for at styrke din korttidshukommelse og m��nstergenkendelse.',
-    ctaLabel: 'Spil Memory Matrix',
-    to: '/memory',
-    icon: '/gameIcons_svg/memory_game_svg.svg',
-  },
-  {
-    id: 'reaction-test',
-    title: 'Reaktionstest',
-    description:
-      'Test din reaktionsevne og forbedr dit fokus ved at reagere lynhurtigt pǾ visuelle signaler.',
-    ctaLabel: 'Start reaktionstest',
-    to: '/reaction-test',
-    icon: '/gameIcons_svg/reaction_game_svg.svg',
-  },
-  {
-    id: 'sorting',
-    title: 'Sorteringsspillet',
-    description:
-      'Sk��rp din kognitive fleksibilitet ved at sortere elementer i de rigtige kategorier sǾ hurtigt som muligt.',
-    ctaLabel: '�.bn sorteringsspillet',
-    to: '/sorting',
-    icon: '/gameIcons_svg/sorting_game_svg.svg',
-  },
-  {
-    id: 'odd-one-out',
-    title: 'Odd One Out',
-    description:
-      'Find elementet der skiller sig ud for at tr��ne m��nstergenkendelse og analytisk t��nkning.',
-    ctaLabel: 'Spil Odd One Out',
-    to: '/odd-one-out',
-    icon: '/gameIcons_svg/odd_one_out_game_svg.svg',
-  },
-  {
-    id: 'puzzle-blox',
-    title: 'Puzzle Blox',
-    description:
-      'L��s rumlige puslespil og udfordr din probleml��sningsevne med farverige byggeklodser.',
-    ctaLabel: 'GǾ til Puzzle Blox',
-    to: '/puzzle-blox',
-    icon: '/gameIcons_svg/puzzle_blocks_game_svg.svg',
-  },
-]
-
-const nextGenGames: GameCard[] = [
-  {
-    id: 'pattern-pulse',
-    title: 'Pattern Pulse',
-    description:
-      'MemorǸr pulserende farvekombinationer og gentag dem for at sk��rpe din arbejdshukommelse.',
-    ctaLabel: 'Start Pattern Pulse',
-    to: '/pattern-pulse',
-    icon: '/gameIcons_svg/pattern_pulse_game_svg.svg',
-    badge: 'Ny',
-  },
-  {
-    id: 'spatial-sweep',
-    title: 'Spatial Sweep',
-    description:
-      'Fang og genskab lysm��nstre i et gitter for at styrke din rumlige hukommelse og opm��rksomhed.',
-    ctaLabel: '�.bn Spatial Sweep',
-    to: '/spatial-sweep',
-    icon: '/gameIcons_svg/spatial_sweep_game_svg.svg',
-    badge: 'Ny',
-  },
-  {
-    id: 'mind-math',
-    title: 'Mind Math',
-    description:
-      'Evaluer regnestykker lynhurtigt og jagt en fejlfri serie for at tr��ne mental aritmetik.',
-    ctaLabel: 'Test Mind Math',
-    to: '/mind-math',
-    icon: '/gameIcons_svg/mind_math_game_svg.svg',
-    badge: 'Ny',
-  },
-  {
-    id: 'focus-flow',
-    title: 'Focus Flow',
-    description:
-      'Klik tallene i r��kkef��lge, selv nǾr nettet ��ndrer sig, og hold din selektive opm��rksomhed skarp.',
-    ctaLabel: 'Tr��n Focus Flow',
-    to: '/focus-flow',
-    icon: '/gameIcons_svg/focus_flow_game_svg.svg',
-    badge: 'Ny',
-  },
-  {
-    id: 'word-weave',
-    title: 'Word Weave',
-    description:
-      'Knyt ord og definitioner sammen og forst��rk din semantiske fleksibilitet gennem pr��cise valg.',
-    ctaLabel: 'Spil Word Weave',
-    to: '/word-weave',
-    icon: '/gameIcons_svg/word_weave_game_svg.svg',
-    badge: 'Ny',
-  },
-]
-
 const sections: GameSection[] = [
   {
-    id: 'classic',
-    eyebrow: 'Favoritter',
-    title: 'Kerneklassikere',
-    description: 'Velafprřvede spil til at teste hukommelse, fokus og reaktionstid.',
-    games: classicGames,
+    id: 'memory',
+    eyebrow: 'Hukommelse',
+    title: 'Hukommelse & mønstre',
+    description:
+      'Træningspakker til visuel hukommelse, mønstergenkendelse og arbejdshukommelsens udholdenhed.',
+    games: [
+      {
+        id: 'memory',
+        title: 'Memory Matrix',
+        description:
+          'Vend og match par under pres for at styrke korttidshukommelse og visuelt overblik.',
+        ctaLabel: 'Spil Memory Matrix',
+        to: '/memory',
+        icon: '/gameIcons_svg/memory_game_svg.svg',
+        focus: 'Visuospatisk hukommelse',
+      },
+      {
+        id: 'pattern-pulse',
+        title: 'Pattern Pulse',
+        description:
+          'Memorér pulserende farvesekvenser og gengiv dem præcist for at holde arbejdshukommelsen skarp.',
+        ctaLabel: 'Start Pattern Pulse',
+        to: '/pattern-pulse',
+        icon: '/gameIcons_svg/pattern_pulse_game_svg.svg',
+        badge: 'Ny',
+        focus: 'Sekvenshukommelse',
+      },
+      {
+        id: 'spatial-sweep',
+        title: 'Spatial Sweep',
+        description:
+          'Følg lysende felter i et gitter og genskab mønsteret for at styrke rumlig hukommelse og opmærksomhed.',
+        ctaLabel: 'Åbn Spatial Sweep',
+        to: '/spatial-sweep',
+        icon: '/gameIcons_svg/spatial_sweep_game_svg.svg',
+        badge: 'Ny',
+        focus: 'Rumlig arbejdshukommelse',
+      },
+    ],
   },
   {
-    id: 'next-gen',
-    eyebrow: 'Nyheder',
-    title: 'Nye spil',
-    description: 'Splitter nye oplevelser, der mǿlretter arbejdshukommelse, tempo og ordforstňelse.',
-    games: nextGenGames,
+    id: 'focus',
+    eyebrow: 'Fokus & tempo',
+    title: 'Fokus & reaktionstid',
+    description:
+      'Spil der forbedrer selektiv opmærksomhed, perifert blik og motorisk reaktionsevne.',
+    games: [
+      {
+        id: 'reaction-test',
+        title: 'Reaktionstest',
+        description:
+          'Klik på signaler i det øjeblik de skifter farve og mål din reaktionstid fra forsøg til forsøg.',
+        ctaLabel: 'Start reaktionstest',
+        to: '/reaction-test',
+        icon: '/gameIcons_svg/reaction_game_svg.svg',
+        focus: 'Perceptuel hastighed',
+      },
+      {
+        id: 'focus-flow',
+        title: 'Focus Flow',
+        description:
+          'Find tallene i rækkefølge mens layoutet skifter og træn evnen til at fastholde selektiv opmærksomhed.',
+        ctaLabel: 'Træn Focus Flow',
+        to: '/focus-flow',
+        icon: '/gameIcons_svg/focus_flow_game_svg.svg',
+        badge: 'Ny',
+        focus: 'Selektiv opmærksomhed',
+      },
+      {
+        id: 'odd-one-out',
+        title: 'Odd One Out',
+        description:
+          'Zoom ind på bittesmå forskelle i form og farve for at skærpe mønstergenkendelse og visuel agilitet.',
+        ctaLabel: 'Spil Odd One Out',
+        to: '/odd-one-out',
+        icon: '/gameIcons_svg/odd_one_out_game_svg.svg',
+        focus: 'Visuel diskrimination',
+      },
+    ],
+  },
+  {
+    id: 'agility',
+    eyebrow: 'Mental agilitet',
+    title: 'Strategi & problemløsning',
+    description:
+      'Øvelser der tester kognitiv fleksibilitet, logisk tænkning og rumlig planlægning.',
+    games: [
+      {
+        id: 'sorting',
+        title: 'Sorteringsspillet',
+        description:
+          'Skift mellem regler på splitsekunder og placer kortene korrekt for at træne kognitiv fleksibilitet.',
+        ctaLabel: 'Åbn sorteringsspillet',
+        to: '/sorting',
+        icon: '/gameIcons_svg/sorting_game_svg.svg',
+        focus: 'Regelskift & fleksibilitet',
+      },
+      {
+        id: 'mind-math',
+        title: 'Mind Math',
+        description:
+          'Evaluer udtryk lynhurtigt for at holde mental aritmetik og beslutningstempo i topform.',
+        ctaLabel: 'Test Mind Math',
+        to: '/mind-math',
+        icon: '/gameIcons_svg/mind_math_game_svg.svg',
+        badge: 'Ny',
+        focus: 'Numerisk hastighed',
+      },
+      {
+        id: 'puzzle-blox',
+        title: 'Puzzle Blox',
+        description:
+          'Placer byggeklodser strategisk i begrænset plads og træn din rumlige planlægning.',
+        ctaLabel: 'Gå til Puzzle Blox',
+        to: '/puzzle-blox',
+        icon: '/gameIcons_svg/puzzle_blocks_game_svg.svg',
+        focus: 'Rumlig strategi',
+      },
+    ],
+  },
+  {
+    id: 'language',
+    eyebrow: 'Sprog',
+    title: 'Sprog & begreber',
+    description:
+      'Aktiviteter der udvider ordforråd og semantisk fleksibilitet gennem præcise valg.',
+    games: [
+      {
+        id: 'word-weave',
+        title: 'Word Weave',
+        description:
+          'Forbind nøgleord med præcise synonymer og styrk den begrebslige smidighed.',
+        ctaLabel: 'Spil Word Weave',
+        to: '/word-weave',
+        icon: '/gameIcons_svg/word_weave_game_svg.svg',
+        badge: 'Ny',
+        focus: 'Semantisk fleksibilitet',
+      },
+    ],
   },
 ]
 
@@ -150,8 +177,8 @@ export default function OverviewGamesScreen() {
           style={{ marginBottom: '1rem' }}
         />
         <p>
-          Udforsk hele biblioteket af fokus- og hukommelsesspil. Klassiske favoritter og helt nye
-          udfordringer ligger klar til dig.
+          Find det præcise kognitive gear du vil træne i dag – fra hukommelse og reaktionstid til
+          strategisk planlægning og sproglig fleksibilitet.
         </p>
       </header>
 
@@ -165,9 +192,13 @@ export default function OverviewGamesScreen() {
             <p className="menu__section-description">{section.description}</p>
           </div>
 
-          <div className="menu__grid">
+          <div
+            className="menu__carousel"
+            role="list"
+            aria-label={`${section.title} spil der træner ${section.eyebrow}`}
+          >
             {section.games.map((game) => (
-              <article key={game.id} className="menu__card">
+              <article key={game.id} className="menu__card" role="listitem">
                 {game.badge && <span className="menu__card-badge">{game.badge}</span>}
                 <div className="menu__card-media">
                   <img src={game.icon} alt={`${game.title} ikon`} className="menu__card-icon" />
@@ -175,6 +206,7 @@ export default function OverviewGamesScreen() {
                 <div className="menu__card-content">
                   <h3>{game.title}</h3>
                   <p>{game.description}</p>
+                  <p className="menu__card-focus">Fokus: {game.focus}</p>
                 </div>
                 <Link to={game.to} className="menu__primary-button">
                   {game.ctaLabel}

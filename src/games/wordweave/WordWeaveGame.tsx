@@ -15,111 +15,63 @@ const TOTAL_ROUNDS = 10
 const prompts: WordPrompt[] = [
   {
     word: 'Adaptiv',
-    correct: 'I stand til at tilpasse sig hurtigt til nye forhold',
-    distractors: [
-      'Fokuseret på gentagelse uden variation',
-      'Uimodtagelig over for ydre påvirkninger',
-      'Optaget af detaljer frem for helhed',
-    ],
+    correct: 'omstillingsparat',
+    distractors: ['fastlåst', 'ufleksibel', 'stiv'],
   },
   {
     word: 'Analytisk',
-    correct: 'Arbejder systematisk med at nedbryde et problem i dele',
-    distractors: [
-      'Handler impulsivt uden overvejelse',
-      'Foretrækker ustrukturerede og tilfældige input',
-      'Fokuserer på sociale relationer frem for data',
-    ],
+    correct: 'systematisk',
+    distractors: ['impulsiv', 'kaotisk', 'følelsesstyret'],
   },
   {
     word: 'Resonere',
-    correct: 'At ræsonnere sig frem til en konklusion ved logisk tænkning',
-    distractors: [
-      'At gentage noget uden at forstå det',
-      'At reagere følelsesladet uden refleksion',
-      'At træffe beslutninger alene på intuition',
-    ],
+    correct: 'reflektere',
+    distractors: ['gætte', 'improvisere', 'kopiere'],
   },
   {
     word: 'Abstraktion',
-    correct: 'At udlede det væsentlige og skjule detaljer for at skabe overblik',
-    distractors: [
-      'At fokusere udelukkende på konkrete sanseindtryk',
-      'At gentage en handling mekanisk uden forståelse',
-      'At gemme informationer uden at bearbejde dem',
-    ],
+    correct: 'begrebsliggørelse',
+    distractors: ['detaljering', 'sansning', 'rutine'],
   },
   {
     word: 'Deduktion',
-    correct: 'At udlede noget specifikt fra en generel regel',
-    distractors: [
-      'At indsamle data uden at konkludere',
-      'At gætte uden nogen form for evidens',
-      'At kombinere idéer for at skabe noget nyt',
-    ],
+    correct: 'slutning',
+    distractors: ['indsamling', 'fornemmelse', 'skabelse'],
   },
   {
     word: 'Intuitiv',
-    correct: 'At handle hurtigt ud fra en stærk mavefornemmelse',
-    distractors: [
-      'At forlange detaljeret dokumentation før enhver beslutning',
-      'At afvise ændringer uanset kontekst',
-      'At analysere data i timevis uden konklusion',
-    ],
+    correct: 'mavefornemmelsesstyret',
+    distractors: ['dokumenterende', 'afventende', 'overanalyserende'],
   },
   {
     word: 'Syntese',
-    correct: 'At samle forskellige dele til et nyt, meningsfuldt hele',
-    distractors: [
-      'At opdele noget i mindre dele for at forstå det',
-      'At kassere information, der ikke passer til forventningerne',
-      'At gentage et kendt mønster uden at ændre det',
-    ],
+    correct: 'sammensmeltning',
+    distractors: ['opdeling', 'afvisning', 'gentagelse'],
   },
   {
     word: 'Fokuseret',
-    correct: 'Evnen til at fastholde opmærksomheden på ét mål',
-    distractors: [
-      'At skifte aktivitet konstant for at undgå kedsomhed',
-      'At vælge spontane inputs frem for planlagte aktiviteter',
-      'At lade sig styre af tilfældige indtryk',
-    ],
+    correct: 'målrettet',
+    distractors: ['spredt', 'rastløs', 'tilfældig'],
   },
   {
     word: 'Strategisk',
-    correct: 'At planlægge målrettet med blik for fremtidige scenarier',
-    distractors: [
-      'At improvisere uden at se fremad',
-      'At fokusere på enkeltstående opgaver uden sammenhæng',
-      'At arbejde kun med kortsigtede løsninger',
-    ],
+    correct: 'langsigtet',
+    distractors: ['spontan', 'øjebliksorienteret', 'tilfældig'],
   },
   {
     word: 'Modulere',
-    correct: 'At justere en indsats trinvis for at finjustere resultatet',
-    distractors: [
-      'At fastholde én intensitet uanset behov',
-      'At undgå forandring for enhver pris',
-      'At vælge ekstreme løsninger frem for balance',
-    ],
+    correct: 'finjustere',
+    distractors: ['fastlåse', 'ignorere', 'overdrive'],
   },
   {
     word: 'Dynamisk',
-    correct: 'Præget af energi og bevægelse, i stand til at ændre retning',
-    distractors: [
-      'Fastlåst og ufleksibel i sin tilgang',
-      'Uinteresseret i nye muligheder',
-      'Opbygget til at modstå enhver forandring',
-    ],
+    correct: 'foranderlig',
+    distractors: ['stagnant', 'passiv', 'monoton'],
   },
   {
     word: 'Konsensus',
-    correct: 'En bred enighed opnået gennem dialog og afvejninger',
-    distractors: [
-      'Et kompromis, hvor ingen har fået indflydelse',
-      'En hurtig beslutning truffet af én person',
-      'Et tilfældigt udfald uden diskussion',
-    ],
+    correct: 'fælles enighed',
+    distractors: ['solobeslutning', 'lotteri', 'konfrontation'],
   },
 ]
 
@@ -131,7 +83,7 @@ export default function WordWeaveGame() {
   const [roundIndex, setRoundIndex] = useState(0)
   const [options, setOptions] = useState<string[]>([])
   const [selected, setSelected] = useState<string | null>(null)
-  const [feedback, setFeedback] = useState('Start Word Weave for at træne din verbale fleksibilitet.')
+  const [feedback, setFeedback] = useState('Start Word Weave og match præcise synonymer.')
   const [score, setScore] = useState(0)
   const [bestScore, setBestScore] = useState(0)
   const [streak, setStreak] = useState(0)
@@ -169,14 +121,14 @@ export default function WordWeaveGame() {
     setRoundIndex(0)
     setScore(0)
     setStreak(0)
-    setFeedback('Vælg den definition, der bedst beskriver ordet.')
+    setFeedback('Vælg det ord, der matcher betydningen tættest.')
     setStatus('active')
   }
 
   const goToSummary = (finalScore: number) => {
     setStatus('finished')
     setBestScore((previous) => Math.max(previous, finalScore))
-    setFeedback('Runden er slut. Start en ny for at væve endnu flere ordforbindelser.')
+    setFeedback('Runden er slut. Start en ny for at væve endnu flere synonymforbindelser.')
   }
 
   const handleSelect = (option: string) => {
@@ -194,8 +146,8 @@ export default function WordWeaveGame() {
     setBestStreak((previous) => Math.max(previous, nextStreak))
     setFeedback(
       isCorrect
-        ? 'Korrekt! Din verbale intuition er skarp.'
-        : `Næsten! Det korrekte svar er: ${currentPrompt.correct}.`,
+        ? 'Korrekt! Din sproglige radar er skarp.'
+        : `Næsten! Det korrekte synonym er: ${currentPrompt.correct}.`,
     )
     setStatus('review')
 
@@ -206,7 +158,7 @@ export default function WordWeaveGame() {
       } else {
         setRoundIndex(nextIndex)
         setStatus('active')
-        setFeedback('Fortsæt og vælg den næste præcise definition.')
+        setFeedback('Fortsæt og vælg det næste præcise synonym.')
       }
     }, 1300)
   }
@@ -222,7 +174,7 @@ export default function WordWeaveGame() {
     setSelected(null)
     setScore(0)
     setStreak(0)
-    setFeedback('Start Word Weave for at træne din verbale fleksibilitet.')
+    setFeedback('Start Word Weave og match præcise synonymer.')
   }
 
   return (
@@ -233,7 +185,7 @@ export default function WordWeaveGame() {
         </p>
 
         <div className="word-weave-game__prompt" aria-live="polite">
-          <span className="word-weave-game__label">Ord</span>
+          <span className="word-weave-game__label">Nøgleord</span>
           <strong className="word-weave-game__word">{currentPrompt?.word ?? 'Klar?'}</strong>
         </div>
 
@@ -308,8 +260,8 @@ export default function WordWeaveGame() {
           </div>
         </dl>
         <p className="word-weave-game__hint">
-          Word Weave træner din semantiske smidighed. Find det mest præcise match og byg stærkere
-          forbindelser i dit ordforråd.
+          Word Weave træner din semantiske smidighed. Spot det stærkeste synonym og udbyg
+          forbindelserne i dit ordforråd.
         </p>
       </aside>
     </div>
