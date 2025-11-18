@@ -40,7 +40,7 @@ const sections: OverviewSection[] = [
     id: 'meditation-breathing',
     title: 'Meditation & Breathing',
     description:
-      'Find ro og rytme i åndedrættet med guidede meditationer og visuelle vejrtrækningsøvelser.',
+      'Find ro åndedrættet med guidede meditationer og visuelle vejrtrækningsøvelser.',
     cta: { to: '/meditation/box-breathing', label: 'Start meditation' },
     icon: '🧘',
     links: [

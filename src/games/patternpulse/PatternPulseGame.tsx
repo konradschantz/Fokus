@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import './PatternPulseGame.css'
 
-type GameStatus = 'idle' | 'showing' | 'awaiting' | 'failed'
+type GameStatus = 'idle' | 'showing' | 'awaiting' | 'transition' | 'failed'
 
 type PatternPad = {
   id: string
@@ -34,21 +34,80 @@ export default function PatternPulseGame() {
   const [level, setLevel] = useState(0)
   const [bestLevel, setBestLevel] = useState(0)
   const [message, setMessage] = useState('Tryk på start for at se den første pulssekvens.')
+  const [timerSeconds, setTimerSeconds] = useState(45)
+  const [timerActive, setTimerActive] = useState(false)
 
   const timeoutsRef = useRef<number[]>([])
+  const timerIntervalRef = useRef<number | null>(null)
+  const levelRef = useRef(level)
 
   const highlightDelay = useMemo(() => Math.max(450, 900 - level * 45), [level])
 
-  const clearTimeouts = () => {
+  const clearTimeouts = useCallback(() => {
     timeoutsRef.current.forEach((id) => window.clearTimeout(id))
     timeoutsRef.current = []
-  }
+  }, [])
 
   useEffect(() => {
     return () => {
       clearTimeouts()
+      if (timerIntervalRef.current !== null) {
+        window.clearInterval(timerIntervalRef.current)
+      }
     }
-  }, [])
+  }, [clearTimeouts])
+
+  useEffect(() => {
+    levelRef.current = level
+  }, [level])
+
+  const endGameDueToTimer = useCallback(() => {
+    clearTimeouts()
+    if (timerIntervalRef.current !== null) {
+      window.clearInterval(timerIntervalRef.current)
+      timerIntervalRef.current = null
+    }
+    setTimerActive(false)
+    setTimerSeconds(0)
+    setSequence([])
+    setStatus('idle')
+    setActivePad(null)
+    setPlayerIndex(0)
+    setLevel(0)
+    setMessage('Tiden er gået. Tryk start for at prøve igen.')
+    setBestLevel((previous) => Math.max(previous, levelRef.current))
+  }, [clearTimeouts])
+
+  useEffect(() => {
+    if (!timerActive) {
+      if (timerIntervalRef.current !== null) {
+        window.clearInterval(timerIntervalRef.current)
+        timerIntervalRef.current = null
+      }
+      return
+    }
+
+    timerIntervalRef.current = window.setInterval(() => {
+      setTimerSeconds((previous) => {
+        if (previous <= 1) {
+          if (timerIntervalRef.current !== null) {
+            window.clearInterval(timerIntervalRef.current)
+            timerIntervalRef.current = null
+          }
+          endGameDueToTimer()
+          return 0
+        }
+        return previous - 1
+      })
+    }, 1000)
+
+    return () => {
+      if (timerIntervalRef.current !== null) {
+        window.clearInterval(timerIntervalRef.current)
+        timerIntervalRef.current = null
+      }
+    }
+  }, [timerActive, endGameDueToTimer])
 
   useEffect(() => {
     if (status !== 'showing' || sequence.length === 0) {
@@ -76,7 +135,7 @@ export default function PatternPulseGame() {
     }, sequence.length * highlightDelay + 220)
 
     timeoutsRef.current.push(finishTimeout)
-  }, [highlightDelay, sequence, status])
+  }, [highlightDelay, sequence, status, clearTimeouts])
 
   const beginGame = () => {
     clearTimeouts()
@@ -86,6 +145,8 @@ export default function PatternPulseGame() {
     setPlayerIndex(0)
     setStatus('showing')
     setMessage('Følg lyset og memorer sekvensen.')
+    setTimerSeconds(45)
+    setTimerActive(true)
   }
 
   const handlePadClick = (padIndex: number) => {
@@ -105,9 +166,15 @@ export default function PatternPulseGame() {
         setSequence(nextSequence)
         setPlayerIndex(0)
         setLevel(nextLevel)
-        setStatus('showing')
-        setMessage('Stærkt! Sekvensen bliver længere – hold fokus.')
+        setStatus('transition')
+       
         setBestLevel((previous) => Math.max(previous, nextLevel))
+
+        const pauseTimeout = window.setTimeout(() => {
+          setStatus('showing')
+
+        }, 1000)
+        timeoutsRef.current.push(pauseTimeout)
       }
     } else {
       setStatus('failed')
@@ -162,18 +229,21 @@ export default function PatternPulseGame() {
         </div>
 
         <div className="pattern-pulse-game__actions">
-          <button
-            type="button"
-            className="menu__primary-button"
-            onClick={beginGame}
-            disabled={status === 'showing'}
-          >
-            Start sekvensen
-          </button>
+          {!timerActive && (
+            <button
+              type="button"
+              className="menu__primary-button"
+              onClick={beginGame}
+              disabled={status === 'showing' || status === 'transition'}
+            >
+              Start sekvensen
+            </button>
+          )}
           <button
             type="button"
             className="menu__secondary-button"
             onClick={handleReset}
+            disabled={timerActive}
           >
             Nulstil
           </button>
@@ -202,17 +272,20 @@ export default function PatternPulseGame() {
                 ? 'Klar til start'
                 : status === 'showing'
                   ? 'Viser mønster'
-                  : status === 'awaiting'
-                    ? 'Din tur'
-                    : 'Sekvens misset'}
+                  : status === 'transition'
+                    ? 'Ny sekvens om lidt'
+                    : status === 'awaiting'
+                      ? 'Din tur'
+                      : 'Sekvens misset'}
             </dd>
           </div>
+          <div className="game-scoreboard__row">
+            <dt>Tid tilbage</dt>
+            <dd>{timerSeconds}s</dd>
+          </div>
         </dl>
-        <p className="pattern-pulse-game__hint">
-          Træn din arbejdshukommelse ved at holde styr på længere og længere sekvenser. Målet er at
-          reagere uden tøven, selv når tempoet stiger.
-        </p>
       </aside>
+
     </div>
   )
 }
