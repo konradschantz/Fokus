@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import './OverviewScreen.css'
 
@@ -11,7 +11,7 @@ type OverviewSection = {
   id: string
   title: string
   description: string
-  cta: SectionLink
+  cta?: SectionLink
   icon: string
   links?: SectionLink[]
 }
@@ -40,9 +40,9 @@ const sections: OverviewSection[] = [
     id: 'meditation-breathing',
     title: 'Meditation & Breathing',
     description:
-      'Find ro åndedrættet med guidede meditationer og visuelle vejrtrækningsøvelser.',
+      'Find ro i åndedrættet med guidede meditationer og visuelle vejrtrækningsøvelser.',
     cta: { to: '/meditation/box-breathing', label: 'Start meditation' },
-    icon: '🧘',
+    icon: '🧘🏽',
     links: [
       { to: '/meditation/box-breathing', label: 'Box Breathing' },
       { to: '/meditation/yoga-candle', label: 'Candle Breathing' },
@@ -50,11 +50,10 @@ const sections: OverviewSection[] = [
   },
   {
     id: 'routine-builder',
-    title: 'Rutiner & Vaner',
+    title: 'Noget nyt på vej',
     description:
-      'Byg holdbare vaner med daglige fokusområder og inspiration til dine egne rutiner.',
-    cta: { to: '/rutines', label: 'Åbn rutinebygger' },
-    icon: '🗓️',
+      'Vi arbejder på en ny rutinebygger og personlige vaner – hold øje med næste release.',
+    icon: '🧭',
   },
 ]
 
@@ -71,7 +70,7 @@ export default function OverviewScreen() {
             aria-label="Skjul introduktion"
             onClick={() => setHeroVisible(false)}
           >
-            ×
+            X
           </button>
           <div className="overview__hero-copy">
             <div className="overview__hero-badge">
@@ -83,17 +82,19 @@ export default function OverviewScreen() {
               </span>
             </div>
             <h1>Styrk din hjerne</h1>
-            <p>
-              Games, meditations, and routines to help you focus better every day. Strengthen
-              your mental clarity and emotional balance through personalized daily practices.
-            </p>
+                     
+                        <p>
+                          Spil og meditationer for at hjælpe dig med at fokusere bedre hver dag.
+                          Styrk din mentale klarhed og følelsesmæssige balance gennem personlige daglige øvelser.
+                        </p>
+        
             <div className="overview__actions">
               <Link to="/overview/games" className="button--primary">
-                Start Training
+                Start træning
               </Link>
-              <Link to="/rutines" className="button--ghost">
-                Learn More
-              </Link>
+              <button type="button" className="button--ghost" disabled aria-label="Noget nyt på vej">
+                Noget nyt på vej
+              </button>
             </div>
           </div>
 
@@ -111,7 +112,7 @@ export default function OverviewScreen() {
         <div className="overview__section-header">
           <h2>Explore Fokus</h2>
           <p className="overview__section-description">
-            Games, meditationer og rutiner samlet ét sted.
+            Games, meditationer og noget nyt på vej samlet ét sted.
           </p>
         </div>
 
@@ -135,9 +136,15 @@ export default function OverviewScreen() {
                 </ul>
               )}
               <div className="overview__card-cta">
-                <Link to={section.cta.to} className="button--primary">
-                  {section.cta.label}
-                </Link>
+                {section.cta ? (
+                  <Link to={section.cta.to} className="button--primary">
+                    {section.cta.label}
+                  </Link>
+                ) : (
+                  <span className="button--ghost" aria-disabled="true">
+                    Noget nyt på vej
+                  </span>
+                )}
               </div>
             </article>
           ))}
@@ -146,3 +153,4 @@ export default function OverviewScreen() {
     </div>
   )
 }
+

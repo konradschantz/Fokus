@@ -1,4 +1,5 @@
 .landing-wrapper {
+  border-radius: 28px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -11,6 +12,7 @@
 }
 
 .landing-overlay {
+  
   width: min(1100px, 94vw);
   margin: clamp(2rem, 6vw, 4rem) auto;
   display: flex;
@@ -19,8 +21,8 @@
 }
 
 .landing-content {
-  max-width: min(560px, 90vw);
-  margin-top: 250px;
+  max-width: min(500px);
+
   flex-direction: column;
   gap: 1.5rem;
   padding: clamp(1.5rem, 6vw, 2.75rem);
@@ -45,10 +47,11 @@
 }
 
 .landing-subtitle {
-  margin: 0;
-  font-size: 1.15rem;
-  line-height: 1.65;
-  color: #334155;
+ margin-top: 1rem;
+  margin-bottom: 1.25rem;
+  line-height: 1.6;
+  max-width: 54ch;
+  color: var(--text-muted, #5a5a5a);
 }
 
 .landing-cta {

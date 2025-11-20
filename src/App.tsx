@@ -19,7 +19,6 @@ import MeditationYogaCandleScreen from './screens/MeditationYogaCandleScreen'
 import OddOneOutScreen from './screens/OddOneOutScreen'
 import LoginScreen from './screens/LoginScreen'
 import PuzzleBloxScreen from './screens/PuzzleBloxScreen'
-import FocusRoutineScreen from './screens/FocusRoutineScreen'
 import OverviewGamesScreen from './screens/OverviewGamesScreen'
 import PatternPulseScreen from './screens/PatternPulseScreen'
 import SpatialSweepScreen from './screens/SpatialSweepScreen'
@@ -49,7 +48,6 @@ const navLinks: NavLink[] = [
   { to: '/overview', label: 'Forside', description: 'Din fokus-hub' },
   { to: '/overview/games', label: 'Games', description: 'Mini udfordringer' },
   { to: '/meditation', label: 'Meditationer', description: 'Åndedræt & ro' },
-  { to: '/rutines', label: 'Rutiner', description: 'Hverdagsvaner' },
 ]
 
 function AppChrome({ mode, onSetMode, children, onBack, canGoBack = true, onNavigate }: AppChromeProps) {
@@ -111,19 +109,31 @@ function AppChrome({ mode, onSetMode, children, onBack, canGoBack = true, onNavi
               <span className="app-shell__back-placeholder" aria-hidden="true" />
             )}
             <div className="app-shell__brand">
-              <BrandLogo
-                as="div"
-                align="left"
-                size={48}
-                wordmarkSize="clamp(1.35rem, 3vw, 1.85rem)"
-                wordmarkText="Fokus"
-              />
-              <p className="app-shell__tagline">Mental performance studio</p>
+              <div className="app-shell__brand-left">
+                <BrandLogo
+                  as="div"
+                  align="left"
+                  size={55}
+                  wordmarkSize="clamp(1.35rem, 3vw, 1.85rem)"
+                  wordmarkText="Fokus"
+                />
+                <p className="app-shell__tagline">Mental performance studio</p>
+              </div>
+              <button
+                type="button"
+                className={`app-shell__burger app-shell__brand-burger ${menuOpen ? 'is-open' : ''}`}
+                onClick={() => setMenuOpen((open) => !open)}
+                aria-expanded={menuOpen}
+                aria-controls="app-shell-menu"
+                aria-label={menuOpen ? 'Luk hovedmenu' : 'Åbn hovedmenu'}
+              >
+                <span />
+                <span />
+                <span />
+              </button>
             </div>
-            <div className="app-shell__mode-chip" role="status">
-              <span className="app-shell__mode-dot" aria-hidden="true" />
-              {modeLabel}
-            </div>
+           
+        
           </div>
 
           <div className="app-shell__primary">
@@ -143,38 +153,7 @@ function AppChrome({ mode, onSetMode, children, onBack, canGoBack = true, onNavi
               ))}
             </nav>
 
-            <div className="app-shell__actions">
-              <div className="app-shell__mode-switch" role="group" aria-label="Skift tema">
-                <button
-                  type="button"
-                  className={`app-shell__mode-option ${mode === 'calm' ? 'is-active' : ''}`}
-                  onClick={() => handleModeSelect('calm')}
-                  aria-pressed={mode === 'calm'}
-                >
-                  Calm
-                </button>
-                <button
-                  type="button"
-                  className={`app-shell__mode-option ${mode === 'focus' ? 'is-active' : ''}`}
-                  onClick={() => handleModeSelect('focus')}
-                  aria-pressed={mode === 'focus'}
-                >
-                  Focus
-                </button>
-              </div>
-              <button
-                type="button"
-                className={`app-shell__burger ${menuOpen ? 'is-open' : ''}`}
-                onClick={() => setMenuOpen((open) => !open)}
-                aria-expanded={menuOpen}
-                aria-controls="app-shell-menu"
-                aria-label={menuOpen ? 'Luk hovedmenu' : 'Åbn hovedmenu'}
-              >
-                <span />
-                <span />
-                <span />
-              </button>
-            </div>
+         
           </div>
         </header>
 
@@ -320,7 +299,6 @@ function App() {
       <AppChrome mode={mode} onSetMode={handleToggleMode} onNavigate={handleLogin}>
         <LoginScreen
           onSkip={() => handleLogin('/')}
-          onGoToRoutine={() => handleLogin('/rutines')}
           onGoToMeditation={() => handleLogin('/meditation/box-breathing')}
         />
       </AppChrome>
@@ -334,7 +312,6 @@ function App() {
         <Route path="overview" element={<OverviewScreen />} />
         <Route path="overview/games" element={<OverviewGamesScreen />} />
         <Route path="memory" element={<MemoryGame />} />
-        <Route path="rutines" element={<FocusRoutineScreen />} />
         <Route path="sorting" element={<SortingGameScreen />} />
         <Route path="odd-one-out" element={<OddOneOutScreen />} />
         <Route path="puzzle-blox" element={<PuzzleBloxScreen />} />

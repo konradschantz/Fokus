@@ -152,9 +152,25 @@ body[data-theme='focus'] .app-shell__top {
   align-items: center;
   gap: clamp(0.85rem, 2vw, 1.5rem);
   flex-wrap: wrap;
+  width: 100%;
+}
+
+.app-shell__brand-burger {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .app-shell__brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.app-shell__brand-left {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
@@ -195,6 +211,8 @@ body[data-theme='focus'] .app-shell__top {
   align-items: center;
   gap: clamp(0.75rem, 2vw, 1.5rem);
   flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .app-shell__primary-nav {
@@ -202,6 +220,7 @@ body[data-theme='focus'] .app-shell__top {
   flex-wrap: wrap;
   gap: 0.75rem;
   flex: 1 1 auto;
+  min-width: 0;
 }
 
 .app-shell__nav-link {
@@ -248,7 +267,11 @@ body[data-theme='focus'] .app-shell__top {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+.app-shell__actions--align-right {
   margin-left: auto;
+  justify-content: flex-end;
 }
 
 .app-shell__mode-switch,
@@ -506,7 +529,7 @@ body[data-theme='focus'] .app-shell__drawer-link {
 
 .app-shell__drawer-link.is-active {
   background: var(--nav-chip-active);
-  color: var(--primary-button-text);
+  color: #6366f1 ;
   border-color: transparent;
   box-shadow: var(--nav-chip-shadow);
 }
@@ -923,14 +946,25 @@ body[data-theme='focus'] .game-scoreboard {
     align-items: stretch;
   }
 
+  .app-shell__primary .app-shell__actions {
+    display: none;
+  }
+
   .app-shell__actions {
     width: 100%;
-    justify-content: space-between;
+  }
+
+  .app-shell__actions--align-right {
+    justify-content: flex-end;
   }
 
   .app-shell__mode-switch {
     flex: 1 1 auto;
     justify-content: space-between;
+  }
+
+  .app-shell__brand-burger {
+    display: inline-flex;
   }
 }
 
@@ -938,6 +972,14 @@ body[data-theme='focus'] .game-scoreboard {
   .app-shell__brand-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .app-shell__brand {
+    width: 100%;
+  }
+
+  .app-shell__brand-burger {
+    align-self: flex-end;
   }
 
   .app-shell__mode-chip {
