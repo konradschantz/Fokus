@@ -1,18 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
-import BrandLogo from './components/BrandLogo'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import './ReactionTest.css'
-import {
-  loadReactionHighscores,
-  mergeReactionHighscores,
-  saveReactionHighscores,
-} from './utils/reactionHighscores'
 
 type Phase = 'waiting' | 'ready' | 'now' | 'result'
 
 const textByPhase = (phase: Phase, reactionTime: number | null) => {
   switch (phase) {
     case 'waiting':
-      return 'Klik for at starte testen.'
+      return 'Hold øje – testen starter automatisk.'
     case 'ready':
       return 'Vent... skærmen skifter farve snart.'
     case 'now':
@@ -24,14 +18,9 @@ const textByPhase = (phase: Phase, reactionTime: number | null) => {
   }
 }
 
-interface ReactionTestProps {
-  onExit?: () => void
-}
-
-export default function ReactionTest({ onExit }: ReactionTestProps) {
+export default function ReactionTest() {
   const [phase, setPhase] = useState<Phase>('waiting')
   const [reactionTime, setReactionTime] = useState<number | null>(null)
-  const [highScores, setHighScores] = useState<number[]>([])
   const timeoutRef = useRef<number | null>(null)
   const startTimeRef = useRef<number | null>(null)
 
@@ -44,31 +33,30 @@ export default function ReactionTest({ onExit }: ReactionTestProps) {
     }
   }, [])
 
-  useEffect(() => {
-    let isMounted = true
-
-    const fetchHighscores = async () => {
-      const scores = await loadReactionHighscores()
-      if (isMounted) {
-        setHighScores(scores)
-      }
+  const scheduleReadyTimeout = useCallback(() => {
+    if (timeoutRef.current !== null) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
     }
 
-    void fetchHighscores()
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
-
-  const scheduleReadyTimeout = () => {
     const delay = Math.floor(Math.random() * 3000) + 2000
     timeoutRef.current = window.setTimeout(() => {
       startTimeRef.current = performance.now()
       setPhase('now')
       timeoutRef.current = null
     }, delay)
-  }
+  }, [])
+
+  useEffect(() => {
+    if (phase !== 'waiting') {
+      return
+    }
+
+    setReactionTime(null)
+    setPhase('ready')
+    startTimeRef.current = null
+    scheduleReadyTimeout()
+  }, [phase, scheduleReadyTimeout])
 
   const handleClick = () => {
     if (phase === 'waiting') {
@@ -99,11 +87,6 @@ export default function ReactionTest({ onExit }: ReactionTestProps) {
         } else {
           const safeElapsed = Math.max(0, elapsed)
           setReactionTime(safeElapsed)
-          setHighScores((previousScores) => {
-            const next = mergeReactionHighscores(previousScores, safeElapsed)
-            void saveReactionHighscores(next)
-            return next
-          })
         }
       } else {
         setReactionTime(null)
@@ -121,59 +104,20 @@ export default function ReactionTest({ onExit }: ReactionTestProps) {
   }
 
   return (
-    <section className="menu game-page reaction-test">
-      <div className="menu__top-bar">
-        <BrandLogo size={64} wordmarkSize="1.75rem" />
-        {onExit && (
-          <button type="button" className="menu__back-button" onClick={onExit}>
-            Tilbage til menu
-          </button>
-        )}
-      </div>
-
-      <header className="menu__header">
-        <h1>Reaktionstest</h1>
-        <p>Hold fokus og klik så hurtigt som muligt, når feltet skifter farve.</p>
-      </header>
-
-      <div className="game-page__grid reaction-test__layout">
-        <div className="reaction-test__content">
-          <div
-            className={`reaction-test__play-area reaction-test__play-area--${phase}`}
-            onClick={handleClick}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault()
-                handleClick()
-              }
-            }}
-          >
-            <span className="reaction-test__message">{textByPhase(phase, reactionTime)}</span>
-          </div>
-          <p className="reaction-test__hint">Tip: Brug mellemrumstasten for at starte og reagere hurtigt.</p>
-        </div>
-
-        <aside className="game-scoreboard">
-          <h2 className="game-scoreboard__title">Scoreboard</h2>
-          {highScores.length === 0 ? (
-            <p className="game-scoreboard__empty">Ingen tider registreret endnu.</p>
-          ) : (
-            <ol className="reaction-test__scores">
-              {highScores.map((score, index) => (
-                <li key={`${score}-${index}`}>
-                  <span className="reaction-test__score-rank">#{index + 1}</span>
-                  <span className="reaction-test__score-value">{Math.round(score)} ms</span>
-                </li>
-              ))}
-            </ol>
-          )}
-          <p className="game-scoreboard__footnote">
-            De fem hurtigste reaktionstider gemmes via Vercel KV og er tilgængelige på tværs
-            af enheder.
-          </p>
-        </aside>
+    <section className="reaction-test reaction-test--immersive">
+      <div
+        className={`reaction-test__play-area reaction-test__play-area--${phase}`}
+        onClick={handleClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            handleClick()
+          }
+        }}
+      >
+        <span className="reaction-test__message">{textByPhase(phase, reactionTime)}</span>
       </div>
     </section>
   )
