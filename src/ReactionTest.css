@@ -1,3 +1,15 @@
+.reaction-test--immersive {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: min(80vh, 760px);
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+}
+
+.reaction-test--immersive .reaction-test__play-area {
+  width: min(780px, 100%);
+}
+
 .reaction-test__layout {
   align-items: stretch;
 }

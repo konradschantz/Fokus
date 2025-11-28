@@ -4,6 +4,11 @@
   padding-bottom: 2.5rem;
 }
 
+.sorting-game--immersive {
+  margin: 0 auto;
+  padding: clamp(1rem, 3vw, 1.75rem) clamp(1.25rem, 4vw, 2.25rem);
+}
+
 .sorting-game__layout {
   align-items: stretch;
 }
@@ -12,6 +17,7 @@
   display: flex;
   flex-direction: column;
   gap: clamp(1rem, 3vw, 1.75rem);
+  align-items: center;
 }
 
 .sorting-game__header {

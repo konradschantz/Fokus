@@ -7,17 +7,12 @@ import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
-import BrandLogo from '../../components/BrandLogo'
 import './SortingGame.css'
-import {
-  loadSortingBestScore,
-  saveSortingBestScore,
-} from '../../utils/sortingBestScore'
 
 type ShapeType = 'square' | 'triangle' | 'circle'
 type Direction = 'left' | 'right'
 
-type Phase = 'idle' | 'running' | 'paused' | 'finished'
+type Phase = 'countdown' | 'running' | 'paused' | 'finished'
 
 interface Shape {
   id: number
@@ -45,8 +40,6 @@ const SHAPE_LABELS: Record<ShapeType, string> = {
 
 const GAME_DURATION_SECONDS = 60
 const INITIAL_QUEUE_LENGTH = 5
-const BEST_SCORE_STORAGE_KEY = 'sorting-game-best-score'
-
 function randomItem<T>(items: readonly T[]): T {
   return items[Math.floor(Math.random() * items.length)]
 }
@@ -73,13 +66,6 @@ function generateRules(): SortingRules {
   return mapping
 }
 
-function formatTime(seconds: number): string {
-  const safeSeconds = Math.max(0, Math.floor(seconds))
-  const minutes = Math.floor(safeSeconds / 60)
-  const remainder = safeSeconds % 60
-  return `${minutes}:${remainder.toString().padStart(2, '0')}`
-}
-
 function createShape(id: number): Shape {
   const type = randomItem(SHAPE_TYPES)
 
@@ -90,24 +76,17 @@ function createShape(id: number): Shape {
   }
 }
 
-interface SortingGameProps {
-  onExit?: () => void
-}
-
-export default function SortingGame({ onExit }: SortingGameProps) {
-  const [phase, setPhase] = useState<Phase>('idle')
+export default function SortingGame() {
+  const [phase, setPhase] = useState<Phase>('countdown')
   const [queue, setQueue] = useState<Shape[]>([])
   const [rules, setRules] = useState<SortingRules>(() => generateRules())
-  const [score, setScore] = useState(0)
-  const [sortedCount, setSortedCount] = useState(0)
-  const [lastResult, setLastResult] = useState<{ score: number; sorted: number } | null>(null)
-  const [bestScore, setBestScore] = useState(0)
-  const [timeRemaining, setTimeRemaining] = useState(GAME_DURATION_SECONDS)
+  const [, setScore] = useState(0)
+  const [, setSortedCount] = useState(0)
+  const [, setTimeRemaining] = useState(GAME_DURATION_SECONDS)
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null)
+  const [countdownRemaining, setCountdownRemaining] = useState<number | null>(3)
 
   const shapeIdRef = useRef(queue.length)
-  const scoreRef = useRef(score)
-  const sortedCountRef = useRef(sortedCount)
   const phaseRef = useRef<Phase>(phase)
   const forcedPauseRef = useRef(false)
   const audioContextRef = useRef<AudioContext | null>(null)
@@ -118,31 +97,6 @@ export default function SortingGame({ onExit }: SortingGameProps) {
     startY: 0,
   })
   const [activeDragOffset, setActiveDragOffset] = useState<{ x: number; y: number } | null>(null)
-
-  useEffect(() => {
-    let isMounted = true
-
-    const fetchBestScore = async () => {
-      const remoteBestScore = await loadSortingBestScore()
-      if (isMounted) {
-        setBestScore(remoteBestScore)
-      }
-    }
-
-    void fetchBestScore()
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
-
-  useEffect(() => {
-    scoreRef.current = score
-  }, [score])
-
-  useEffect(() => {
-    sortedCountRef.current = sortedCount
-  }, [sortedCount])
 
   useEffect(() => {
     phaseRef.current = phase
@@ -206,38 +160,19 @@ export default function SortingGame({ onExit }: SortingGameProps) {
     }
   }, [phase, scheduleHintShuffle, clearHintTimeout])
 
-  const updateBestScore = useCallback((finalScore: number) => {
-    setBestScore((previous) => {
-      if (finalScore <= previous) {
-        return previous
-      }
-
-      void saveSortingBestScore(finalScore)
-
-      return finalScore
-    })
-  }, [])
-
   const resetQueue = useCallback(() => {
     shapeIdRef.current = 0
     setQueue(Array.from({ length: INITIAL_QUEUE_LENGTH }, () => createShape(shapeIdRef.current++)))
   }, [])
 
   const finishGame = useCallback(() => {
-    const finalScore = scoreRef.current
-    const finalSorted = sortedCountRef.current
-    setLastResult({ score: finalScore, sorted: finalSorted })
+    if (phaseRef.current === 'finished') {
+      return
+    }
 
-    setPhase((currentPhase) => {
-      if (currentPhase === 'finished') {
-        return currentPhase
-      }
-
-      updateBestScore(finalScore)
-      phaseRef.current = 'finished'
-      return 'finished'
-    })
-  }, [updateBestScore])
+    phaseRef.current = 'finished'
+    setPhase('finished')
+  }, [])
 
   const playFeedbackSound = useCallback((type: 'correct' | 'incorrect') => {
     if (typeof window === 'undefined') {
@@ -301,7 +236,6 @@ export default function SortingGame({ onExit }: SortingGameProps) {
 
         setScore((previous) => {
           const nextScore = isCorrect ? previous + 1 : Math.max(0, previous - 1)
-          scoreRef.current = nextScore
           return nextScore
         })
 
@@ -509,7 +443,6 @@ export default function SortingGame({ onExit }: SortingGameProps) {
 
   const startGame = useCallback(() => {
     setScore(0)
-    scoreRef.current = 0
     setTimeRemaining(GAME_DURATION_SECONDS)
     setRules(generateRules())
     resetQueue()
@@ -519,12 +452,48 @@ export default function SortingGame({ onExit }: SortingGameProps) {
     setPhase('running')
   }, [resetQueue])
 
-  const resumeGame = useCallback(() => {
-    if (phaseRef.current === 'paused') {
-      forcedPauseRef.current = false
-      setPhase('running')
+  useEffect(() => {
+    if (phase !== 'countdown') {
+      return
     }
-  }, [])
+
+    setCountdownRemaining(3)
+
+    const interval = window.setInterval(() => {
+      setCountdownRemaining((current) => {
+        if (current === null) {
+          return current
+        }
+
+        if (current <= 1) {
+          window.clearInterval(interval)
+          setCountdownRemaining(null)
+          startGame()
+          return null
+        }
+
+        return current - 1
+      })
+    }, 1000)
+
+    return () => {
+      window.clearInterval(interval)
+    }
+  }, [phase, startGame])
+
+  useEffect(() => {
+    if (phase !== 'finished') {
+      return
+    }
+
+    const restartTimeout = window.setTimeout(() => {
+      setPhase('countdown')
+    }, 900)
+
+    return () => {
+      window.clearTimeout(restartTimeout)
+    }
+  }, [phase, startGame])
 
   const leftShapes = useMemo(() => SHAPE_TYPES.filter((shape) => rules[shape] === 'left'), [rules])
   const rightShapes = useMemo(
@@ -533,241 +502,140 @@ export default function SortingGame({ onExit }: SortingGameProps) {
   )
 
   return (
-    <section className="menu game-page sorting-game">
-      <div className="menu__top-bar">
-        <BrandLogo size={64} wordmarkSize="1.75rem" />
-        <button type="button" className="menu__back-button" onClick={onExit}>
-          Tilbage til menu
-        </button>
-      </div>
-
-      <header className="menu__header sorting-game__header">
-        <h1>Sorteringsspillet</h1>
-        <p>
-          Sortér figurerne efter reglerne ved at bruge piletasterne, knapperne nedenfor eller ved at
-          swipe figuren mod den rigtige side på mobilen.
-        </p>
-      </header>
-
-      <div className="game-page__grid sorting-game__layout">
-        <div className="sorting-game__content">
-          <div className="sorting-game__actions sorting-game__actions--top">
-            {phase === 'idle' && (
-              <button type="button" className="sorting-game__primary-button" onClick={startGame}>
-                Start spil
-              </button>
-            )}
-            {phase === 'paused' && (
-              <button type="button" className="sorting-game__primary-button" onClick={resumeGame}>
-                Fortsæt
-              </button>
-            )}
-          </div>
-
-          <div className="sorting-game__status">
-            <div className="sorting-game__metric">
-              <span className="sorting-game__metric-label">Score</span>
-              <span className="sorting-game__metric-value">{score}</span>
-            </div>
-            <div className="sorting-game__metric">
-              <span className="sorting-game__metric-label">Bedste</span>
-              <span className="sorting-game__metric-value">{bestScore}</span>
-            </div>
-            <div className="sorting-game__metric">
-              <span className="sorting-game__metric-label">Sorterede</span>
-              <span className="sorting-game__metric-value">{sortedCount}</span>
-            </div>
-            <div className="sorting-game__metric">
-              <span className="sorting-game__metric-label">Tid</span>
-              <span className="sorting-game__metric-value">{formatTime(timeRemaining)}</span>
-            </div>
-          </div>
-
-          <div className="sorting-game__play-area">
-            <div className="sorting-game__rule-column sorting-game__rule-column--left">
-              <div className="sorting-game__rule-title">Venstre</div>
-              <div className="sorting-game__rule-items">
-                {leftShapes.map((shape) => (
-                  <div key={`left-${shape}`} className={`sorting-game__rule-item sorting-game__rule-item--${shape}`}>
-                    <span
-                      className={`sorting-game__rule-shape sorting-game__rule-shape--${shape}`}
-                      style={{ '--shape-color': SHAPE_COLORS[shape] } as CSSProperties}
-                      aria-hidden="true"
-                    />
-                    <span className="sorting-game__rule-label">{SHAPE_LABELS[shape]}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="sorting-game__queue">
-              <div
-                className="sorting-game__queue-track"
-                aria-label="Figurkø"
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerEnd}
-                onPointerCancel={handlePointerEnd}
-                onPointerLeave={handlePointerEnd}
-              >
-                {phase === 'running' || phase === 'paused' ? (
-                  queue.map((shape, index) => {
-                    const isActive = index === 0
-                    const offset = Math.min(index, 4)
-                    const translateY = offset * -0.65
-                    const scale = isActive ? 1 : Math.max(0.7, 1 - offset * 0.08)
-                    const opacity = isActive ? 1 : Math.max(0.35, 0.85 - offset * 0.1)
-                    const feedbackClass = isActive && feedback ? ` sorting-game__shape--${feedback}` : ''
-                    const dragClass =
-                      isActive && activeDragOffset ? ' sorting-game__shape--dragging' : ''
-                    const baseClass = `sorting-game__shape sorting-game__shape--${shape.type}`
-                    const stateClass = isActive
-                      ? ' sorting-game__shape--active'
-                      : ' sorting-game__shape--queued'
-                    const shapeClassName = `${baseClass}${stateClass}${dragClass}${feedbackClass}`
-
-                    const transformParts = [`translate(-50%, ${translateY}rem)`]
-
-                    if (isActive && activeDragOffset) {
-                      transformParts.push(
-                        `translate(${activeDragOffset.x}px, ${activeDragOffset.y}px)`,
-                      )
-                    }
-
-                    transformParts.push(`scale(${scale})`)
-
-                    return (
-                      <div
-                        key={shape.id}
-                        className={shapeClassName}
-                        style={
-                          {
-                            '--shape-color': shape.color,
-                            transform: transformParts.join(' '),
-                            opacity,
-                            zIndex: queue.length - index,
-                          } as CSSProperties
-                        }
-                        aria-label={
-                          isActive ? `Aktiv figur: ${SHAPE_LABELS[shape.type]}` : undefined
-                        }
-                        aria-hidden={!isActive}
-                        aria-live={isActive ? 'polite' : undefined}
-                      />
-                    )
-                  })
-                ) : (
-                  <button
-                    type="button"
-                    className="sorting-game__queue-placeholder"
-                    onClick={startGame}
-                  >
-                    Tryk her eller på &quot;Start spil&quot; for at begynde at sortere figurerne.
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="sorting-game__rule-column sorting-game__rule-column--right">
-              <div className="sorting-game__rule-title">Højre</div>
-              <div className="sorting-game__rule-items">
-                {rightShapes.map((shape) => (
-                  <div key={`right-${shape}`} className={`sorting-game__rule-item sorting-game__rule-item--${shape}`}>
-                    <span
-                      className={`sorting-game__rule-shape sorting-game__rule-shape--${shape}`}
-                      style={{ '--shape-color': SHAPE_COLORS[shape] } as CSSProperties}
-                      aria-hidden="true"
-                    />
-                    <span className="sorting-game__rule-label">{SHAPE_LABELS[shape]}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="sorting-game__controls" aria-hidden={phase !== 'running'}>
-            <button
-              type="button"
-              className="sorting-game__control-button sorting-game__control-button--left"
-              onClick={() => handleChoice('left')}
-              disabled={phase !== 'running'}
-            >
-              ← Venstre
-            </button>
-            <button
-              type="button"
-              className="sorting-game__control-button sorting-game__control-button--right"
-              onClick={() => handleChoice('right')}
-              disabled={phase !== 'running'}
-            >
-              Højre →
-            </button>
-          </div>
-
-          {phase === 'paused' && (
-            <div className="sorting-game__overlay" role="status" aria-live="assertive">
-              <div className="sorting-game__overlay-content">
-                <h2>Pause</h2>
-                <p>Vinduet mistede fokus. Klik på "Fortsæt" eller fokusér vinduet for at fortsætte.</p>
-              </div>
-            </div>
-          )}
-
-          {phase === 'finished' && (
-            <div className="sorting-game__overlay" role="status" aria-live="assertive">
-              <div className="sorting-game__overlay-content sorting-game__overlay-content--finished">
-                <h2>Spillet er slut!</h2>
-                <p className="sorting-game__overlay-description">Se din score og vælg hvad du vil gøre nu.</p>
-                <dl className="sorting-game__scoreboard">
-                  <div className="sorting-game__scoreboard-row">
-                    <dt>Din score</dt>
-                    <dd>{scoreRef.current}</dd>
-                  </div>
-                  <div className="sorting-game__scoreboard-row">
-                    <dt>Sorterede figurer</dt>
-                    <dd>{sortedCount}</dd>
-                  </div>
-                  <div className="sorting-game__scoreboard-row">
-                    <dt>Bedste score</dt>
-                    <dd>{bestScore}</dd>
-                  </div>
-                </dl>
-                <div className="sorting-game__overlay-actions">
-                  <button type="button" className="sorting-game__primary-button" onClick={startGame}>
-                    Prøv igen
-                  </button>
-                  {onExit && (
-                    <button type="button" className="sorting-game__secondary-button" onClick={onExit}>
-                      Afslut spil
-                    </button>
-                  )}
+    <section className="sorting-game sorting-game--immersive">
+      <div className="sorting-game__content">
+        <div className="sorting-game__play-area">
+          <div className="sorting-game__rule-column sorting-game__rule-column--left">
+            <div className="sorting-game__rule-title">Venstre</div>
+            <div className="sorting-game__rule-items">
+              {leftShapes.map((shape) => (
+                <div key={`left-${shape}`} className={`sorting-game__rule-item sorting-game__rule-item--${shape}`}>
+                  <span
+                    className={`sorting-game__rule-shape sorting-game__rule-shape--${shape}`}
+                    style={{ '--shape-color': SHAPE_COLORS[shape] } as CSSProperties}
+                    aria-hidden="true"
+                  />
+                  <span className="sorting-game__rule-label">{SHAPE_LABELS[shape]}</span>
                 </div>
-              </div>
+              ))}
             </div>
-          )}
+          </div>
+
+          <div className="sorting-game__queue">
+            <div
+              className="sorting-game__queue-track"
+              aria-label="Figurkø"
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerEnd}
+              onPointerCancel={handlePointerEnd}
+              onPointerLeave={handlePointerEnd}
+            >
+              {phase === 'running' || phase === 'paused' ? (
+                queue.map((shape, index) => {
+                  const isActive = index === 0
+                  const offset = Math.min(index, 4)
+                  const translateY = offset * -0.65
+                  const scale = isActive ? 1 : Math.max(0.7, 1 - offset * 0.08)
+                  const opacity = isActive ? 1 : Math.max(0.35, 0.85 - offset * 0.1)
+                  const feedbackClass = isActive && feedback ? ` sorting-game__shape--${feedback}` : ''
+                  const dragClass =
+                    isActive && activeDragOffset ? ' sorting-game__shape--dragging' : ''
+                  const baseClass = `sorting-game__shape sorting-game__shape--${shape.type}`
+                  const stateClass = isActive
+                    ? ' sorting-game__shape--active'
+                    : ' sorting-game__shape--queued'
+                  const shapeClassName = `${baseClass}${stateClass}${dragClass}${feedbackClass}`
+
+                  const transformParts = [`translate(-50%, ${translateY}rem)`]
+
+                  if (isActive && activeDragOffset) {
+                    transformParts.push(`translate(${activeDragOffset.x}px, ${activeDragOffset.y}px)`)
+                  }
+
+                  transformParts.push(`scale(${scale})`)
+
+                  return (
+                    <div
+                      key={shape.id}
+                      className={shapeClassName}
+                      style={
+                        {
+                          '--shape-color': shape.color,
+                          transform: transformParts.join(' '),
+                          opacity,
+                          zIndex: queue.length - index,
+                        } as CSSProperties
+                      }
+                      aria-label={isActive ? `Aktiv figur: ${SHAPE_LABELS[shape.type]}` : undefined}
+                      aria-hidden={!isActive}
+                      aria-live={isActive ? 'polite' : undefined}
+                    />
+                  )
+                })
+              ) : (
+                <div className="sorting-game__queue-placeholder" aria-live="polite">
+                  {countdownRemaining !== null
+                    ? `Starter om ${countdownRemaining} sekunder...`
+                    : 'Gør dig klar... spillet starter automatisk.'}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="sorting-game__rule-column sorting-game__rule-column--right">
+            <div className="sorting-game__rule-title">Højre</div>
+            <div className="sorting-game__rule-items">
+              {rightShapes.map((shape) => (
+                <div key={`right-${shape}`} className={`sorting-game__rule-item sorting-game__rule-item--${shape}`}>
+                  <span
+                    className={`sorting-game__rule-shape sorting-game__rule-shape--${shape}`}
+                    style={{ '--shape-color': SHAPE_COLORS[shape] } as CSSProperties}
+                    aria-hidden="true"
+                  />
+                  <span className="sorting-game__rule-label">{SHAPE_LABELS[shape]}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <aside className="game-scoreboard">
-          <h2 className="game-scoreboard__title">Scoreboard</h2>
-          <dl className="game-scoreboard__rows">
-            <div className="game-scoreboard__row">
-              <dt>Bedste score</dt>
-              <dd>{bestScore}</dd>
+        <div className="sorting-game__controls" aria-hidden={phase !== 'running'}>
+          <button
+            type="button"
+            className="sorting-game__control-button sorting-game__control-button--left"
+            onClick={() => handleChoice('left')}
+            disabled={phase !== 'running'}
+          >
+            ← Venstre
+          </button>
+          <button
+            type="button"
+            className="sorting-game__control-button sorting-game__control-button--right"
+            onClick={() => handleChoice('right')}
+            disabled={phase !== 'running'}
+          >
+            Højre →
+          </button>
+        </div>
+
+        {phase === 'paused' && (
+          <div className="sorting-game__overlay" role="status" aria-live="assertive">
+            <div className="sorting-game__overlay-content">
+              <h2>Pause</h2>
+              <p>Fokusér vinduet igen for at fortsætte spillet.</p>
             </div>
-            <div className="game-scoreboard__row">
-              <dt>Sidste score</dt>
-              <dd>{lastResult ? lastResult.score : '–'}</dd>
+          </div>
+        )}
+
+        {phase === 'finished' && (
+          <div className="sorting-game__overlay" role="status" aria-live="assertive">
+            <div className="sorting-game__overlay-content sorting-game__overlay-content--finished">
+              <h2>Ny runde på vej</h2>
+              <p className="sorting-game__overlay-description">Hold øje med næste figur.</p>
             </div>
-            <div className="game-scoreboard__row">
-              <dt>Sorterede figurer</dt>
-              <dd>{lastResult ? lastResult.sorted : '–'}</dd>
-            </div>
-          </dl>
-          <p className="game-scoreboard__footnote">
-            Rekorden gemmes nu sikkert via Vercel KV og opdateres automatisk,
-            når du slår den.
-          </p>
-        </aside>
+          </div>
+        )}
       </div>
     </section>
   )
