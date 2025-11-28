@@ -77,7 +77,7 @@ function createShape(id: number): Shape {
 }
 
 export default function SortingGame() {
-  const [phase, setPhase] = useState<Phase>('countdown')
+  const [phase, setPhase] = useState<Phase>('idle')
   const [queue, setQueue] = useState<Shape[]>([])
   const [rules, setRules] = useState<SortingRules>(() => generateRules())
   const [, setScore] = useState(0)
@@ -453,31 +453,8 @@ export default function SortingGame() {
   }, [resetQueue])
 
   useEffect(() => {
-    if (phase !== 'countdown') {
-      return
-    }
-
-    setCountdownRemaining(3)
-
-    const interval = window.setInterval(() => {
-      setCountdownRemaining((current) => {
-        if (current === null) {
-          return current
-        }
-
-        if (current <= 1) {
-          window.clearInterval(interval)
-          setCountdownRemaining(null)
-          startGame()
-          return null
-        }
-
-        return current - 1
-      })
-    }, 1000)
-
-    return () => {
-      window.clearInterval(interval)
+    if (phase === 'idle') {
+      startGame()
     }
   }, [phase, startGame])
 
@@ -487,7 +464,7 @@ export default function SortingGame() {
     }
 
     const restartTimeout = window.setTimeout(() => {
-      setPhase('countdown')
+      startGame()
     }, 900)
 
     return () => {
@@ -575,9 +552,7 @@ export default function SortingGame() {
                 })
               ) : (
                 <div className="sorting-game__queue-placeholder" aria-live="polite">
-                  {countdownRemaining !== null
-                    ? `Starter om ${countdownRemaining} sekunder...`
-                    : 'Gør dig klar... spillet starter automatisk.'}
+                  Gør dig klar... spillet starter automatisk.
                 </div>
               )}
             </div>

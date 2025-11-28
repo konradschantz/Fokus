@@ -5,8 +5,8 @@ type Phase = 'countdown' | 'ready' | 'now' | 'result'
 
 const textByPhase = (phase: Phase, reactionTime: number | null) => {
   switch (phase) {
-    case 'countdown':
-      return 'Spillet starter straks. Gør dig klar.'
+    case 'waiting':
+      return 'Hold øje – testen starter automatisk.'
     case 'ready':
       return 'Vent... skærmen skifter farve snart.'
     case 'now':
@@ -19,8 +19,7 @@ const textByPhase = (phase: Phase, reactionTime: number | null) => {
 }
 
 export default function ReactionTest() {
-  const [phase, setPhase] = useState<Phase>('countdown')
-  const [countdownRemaining, setCountdownRemaining] = useState<number | null>(3)
+  const [phase, setPhase] = useState<Phase>('waiting')
   const [reactionTime, setReactionTime] = useState<number | null>(null)
   const timeoutRef = useRef<number | null>(null)
   const startTimeRef = useRef<number | null>(null)
@@ -49,35 +48,14 @@ export default function ReactionTest() {
   }, [])
 
   useEffect(() => {
-    if (phase !== 'countdown') {
+    if (phase !== 'waiting') {
       return
     }
 
     setReactionTime(null)
-    setCountdownRemaining(3)
+    setPhase('ready')
     startTimeRef.current = null
-
-    const interval = window.setInterval(() => {
-      setCountdownRemaining((current) => {
-        if (current === null) {
-          return current
-        }
-
-        if (current <= 1) {
-          window.clearInterval(interval)
-          setCountdownRemaining(null)
-          setPhase('ready')
-          scheduleReadyTimeout()
-          return null
-        }
-
-        return current - 1
-      })
-    }, 1000)
-
-    return () => {
-      window.clearInterval(interval)
-    }
+    scheduleReadyTimeout()
   }, [phase, scheduleReadyTimeout])
 
   const handleClick = () => {
@@ -135,11 +113,7 @@ export default function ReactionTest() {
           }
         }}
       >
-        <span className="reaction-test__message">
-          {countdownRemaining !== null
-            ? `Starter om ${countdownRemaining}...`
-            : textByPhase(phase, reactionTime)}
-        </span>
+        <span className="reaction-test__message">{textByPhase(phase, reactionTime)}</span>
       </div>
     </section>
   )
