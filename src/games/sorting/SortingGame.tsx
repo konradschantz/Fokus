@@ -12,7 +12,7 @@ import './SortingGame.css'
 type ShapeType = 'square' | 'triangle' | 'circle'
 type Direction = 'left' | 'right'
 
-type Phase = 'idle' | 'running' | 'paused' | 'finished'
+type Phase = 'countdown' | 'running' | 'paused' | 'finished'
 
 interface Shape {
   id: number
@@ -84,6 +84,7 @@ export default function SortingGame() {
   const [, setSortedCount] = useState(0)
   const [, setTimeRemaining] = useState(GAME_DURATION_SECONDS)
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null)
+  const [countdownRemaining, setCountdownRemaining] = useState<number | null>(3)
 
   const shapeIdRef = useRef(queue.length)
   const phaseRef = useRef<Phase>(phase)

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import './ReactionTest.css'
 
-type Phase = 'waiting' | 'ready' | 'now' | 'result'
+type Phase = 'countdown' | 'ready' | 'now' | 'result'
 
 const textByPhase = (phase: Phase, reactionTime: number | null) => {
   switch (phase) {
@@ -59,11 +59,7 @@ export default function ReactionTest() {
   }, [phase, scheduleReadyTimeout])
 
   const handleClick = () => {
-    if (phase === 'waiting') {
-      setReactionTime(null)
-      setPhase('ready')
-      startTimeRef.current = null
-      scheduleReadyTimeout()
+    if (phase === 'countdown') {
       return
     }
 
@@ -73,7 +69,7 @@ export default function ReactionTest() {
         timeoutRef.current = null
       }
       setReactionTime(null)
-      setPhase('waiting')
+      setPhase('countdown')
       startTimeRef.current = null
       return
     }
@@ -98,7 +94,7 @@ export default function ReactionTest() {
 
     if (phase === 'result') {
       setReactionTime(null)
-      setPhase('waiting')
+      setPhase('countdown')
       startTimeRef.current = null
     }
   }
