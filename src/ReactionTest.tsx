@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import './ReactionTest.css'
 
-type Phase = 'countdown' | 'ready' | 'now' | 'result'
+type Phase = 'waiting' | 'countdown' | 'ready' | 'now' | 'result'
 
 const textByPhase = (phase: Phase, reactionTime: number | null) => {
   switch (phase) {

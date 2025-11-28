@@ -7,12 +7,13 @@ import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
+import { loadSortingBestScore, saveSortingBestScore } from '../../utils/sortingBestScore'
 import './SortingGame.css'
 
 type ShapeType = 'square' | 'triangle' | 'circle'
 type Direction = 'left' | 'right'
 
-type Phase = 'countdown' | 'running' | 'paused' | 'finished'
+type Phase = 'idle' | 'countdown' | 'running' | 'paused' | 'finished'
 
 interface Shape {
   id: number
@@ -80,9 +81,11 @@ export default function SortingGame() {
   const [phase, setPhase] = useState<Phase>('idle')
   const [queue, setQueue] = useState<Shape[]>([])
   const [rules, setRules] = useState<SortingRules>(() => generateRules())
-  const [, setScore] = useState(0)
-  const [, setSortedCount] = useState(0)
-  const [, setTimeRemaining] = useState(GAME_DURATION_SECONDS)
+  const [score, setScore] = useState(0)
+  const [sortedCount, setSortedCount] = useState(0)
+  const [timeRemaining, setTimeRemaining] = useState(GAME_DURATION_SECONDS)
+  const [bestScore, setBestScore] = useState(0)
+  const [achievedNewBest, setAchievedNewBest] = useState(false)
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null)
   const [countdownRemaining, setCountdownRemaining] = useState<number | null>(3)
 
@@ -97,6 +100,20 @@ export default function SortingGame() {
     startY: 0,
   })
   const [activeDragOffset, setActiveDragOffset] = useState<{ x: number; y: number } | null>(null)
+
+  useEffect(() => {
+    let isMounted = true
+
+    void loadSortingBestScore().then((value) => {
+      if (isMounted) {
+        setBestScore(value)
+      }
+    })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   useEffect(() => {
     phaseRef.current = phase
@@ -362,6 +379,21 @@ export default function SortingGame() {
   }, [phase, finishGame])
 
   useEffect(() => {
+    if (phase !== 'finished') {
+      return
+    }
+
+    const isNewBest = score > bestScore
+
+    setAchievedNewBest(isNewBest)
+
+    if (isNewBest) {
+      setBestScore(score)
+      void saveSortingBestScore(score)
+    }
+  }, [bestScore, phase, score])
+
+  useEffect(() => {
     if (phase !== 'running') {
       return
     }
@@ -448,6 +480,7 @@ export default function SortingGame() {
     resetQueue()
     setFeedback(null)
     setSortedCount(0)
+    setAchievedNewBest(false)
     forcedPauseRef.current = false
     setPhase('running')
   }, [resetQueue])
@@ -465,7 +498,7 @@ export default function SortingGame() {
 
     const restartTimeout = window.setTimeout(() => {
       startGame()
-    }, 900)
+    }, 1600)
 
     return () => {
       window.clearTimeout(restartTimeout)
@@ -478,9 +511,30 @@ export default function SortingGame() {
     [rules],
   )
 
+  const displayedBestScore = Math.max(bestScore, score)
+
   return (
     <section className="sorting-game sorting-game--immersive">
       <div className="sorting-game__content">
+        <div className="sorting-game__status" aria-live="polite">
+          <div className="sorting-game__metric" aria-label="Tid tilbage">
+            <span className="sorting-game__metric-label">Tid tilbage</span>
+            <span className="sorting-game__metric-value">{timeRemaining}s</span>
+          </div>
+          <div className="sorting-game__metric" aria-label="Aktuel score">
+            <span className="sorting-game__metric-label">Aktuel score</span>
+            <span className="sorting-game__metric-value">{score}</span>
+          </div>
+          <div className="sorting-game__metric" aria-label="Bedste score">
+            <span className="sorting-game__metric-label">Bedste score</span>
+            <span className="sorting-game__metric-value">{displayedBestScore}</span>
+          </div>
+          <div className="sorting-game__metric" aria-label="Sorterede figurer">
+            <span className="sorting-game__metric-label">Sorterede figurer</span>
+            <span className="sorting-game__metric-value">{sortedCount}</span>
+          </div>
+        </div>
+
         <div className="sorting-game__play-area">
           <div className="sorting-game__rule-column sorting-game__rule-column--left">
             <div className="sorting-game__rule-title">Venstre</div>
@@ -606,8 +660,31 @@ export default function SortingGame() {
         {phase === 'finished' && (
           <div className="sorting-game__overlay" role="status" aria-live="assertive">
             <div className="sorting-game__overlay-content sorting-game__overlay-content--finished">
-              <h2>Ny runde på vej</h2>
-              <p className="sorting-game__overlay-description">Hold øje med næste figur.</p>
+              <h2>Runden er slut!</h2>
+              <p className="sorting-game__overlay-description">
+                Ny runde starter automatisk. Se dine resultater herunder.
+              </p>
+
+              <dl className="sorting-game__scoreboard">
+                <div className="sorting-game__scoreboard-row">
+                  <dt>Score denne runde</dt>
+                  <dd>{score}</dd>
+                </div>
+                <div className="sorting-game__scoreboard-row">
+                  <dt>Sorterede figurer</dt>
+                  <dd>{sortedCount}</dd>
+                </div>
+                <div className="sorting-game__scoreboard-row">
+                  <dt>Bedste score</dt>
+                  <dd>{displayedBestScore}</dd>
+                </div>
+              </dl>
+
+              {achievedNewBest && (
+                <p className="sorting-game__overlay-description" aria-live="polite">
+                  Stærkt gået! Du slog din tidligere rekord.
+                </p>
+              )}
             </div>
           </div>
         )}
