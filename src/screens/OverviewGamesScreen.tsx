@@ -176,10 +176,6 @@ export default function OverviewGamesScreen() {
           wordmarkText="Cognitive Games"
           style={{ marginBottom: '1rem' }}
         />
-        <p>
-          Find det præcise kognitive gear du vil træne i dag – fra hukommelse og reaktionstid til
-          strategisk planlægning og sproglig fleksibilitet.
-        </p>
       </header>
 
       {sections.map((section) => (

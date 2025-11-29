@@ -23,18 +23,7 @@ const sections: OverviewSection[] = [
     description:
       'Boost hukommelsen og koncentrationen med hurtige, videnskabeligt inspirerede mini-udfordringer.',
     cta: { to: '/overview/games', label: 'Udforsk spil' },
-    icon: '🧠',
-    links: [
-      { to: '/reaction-test', label: 'Reaktionstest' },
-      { to: '/sorting', label: 'Sorteringsspillet' },
-      { to: '/odd-one-out', label: 'Odd One Out' },
-      { to: '/puzzle-blox', label: 'Puzzle Blox' },
-      { to: '/pattern-pulse', label: 'Pattern Pulse' },
-      { to: '/spatial-sweep', label: 'Spatial Sweep' },
-      { to: '/mind-math', label: 'Mind Math' },
-      { to: '/focus-flow', label: 'Focus Flow' },
-      { to: '/word-weave', label: 'Word Weave' },
-    ],
+    icon: '🧠'
   },
   {
     id: 'meditation-breathing',
@@ -42,11 +31,7 @@ const sections: OverviewSection[] = [
     description:
       'Find ro i åndedrættet med guidede meditationer og visuelle vejrtrækningsøvelser.',
     cta: { to: '/meditation/box-breathing', label: 'Start meditation' },
-    icon: '🧘🏽',
-    links: [
-      { to: '/meditation/box-breathing', label: 'Box Breathing' },
-      { to: '/meditation/yoga-candle', label: 'Candle Breathing' },
-    ],
+    icon: '🧘🏽'
   },
   {
     id: 'routine-builder',

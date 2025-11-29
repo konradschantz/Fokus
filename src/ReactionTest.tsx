@@ -1,76 +1,190 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import './ReactionTest.css'
 
-type Phase = 'waiting' | 'countdown' | 'ready' | 'now' | 'result'
+type Phase = 'countdown' | 'ready' | 'now' | 'result'
 
-const textByPhase = (phase: Phase, reactionTime: number | null) => {
+const ROUND_DURATION_MS = 30000
+
+const textByPhase = (phase: Phase, reactionTime: number | null, countdownValue: number) => {
   switch (phase) {
-    case 'waiting':
-      return 'Hold øje – testen starter automatisk.'
+    case 'countdown':
+      return `Spillet starter om ${countdownValue} sekunder. Hold fokus.`
     case 'ready':
-      return 'Vent... skærmen skifter farve snart.'
+      return 'Vent... feltet skifter farve snart. Klik først når det bliver grønt.'
     case 'now':
       return 'Klik nu!'
     case 'result':
       return reactionTime !== null
         ? `Din reaktionstid var ${Math.round(reactionTime)} ms. Klik for at prøve igen.`
         : 'Noget gik galt. Klik for at prøve igen.'
+    default:
+      return ''
   }
 }
 
 export default function ReactionTest() {
-  const [phase, setPhase] = useState<Phase>('waiting')
+  const navigate = useNavigate()
+  const [phase, setPhase] = useState<Phase>('countdown')
+  const [countdownValue, setCountdownValue] = useState(3)
   const [reactionTime, setReactionTime] = useState<number | null>(null)
-  const timeoutRef = useRef<number | null>(null)
+  const [reactionTimes, setReactionTimes] = useState<number[]>([])
+  const [roundOver, setRoundOver] = useState(false)
+  const [sessionRemainingMs, setSessionRemainingMs] = useState(ROUND_DURATION_MS)
+  const readyTimeoutRef = useRef<number | null>(null)
+  const countdownIntervalRef = useRef<number | null>(null)
+  const roundTimeoutRef = useRef<number | null>(null)
+  const sessionIntervalRef = useRef<number | null>(null)
+  const sessionStartRef = useRef<number | null>(null)
   const startTimeRef = useRef<number | null>(null)
+  const hasShownCountdownRef = useRef(false)
+  const sessionTimerStartedRef = useRef(false)
 
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current !== null) {
-        clearTimeout(timeoutRef.current)
-        timeoutRef.current = null
-      }
+  const clearTrialTimers = useCallback(() => {
+    if (readyTimeoutRef.current !== null) {
+      clearTimeout(readyTimeoutRef.current)
+      readyTimeoutRef.current = null
+    }
+    if (countdownIntervalRef.current !== null) {
+      clearInterval(countdownIntervalRef.current)
+      countdownIntervalRef.current = null
     }
   }, [])
 
-  const scheduleReadyTimeout = useCallback(() => {
-    if (timeoutRef.current !== null) {
-      clearTimeout(timeoutRef.current)
-      timeoutRef.current = null
+  const clearAllTimers = useCallback(() => {
+    clearTrialTimers()
+    if (roundTimeoutRef.current !== null) {
+      clearTimeout(roundTimeoutRef.current)
+      roundTimeoutRef.current = null
     }
+    if (sessionIntervalRef.current !== null) {
+      clearInterval(sessionIntervalRef.current)
+      sessionIntervalRef.current = null
+    }
+    sessionStartRef.current = null
+    sessionTimerStartedRef.current = false
+  }, [clearTrialTimers])
 
+  const ensureSessionTimerStarted = useCallback(() => {
+    if (sessionTimerStartedRef.current) {
+      return
+    }
+    sessionTimerStartedRef.current = true
+    sessionStartRef.current = performance.now()
+
+    sessionIntervalRef.current = window.setInterval(() => {
+      if (sessionStartRef.current === null) return
+      const elapsed = performance.now() - sessionStartRef.current
+      const remaining = Math.max(0, ROUND_DURATION_MS - elapsed)
+      setSessionRemainingMs(remaining)
+      if (remaining <= 0) {
+        clearInterval(sessionIntervalRef.current as number)
+        sessionIntervalRef.current = null
+        setRoundOver(true)
+        clearTrialTimers()
+        setPhase('result')
+      }
+    }, 200)
+
+    roundTimeoutRef.current = window.setTimeout(() => {
+      setRoundOver(true)
+      clearTrialTimers()
+      setPhase('result')
+    }, ROUND_DURATION_MS)
+  }, [clearTrialTimers])
+
+  const beginReadyPhase = useCallback(() => {
+    setPhase('ready')
     const delay = Math.floor(Math.random() * 3000) + 2000
-    timeoutRef.current = window.setTimeout(() => {
+    readyTimeoutRef.current = window.setTimeout(() => {
       startTimeRef.current = performance.now()
       setPhase('now')
-      timeoutRef.current = null
+      readyTimeoutRef.current = null
     }, delay)
   }, [])
 
+  const startTrial = useCallback(
+    (withCountdown: boolean) => {
+      clearTrialTimers()
+      setReactionTime(null)
+      startTimeRef.current = null
+
+      if (withCountdown && !hasShownCountdownRef.current) {
+        hasShownCountdownRef.current = true
+        setCountdownValue(3)
+        setPhase('countdown')
+
+        let nextValue = 3
+        const intervalId = window.setInterval(() => {
+          nextValue -= 1
+          if (nextValue <= 0) {
+            clearInterval(intervalId)
+            countdownIntervalRef.current = null
+            ensureSessionTimerStarted()
+            beginReadyPhase()
+            return
+          }
+          setCountdownValue(nextValue)
+        }, 1000)
+        countdownIntervalRef.current = intervalId
+      } else {
+        ensureSessionTimerStarted()
+        beginReadyPhase()
+      }
+    },
+    [beginReadyPhase, clearTrialTimers, ensureSessionTimerStarted],
+  )
+
+  const startSession = useCallback(() => {
+    clearAllTimers()
+    setRoundOver(false)
+    setReactionTimes([])
+    hasShownCountdownRef.current = false
+    setSessionRemainingMs(ROUND_DURATION_MS)
+    sessionStartRef.current = null
+    sessionTimerStartedRef.current = false
+
+    startTrial(true)
+  }, [clearAllTimers, clearTrialTimers, startTrial])
+
   useEffect(() => {
-    if (phase !== 'waiting') {
+    startSession()
+    return () => {
+      clearAllTimers()
+    }
+  }, [clearAllTimers, startSession])
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [])
+
+  const averageReactionTime = useMemo(() => {
+    if (reactionTimes.length === 0) return null
+    const total = reactionTimes.reduce((sum, t) => sum + t, 0)
+    return Math.round(total / reactionTimes.length)
+  }, [reactionTimes])
+
+  const sessionSecondsLeft = useMemo(
+    () => Math.max(0, Math.ceil(sessionRemainingMs / 1000)),
+    [sessionRemainingMs],
+  )
+
+  const handleClick = () => {
+    if (roundOver) {
       return
     }
 
-    setReactionTime(null)
-    setPhase('ready')
-    startTimeRef.current = null
-    scheduleReadyTimeout()
-  }, [phase, scheduleReadyTimeout])
-
-  const handleClick = () => {
     if (phase === 'countdown') {
       return
     }
 
     if (phase === 'ready') {
-      if (timeoutRef.current !== null) {
-        clearTimeout(timeoutRef.current)
-        timeoutRef.current = null
-      }
-      setReactionTime(null)
-      setPhase('countdown')
-      startTimeRef.current = null
+      ensureSessionTimerStarted()
+      startTrial(false)
       return
     }
 
@@ -83,6 +197,7 @@ export default function ReactionTest() {
         } else {
           const safeElapsed = Math.max(0, elapsed)
           setReactionTime(safeElapsed)
+          setReactionTimes((times) => [...times, safeElapsed])
         }
       } else {
         setReactionTime(null)
@@ -93,10 +208,16 @@ export default function ReactionTest() {
     }
 
     if (phase === 'result') {
-      setReactionTime(null)
-      setPhase('countdown')
-      startTimeRef.current = null
+      startTrial(false)
     }
+  }
+
+  const handleRetry = () => {
+    startSession()
+  }
+
+  const handleBackToOverview = () => {
+    navigate('/overview/games')
   }
 
   return (
@@ -113,8 +234,51 @@ export default function ReactionTest() {
           }
         }}
       >
-        <span className="reaction-test__message">{textByPhase(phase, reactionTime)}</span>
+        {phase === 'countdown' ? (
+          <div className="reaction-test__countdown">
+            <span className="reaction-test__countdown-number">{countdownValue}</span>
+            <p className="reaction-test__countdown-hint">
+              Bliv klar. Du har 30 sekunder til at måle din reaktionstid.
+            </p>
+          </div>
+        ) : (
+          <span className="reaction-test__message">
+            {textByPhase(phase, reactionTime, countdownValue)}
+          </span>
+        )}
+        {phase === 'result' && !roundOver && (
+          <div className="reaction-test__next-hint">Klik for næste forsøg</div>
+        )}
+        <div className="reaction-test__timer-chip"> {sessionSecondsLeft} sek</div>
       </div>
+
+      {roundOver && (
+        <div className="reaction-test__overlay" role="dialog" aria-modal="true">
+          <div className="reaction-test__overlay-card">
+            <p className="reaction-test__eyebrow">Runden er slut</p>
+            <h2 className="reaction-test__overlay-average">
+              {averageReactionTime !== null
+                ? `${averageReactionTime} ms i gennemsnit`
+                : 'Ingen gyldige målinger'}
+            </h2>
+            <p className="reaction-test__overlay-text">
+              30 sekunder gennemført
+            </p>
+            <div className="reaction-test__overlay-actions">
+              <button type="button" className="reaction-test__start-button" onClick={handleRetry}>
+                Prøv igen
+              </button>
+              <button
+                type="button"
+                className="reaction-test__ghost-button"
+                onClick={handleBackToOverview}
+              >
+                Spiloversigt
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }

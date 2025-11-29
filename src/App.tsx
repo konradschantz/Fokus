@@ -36,6 +36,7 @@ type AppChromeProps = {
   onBack?: () => void
   canGoBack?: boolean
   onNavigate?: (to: string) => void
+  hideTopBar?: boolean
 }
 
 type NavLink = {
@@ -50,7 +51,15 @@ const navLinks: NavLink[] = [
   { to: '/meditation', label: 'Meditationer', description: 'Åndedræt & ro' },
 ]
 
-function AppChrome({ mode, onSetMode, children, onBack, canGoBack = true, onNavigate }: AppChromeProps) {
+function AppChrome({
+  mode,
+  onSetMode,
+  children,
+  onBack,
+  canGoBack = true,
+  onNavigate,
+  hideTopBar = false,
+}: AppChromeProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
 
@@ -87,10 +96,11 @@ function AppChrome({ mode, onSetMode, children, onBack, canGoBack = true, onNavi
   }
 
   return (
-    <main className={`app app--${mode}`}>
+    <main className={`app app--${mode} ${hideTopBar ? 'app--fullbleed' : ''}`}>
       <span className="app__halo app__halo--one" aria-hidden="true" />
       <span className="app__halo app__halo--two" aria-hidden="true" />
       <div className="app__inner">
+        {!hideTopBar && (
         <header className="app-shell__top" aria-label="Global navigation">
           <div className="app-shell__brand-row">
             {onBack ? (
@@ -117,7 +127,7 @@ function AppChrome({ mode, onSetMode, children, onBack, canGoBack = true, onNavi
                   wordmarkSize="clamp(1.35rem, 3vw, 1.85rem)"
                   wordmarkText="Fokus"
                 />
-                <p className="app-shell__tagline">Mental performance studio</p>
+                <p className="app-shell__tagline">Mental developing studio</p>
               </div>
               <button
                 type="button"
@@ -156,6 +166,7 @@ function AppChrome({ mode, onSetMode, children, onBack, canGoBack = true, onNavi
          
           </div>
         </header>
+        )}
 
         <div className="app-shell__content" aria-live="polite">
 
@@ -248,6 +259,7 @@ function AppChrome({ mode, onSetMode, children, onBack, canGoBack = true, onNavi
 function AppLayout({ mode, onSetMode }: { mode: ThemeMode; onSetMode: (mode: ThemeMode) => void }) {
   const navigate = useNavigate()
   const location = useLocation()
+  const hideTopBar = location.pathname.startsWith('/reaction-test')
 
   const handleBack = () => {
     if (location.pathname === '/overview') {
@@ -267,6 +279,7 @@ function AppLayout({ mode, onSetMode }: { mode: ThemeMode; onSetMode: (mode: The
       onSetMode={onSetMode}
       onBack={location.pathname !== '/overview' ? handleBack : undefined}
       canGoBack={location.pathname !== '/overview'}
+      hideTopBar={hideTopBar}
     >
       <Outlet />
     </AppChrome>

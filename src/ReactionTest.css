@@ -2,12 +2,14 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: min(80vh, 760px);
-  padding: clamp(1.25rem, 4vw, 2.5rem);
+  min-height: 100vh;
+  padding: 0;
+  width: 100%;
 }
 
 .reaction-test--immersive .reaction-test__play-area {
-  width: min(780px, 100%);
+  width: min(900px, 100%);
+  height: 100%;
 }
 
 .reaction-test__layout {
@@ -20,17 +22,98 @@
   gap: 0.85rem;
 }
 
+.reaction-test__intro {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: min(80vh, 760px);
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+}
+
+.reaction-test__intro-card {
+  width: min(820px, 100%);
+  background: linear-gradient(145deg, #0f172a, #111827 30%, #0b1220);
+  color: #e2e8f0;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 1.25rem;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.reaction-test__eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #a5b4fc;
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin: 0 0 0.5rem;
+}
+
+.reaction-test__intro-title {
+  margin: 0 0 0.5rem;
+  font-size: clamp(2rem, 5vw, 2.6rem);
+  color: #f8fafc;
+}
+
+.reaction-test__intro-text {
+  margin: 0 0 1.25rem;
+  color: #cbd5e1;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.reaction-test__intro-list {
+  margin: 0 0 1.5rem;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 0.6rem;
+  color: #dbeafe;
+  line-height: 1.5;
+}
+
+.reaction-test__intro-list li {
+  position: relative;
+}
+
+.reaction-test__intro-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.reaction-test__start-button {
+  background: linear-gradient(120deg, #22c55e, #16a34a);
+  border: none;
+  color: #0b1220;
+  font-weight: 700;
+  padding: 0.85rem 1.4rem;
+  border-radius: 0.9rem;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.reaction-test__start-button:hover {
+  filter: brightness(1.05);
+  box-shadow: 0 15px 35px rgba(34, 197, 94, 0.35);
+}
+
+.reaction-test__start-button:active {
+  transform: translateY(1px);
+}
+
 .reaction-test__play-area {
   align-items: center;
-  border-radius: 1.25rem;
+  border-radius: 0;
+  border: none;
   color: #fff;
   cursor: pointer;
   display: flex;
   font-size: clamp(1.35rem, 3vw, 2.2rem);
   font-weight: 600;
   justify-content: center;
-  min-height: clamp(260px, 42vh, 380px);
-  padding: clamp(1.25rem, 4vw, 2rem);
+  min-height: clamp(340px, 65vh, 720px);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
   position: relative;
   text-align: center;
   transition: background-color 0.2s ease, transform 0.2s ease;
@@ -44,6 +127,10 @@
 
 .reaction-test__play-area--waiting {
   background: radial-gradient(circle at top, #111827, #1f2937);
+}
+
+.reaction-test__play-area--countdown {
+  background: radial-gradient(circle at 20% 20%, #0ea5e9, #0b1726);
 }
 
 .reaction-test__play-area--ready {
@@ -66,6 +153,119 @@
   margin: 0;
   font-size: 0.95rem;
   color: #475569;
+}
+
+.reaction-test__countdown {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.reaction-test__countdown-number {
+  font-size: clamp(3rem, 10vw, 4.5rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.reaction-test__countdown-hint {
+  margin: 0;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.reaction-test__next-hint {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.18);
+  color: #f8fafc;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  backdrop-filter: blur(4px);
+}
+
+.reaction-test__timer-chip {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  color: #f8fafc;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.reaction-test__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 14, 25, 0.7);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 20;
+}
+
+.reaction-test__overlay-card {
+  background: #0b1220;
+  color: #e2e8f0;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  width: min(520px, 100%);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+  text-align: center;
+}
+
+.reaction-test__overlay-text {
+  margin: 0.35rem 0 1.2rem;
+  color: #cbd5e1;
+}
+
+.reaction-test__overlay-average {
+  margin: 0.25rem 0 0.5rem;
+  font-size: clamp(2rem, 5vw, 2.6rem);
+  color: #f8fafc;
+}
+
+.reaction-test__overlay-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.reaction-test__ghost-button {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #e2e8f0;
+  padding: 0.8rem 1.25rem;
+  border-radius: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+}
+
+.reaction-test__ghost-button:hover {
+  border-color: #22c55e;
+  color: #befae0;
+}
+
+.reaction-test__ghost-button:active {
+  transform: translateY(1px);
+}
+
+.reaction-test__underline {
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
 }
 
 .reaction-test__scores {
@@ -97,7 +297,26 @@
 
 @media (max-width: 899px) {
   .reaction-test__play-area {
-    min-height: clamp(200px, 45vw, 320px);
+    min-height: 75vh;
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .reaction-test--immersive {
+    padding: 0;
+  }
+
+  .reaction-test__play-area {
+    border-radius: 0;
+    min-height: 100vh;
+  }
+
+  .reaction-test__timer-chip,
+  .reaction-test__next-hint {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
   }
 }
 
