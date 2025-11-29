@@ -39,6 +39,27 @@ export default function ReactionTest() {
   const startTimeRef = useRef<number | null>(null)
   const hasShownCountdownRef = useRef(false)
   const sessionTimerStartedRef = useRef(false)
+  const audioCtxRef = useRef<AudioContext | null>(null)
+
+  const playCountdownBeep = useCallback(() => {
+    const AudioCtor = window.AudioContext || (window as any).webkitAudioContext
+    if (!AudioCtor) return
+    if (!audioCtxRef.current) {
+      audioCtxRef.current = new AudioCtor()
+    }
+    const ctx = audioCtxRef.current
+    const oscillator = ctx.createOscillator()
+    const gain = ctx.createGain()
+    oscillator.type = 'sine'
+    oscillator.frequency.value = 880
+    gain.gain.value = 0.15
+    oscillator.connect(gain)
+    gain.connect(ctx.destination)
+    const now = ctx.currentTime
+    oscillator.start(now)
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18)
+    oscillator.stop(now + 0.18)
+  }, [])
 
   const clearTrialTimers = useCallback(() => {
     if (readyTimeoutRef.current !== null) {
@@ -63,6 +84,11 @@ export default function ReactionTest() {
     }
     sessionStartRef.current = null
     sessionTimerStartedRef.current = false
+
+    if (audioCtxRef.current) {
+      audioCtxRef.current.close().catch(() => {})
+      audioCtxRef.current = null
+    }
   }, [clearTrialTimers])
 
   const ensureSessionTimerStarted = useCallback(() => {
@@ -153,6 +179,12 @@ export default function ReactionTest() {
       clearAllTimers()
     }
   }, [clearAllTimers, startSession])
+
+  useEffect(() => {
+    if (phase === 'countdown' && countdownValue > 0) {
+      playCountdownBeep()
+    }
+  }, [countdownValue, phase, playCountdownBeep])
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow

@@ -4,14 +4,14 @@ import GameShell from '../components/GameShell'
 
 type MemoryDifficulty = 'easy' | 'medium' | 'hard'
 
-interface MemoryCard {
+type MemoryCard = {
   id: number
   symbol: string
   revealed: boolean
   matched: boolean
 }
 
-interface DifficultyConfig {
+type DifficultyConfig = {
   columns: number
   pairs: number
 }
@@ -22,23 +22,22 @@ const difficulties: Record<MemoryDifficulty, DifficultyConfig> = {
   hard: { columns: 6, pairs: 12 },
 }
 
-const symbols = ['★', '◆', '●', '▲', '☀', '☁', '✦', '✪', '✿', '☾', '☼', '✚', '✖', '➤', '♢']
+const symbols = ['🍎', '🚀', '🎧', '🌟', '📚', '🎲', '🧠', '🦊', '🏀', '🎨', '🌿', '⚡', '🍩', '🎹', '🚲', '🧩']
 const HIDE_DELAY_MS = 700
+const ROUND_DURATION_MS = 60000
 
-function shuffle<T>(list: T[]): T[] {
-  const array = [...list]
-  for (let index = array.length - 1; index > 0; index -= 1) {
-    const randomIndex = Math.floor(Math.random() * (index + 1))
-    ;[array[index], array[randomIndex]] = [array[randomIndex], array[index]]
+function shuffle<T>(items: T[]): T[] {
+  const result = [...items]
+  for (let i = result.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[result[i], result[j]] = [result[j], result[i]]
   }
-  return array
+  return result
 }
 
 function createDeck(difficulty: MemoryDifficulty): MemoryCard[] {
   const { pairs } = difficulties[difficulty]
-  const availableSymbols = shuffle(symbols)
-  const selectedSymbols = availableSymbols.slice(0, pairs)
-  const deckSymbols = shuffle([...selectedSymbols, ...selectedSymbols])
+  const deckSymbols = shuffle([...shuffle(symbols).slice(0, pairs), ...shuffle(symbols).slice(0, pairs)])
   return deckSymbols.map((symbol, index) => ({
     id: index,
     symbol,
@@ -68,19 +67,22 @@ export default function MemoryGame() {
 
   const gridTemplateColumns = useMemo(() => {
     const { columns } = difficulties[difficulty]
-    return `repeat(${columns}, minmax(64px, 1fr))`
+    const maxColumns = 4
+    const effectiveColumns = Math.min(columns, maxColumns)
+    return `repeat(${effectiveColumns}, minmax(64px, 1fr))`
   }, [difficulty])
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (timerRef.current !== null) {
         window.clearInterval(timerRef.current)
       }
       if (hideTimeoutRef.current !== null) {
         window.clearTimeout(hideTimeoutRef.current)
       }
-    }
-  }, [])
+    },
+    [],
+  )
 
   useEffect(() => {
     if (!isTimerRunning) {
@@ -233,12 +235,31 @@ export default function MemoryGame() {
     [cards, elapsedMs, moves],
   )
 
+  const remainingSeconds = useMemo(
+    () => Math.max(0, Math.ceil((ROUND_DURATION_MS - elapsedMs) / 1000)),
+    [elapsedMs],
+  )
+
+  useEffect(() => {
+    if (!isTimerRunning) return
+    if (ROUND_DURATION_MS - elapsedMs <= 0) {
+      setIsTimerRunning(false)
+      setIsComplete(true)
+      startTimestampRef.current = null
+    }
+  }, [elapsedMs, isTimerRunning])
+
   return (
     <GameShell
       title="Memory"
       subtitle="Find alle par"
       isFinished={isComplete}
       summaryLines={summaryLines}
+      eyebrowAddon={
+        <span aria-live="polite" style={{ fontSize: '0.85rem' }}>
+          Tid: <strong style={{ fontVariantNumeric: 'tabular-nums' }}>{remainingSeconds}s</strong>
+        </span>
+      }
       onRestart={() => handleNewGame()}
       onExit={() => navigate('/overview/games')}
     >
@@ -282,21 +303,6 @@ export default function MemoryGame() {
               ))}
             </select>
           </label>
-          <button
-            type="button"
-            onClick={() => handleNewGame()}
-            style={{
-              background: 'linear-gradient(120deg, #22c55e, #16a34a)',
-              border: 'none',
-              borderRadius: '0.9rem',
-              color: '#0b1220',
-              padding: '0.7rem 1.4rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}
-          >
-            Start igen
-          </button>
         </div>
 
         <div
@@ -322,7 +328,7 @@ export default function MemoryGame() {
                 key={card.id}
                 type="button"
                 onClick={() => handleCardClick(card.id)}
-                disabled={card.matched || card.revealed || isLocked}
+                disabled={card.matched || card.revealed || isLocked || (!isTimerRunning && isComplete)}
                 aria-label={ariaLabel}
                 style={{
                   alignItems: 'center',
@@ -331,7 +337,7 @@ export default function MemoryGame() {
                   border: '1px solid rgba(148, 163, 184, 0.3)',
                   borderRadius: '0.9rem',
                   color: isShowing ? '#fff' : '#e2e8f0',
-                  cursor: card.matched || card.revealed || isLocked ? 'not-allowed' : 'pointer',
+                  cursor: card.matched || card.revealed || isLocked || isComplete ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   fontSize: 'clamp(1.4rem, 4vw, 2.2rem)',
                   fontWeight: 700,
