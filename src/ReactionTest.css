@@ -176,9 +176,9 @@
 
 .reaction-test__next-hint {
   position: absolute;
-  bottom: 1rem;
+  top: 58%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   background: rgba(255, 255, 255, 0.18);
   color: #f8fafc;
   padding: 0.5rem 0.9rem;
@@ -317,6 +317,11 @@
     left: 50%;
     right: auto;
     transform: translateX(-50%);
+  }
+
+  .reaction-test__next-hint {
+    top: auto;
+    bottom: 18%;
   }
 }
 

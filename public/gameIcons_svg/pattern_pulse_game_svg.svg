@@ -1,23 +1,10 @@
-<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="12" y="12" width="136" height="136" rx="32" fill="url(#pulseGradient)" />
-  <g fill="none" stroke-width="10" stroke-linecap="round">
-    <path d="M42 80H64L74 52L88 116L100 80H118" stroke="url(#pulseStroke1)" />
-    <path d="M42 106H58L68 74L84 128L96 96H118" stroke="url(#pulseStroke2)" stroke-opacity="0.7" />
-  </g>
-  <circle cx="42" cy="80" r="9" fill="#38bdf8" />
-  <circle cx="118" cy="80" r="9" fill="#22d3ee" />
-  <defs>
-    <linearGradient id="pulseGradient" x1="12" y1="12" x2="148" y2="148" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#312e81" />
-      <stop offset="1" stop-color="#0ea5e9" />
-    </linearGradient>
-    <linearGradient id="pulseStroke1" x1="42" y1="52" x2="118" y2="116" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#bfdbfe" />
-      <stop offset="1" stop-color="#38bdf8" />
-    </linearGradient>
-    <linearGradient id="pulseStroke2" x1="42" y1="74" x2="118" y2="128" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#c084fc" />
-      <stop offset="1" stop-color="#22d3ee" />
-    </linearGradient>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <rect width="120" height="120" rx="18" fill="#F4F6FB"/>
+  <polyline points="18,78 38,46 54,66 70,38 94,62" fill="none" stroke="#2563EB" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="18" cy="78" r="6" fill="#2563EB"/>
+  <circle cx="38" cy="46" r="6" fill="#10B981"/>
+  <circle cx="54" cy="66" r="6" fill="#2563EB"/>
+  <circle cx="70" cy="38" r="6" fill="#0F172A" opacity="0.85"/>
+  <circle cx="94" cy="62" r="6" fill="#2563EB"/>
+  <path d="M22 96h76" stroke="#D6DEEF" stroke-width="3" stroke-linecap="round" stroke-dasharray="6 6"/>
 </svg>

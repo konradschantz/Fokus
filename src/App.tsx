@@ -259,7 +259,17 @@ function AppChrome({
 function AppLayout({ mode, onSetMode }: { mode: ThemeMode; onSetMode: (mode: ThemeMode) => void }) {
   const navigate = useNavigate()
   const location = useLocation()
-  const hideTopBar = location.pathname.startsWith('/reaction-test')
+  const hideTopBar =
+    location.pathname.startsWith('/reaction-test') ||
+    location.pathname.startsWith('/memory') ||
+    location.pathname.startsWith('/sorting') ||
+    location.pathname.startsWith('/odd-one-out') ||
+    location.pathname.startsWith('/puzzle-blox') ||
+    location.pathname.startsWith('/pattern-pulse') ||
+    location.pathname.startsWith('/spatial-sweep') ||
+    location.pathname.startsWith('/mind-math') ||
+    location.pathname.startsWith('/focus-flow') ||
+    location.pathname.startsWith('/word-weave')
 
   const handleBack = () => {
     if (location.pathname === '/overview') {

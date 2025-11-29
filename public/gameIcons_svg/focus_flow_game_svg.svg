@@ -1,22 +1,8 @@
-<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="12" y="12" width="136" height="136" rx="30" fill="url(#flowGradient)" />
-  <g font-family="'Inter', 'Segoe UI', sans-serif" font-weight="700" fill="#0f172a">
-    <rect x="40" y="44" width="32" height="32" rx="10" fill="#bfdbfe" />
-    <text x="56" y="66" font-size="20" text-anchor="middle">1</text>
-    <rect x="84" y="40" width="32" height="32" rx="10" fill="#93c5fd" />
-    <text x="100" y="62" font-size="20" text-anchor="middle">2</text>
-    <rect x="40" y="88" width="32" height="32" rx="10" fill="#60a5fa" />
-    <text x="56" y="110" font-size="20" text-anchor="middle">3</text>
-    <rect x="84" y="92" width="32" height="32" rx="10" fill="#3b82f6" />
-    <text x="100" y="114" font-size="20" text-anchor="middle" fill="#f8fafc">4</text>
-    <rect x="108" y="116" width="32" height="32" rx="10" fill="#1d4ed8" />
-    <text x="124" y="138" font-size="20" text-anchor="middle" fill="#f8fafc">5</text>
-  </g>
-  <path d="M40 120C48 112 58 108 68 108C82 108 94 122 108 122C118 122 126 118 132 112" stroke="rgba(15,23,42,0.2)" stroke-width="6" stroke-linecap="round" />
-  <defs>
-    <linearGradient id="flowGradient" x1="12" y1="12" x2="148" y2="148" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#1d4ed8" />
-      <stop offset="1" stop-color="#22d3ee" />
-    </linearGradient>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <rect width="120" height="120" rx="18" fill="#F4F6FB"/>
+  <circle cx="60" cy="60" r="36" stroke="#2563EB" stroke-width="4"/>
+  <circle cx="60" cy="60" r="24" stroke="#0F172A" stroke-width="3" stroke-dasharray="6 6"/>
+  <circle cx="60" cy="60" r="12" fill="#2563EB" opacity="0.18"/>
+  <circle cx="60" cy="60" r="6" fill="#0F172A"/>
+  <path d="M60 20v10m0 60v10m40-40h-10m-60 0H20m54-26 7-7m-48 48-7 7m48 0 7 7m-48-48-7-7" stroke="#10B981" stroke-width="3" stroke-linecap="round"/>
 </svg>

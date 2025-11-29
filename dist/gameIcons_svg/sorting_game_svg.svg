@@ -1,24 +1,13 @@
-<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
-  <!-- Baggrund -->
-  <rect width="300" height="300" fill="#E8E8E8" rx="15"/>
-  
-  <!-- Stor cirkel (baggrund) -->
-  <circle cx="150" cy="150" r="80" fill="#4A90E2" stroke="#2C3E50" stroke-width="4"/>
-  
-  <!-- Venstre transportbånd -->
-  <rect x="110" y="100" width="20" height="100" fill="#F5F5F5" stroke="#2C3E50" stroke-width="2" rx="3"/>
-  
-  <!-- Venstre: Cirkler og firkanter -->
-  <circle cx="120" cy="115" r="6" fill="#4A90E2" stroke="#2C3E50" stroke-width="2"/>
-  <rect x="114" y="134" width="12" height="12" fill="#4A90E2" stroke="#2C3E50" stroke-width="2"/>
-  <circle cx="120" cy="165" r="6" fill="#4A90E2" stroke="#2C3E50" stroke-width="2"/>
-  <rect x="114" y="179" width="12" height="12" fill="#4A90E2" stroke="#2C3E50" stroke-width="2"/>
-  
-  <!-- Højre transportbånd -->
-  <rect x="170" y="100" width="20" height="100" fill="#F5F5F5" stroke="#2C3E50" stroke-width="2" rx="3"/>
-  
-  <!-- Højre: Trekanter -->
-  <polygon points="180,115 175,125 185,125" fill="#4A90E2" stroke="#2C3E50" stroke-width="2"/>
-  <polygon points="180,145 175,155 185,155" fill="#4A90E2" stroke="#2C3E50" stroke-width="2"/>
-  <polygon points="180,175 175,185 185,185" fill="#4A90E2" stroke="#2C3E50" stroke-width="2"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <rect width="120" height="120" rx="18" fill="#F4F6FB"/>
+  <rect x="20" y="24" width="16" height="72" rx="6" fill="#E8EEFC" stroke="#2563EB" stroke-width="3"/>
+  <rect x="52" y="24" width="16" height="72" rx="6" fill="#E8EEFC" stroke="#2563EB" stroke-width="3"/>
+  <rect x="84" y="24" width="16" height="72" rx="6" fill="#E8EEFC" stroke="#2563EB" stroke-width="3"/>
+  <circle cx="28" cy="40" r="7" fill="#2563EB"/>
+  <rect x="55" y="34" width="10" height="12" rx="3" fill="#0F172A" opacity="0.9"/>
+  <polygon points="92,38 98,48 86,48" fill="#10B981"/>
+  <circle cx="28" cy="64" r="7" fill="#CBD5F5"/>
+  <rect x="55" y="58" width="10" height="12" rx="3" fill="#2563EB"/>
+  <polygon points="92,62 98,72 86,72" fill="#0F172A" opacity="0.8"/>
+  <path d="M24 90h72" stroke="#0F172A" stroke-width="3" stroke-linecap="round" stroke-dasharray="6 6"/>
 </svg>
