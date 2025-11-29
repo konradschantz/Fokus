@@ -213,7 +213,6 @@ export default function OverviewGamesScreen() {
                 <div className="menu__card-content">
                   <h3>{game.title}</h3>
                   <p>{game.description}</p>
-                  <p className="menu__card-focus">Fokus: {game.focus}</p>
                 </div>
                 <Link to={game.to} className="menu__primary-button">
                   {game.ctaLabel}
