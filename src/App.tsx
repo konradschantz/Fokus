@@ -25,6 +25,7 @@ import SpatialSweepScreen from './screens/SpatialSweepScreen'
 import MindMathScreen from './screens/MindMathScreen'
 import FocusFlowScreen from './screens/FocusFlowScreen'
 import WordWeaveScreen from './screens/WordWeaveScreen'
+import WordSearchScreen from './screens/WordSearchScreen'
 import BrandLogo from './components/BrandLogo'
 
 type ThemeMode = 'calm' | 'focus'
@@ -342,6 +343,7 @@ function App() {
         <Route path="mind-math" element={<MindMathScreen />} />
         <Route path="focus-flow" element={<FocusFlowScreen />} />
         <Route path="word-weave" element={<WordWeaveScreen />} />
+        <Route path="word-search" element={<WordSearchScreen />} />
         <Route path="reaction-test" element={<ReactionTestScreen />} />
         <Route path="meditation">
           <Route index element={<MeditationHubScreen />} />
