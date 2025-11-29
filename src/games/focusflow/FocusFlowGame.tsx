@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { shuffle } from '../../utils/shuffle'
 import './FocusFlowGame.css'
 
@@ -10,7 +10,12 @@ function createNumbers(level: number): number[] {
   return shuffle(numbers)
 }
 
-export default function FocusFlowGame() {
+type FocusFlowGameProps = {
+  startSignal?: number
+  onFinished?: (summary: { level: number; bestLevel: number; lives: number }) => void
+}
+
+export default function FocusFlowGame({ startSignal, onFinished }: FocusFlowGameProps) {
   const [numbers, setNumbers] = useState<number[]>([])
   const [cleared, setCleared] = useState<Set<number>>(new Set())
   const [nextTarget, setNextTarget] = useState(1)
@@ -44,7 +49,7 @@ export default function FocusFlowGame() {
     setMessage('Klik på tallene 1, 2, 3 ... så hurtigt og præcist som muligt.')
   }, [])
 
-  const resetGame = () => {
+  const resetGame = useCallback(() => {
     setStatus('idle')
     setNumbers([])
     setCleared(new Set())
@@ -52,7 +57,7 @@ export default function FocusFlowGame() {
     setLevel(1)
     setLives(3)
     setMessage('Start Focus Flow og klik på tallene i stigende rækkefølge.')
-  }
+  }, [])
 
   const advanceLevel = useCallback(
     (currentLevel: number) => {
@@ -96,12 +101,19 @@ export default function FocusFlowGame() {
       )
       if (remainingLives <= 0) {
         setStatus('failed')
+        onFinished?.({ level, bestLevel: Math.max(bestLevel, level), lives: remainingLives })
       }
     }
   }
 
+  useEffect(() => {
+    if (typeof startSignal === 'number') {
+      beginGame()
+    }
+  }, [beginGame, startSignal])
+
   return (
-    <div className="focus-flow-game">
+    <div className="focus-flow-game focus-flow-game--immersive">
       <div className="focus-flow-game__stage">
         <p className="focus-flow-game__status" role="status">
           {message}
@@ -129,44 +141,19 @@ export default function FocusFlowGame() {
         </div>
 
         <div className="focus-flow-game__actions">
-          <button type="button" className="menu__primary-button" onClick={beginGame}>
-            {status === 'idle' || status === 'failed' ? 'Start Focus Flow' : 'Genstart niveau'}
-          </button>
-          <button type="button" className="menu__secondary-button" onClick={resetGame}>
+          {status !== 'active' ? (
+            <button type="button" className="menu__primary-button" onClick={beginGame}>
+              Start
+            </button>
+          ) : (
+            <p className="focus-flow-game__status">Find tallene i rækkefølge.</p>
+          )}
+          <button type="button" className="menu__secondary-button" onClick={resetGame} disabled={status === 'active'}>
             Nulstil
           </button>
         </div>
       </div>
 
-      <aside className="game-scoreboard focus-flow-game__scoreboard">
-        <h2 className="game-scoreboard__title">Flowdata</h2>
-        <dl className="game-scoreboard__rows">
-          <div className="game-scoreboard__row">
-            <dt>Nuværende niveau</dt>
-            <dd>{status === 'idle' ? '-' : level}</dd>
-          </div>
-          <div className="game-scoreboard__row">
-            <dt>Bedste niveau</dt>
-            <dd>{bestLevel}</dd>
-          </div>
-          <div className="game-scoreboard__row">
-            <dt>Næste tal</dt>
-            <dd>{status === 'active' ? nextTarget : '-'}</dd>
-          </div>
-          <div className="game-scoreboard__row">
-            <dt>Liv tilbage</dt>
-            <dd>{lives}</dd>
-          </div>
-          <div className="game-scoreboard__row">
-            <dt>Tal i spil</dt>
-            <dd>{numbers.length}</dd>
-          </div>
-        </dl>
-        <p className="focus-flow-game__hint">
-          Focus Flow træner skift mellem scanning og præcision. Klik tallene i orden, selv når mængden
-          vokser og layoutet ændres.
-        </p>
-      </aside>
     </div>
   )
 }

@@ -1,32 +1,51 @@
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import BrandLogo from '../components/BrandLogo'
+import GameShell from '../components/GameShell'
 import SpatialSweepGame from '../games/spatialsweep/SpatialSweepGame'
 import './NewCognitiveGames.css'
 
 export default function SpatialSweepScreen() {
   const navigate = useNavigate()
+  const [isFinished, setIsFinished] = useState(false)
+  const [startSignal, setStartSignal] = useState(0)
+  const [summary, setSummary] = useState<{
+    level: number
+    bestLevel: number
+    attemptsLeft: number
+    averageTime: number
+  } | null>(null)
+
+  const summaryLines = useMemo(() => {
+    if (!summary) return ['Ingen score registreret.']
+    return [
+      `Niveau: ${summary.level}`,
+      `Bedste niveau: ${summary.bestLevel}`,
+      `Forsøg tilbage: ${summary.attemptsLeft}`,
+      summary.averageTime > 0 ? `Gns. reaktion: ${Math.round(summary.averageTime)} ms` : 'Ingen data',
+    ]
+  }, [summary])
 
   return (
-    <section className="menu game-page spatial-sweep">
-      <div className="menu__top-bar">
-        <BrandLogo size={64} wordmarkSize="1.75rem" />
-        <button
-          type="button"
-          className="menu__back-button"
-          onClick={() => navigate('/overview/games')}
-        >
-          Tilbage til spiloversigt
-        </button>
-      </div>
-
-      <header className="menu__header spatial-sweep__header">
-        <h1>Spatial Sweep</h1>
-        <p>Følg lysmønstrene i gitteret og genskab dem, før de forsvinder.</p>
-      </header>
-
-      <div className="game-page__grid spatial-sweep__layout">
-        <SpatialSweepGame />
-      </div>
-    </section>
+    <GameShell
+      title="Spatial Sweep"
+      subtitle="Husk mønsteret og genskab det"
+      isFinished={isFinished}
+      summaryLines={summaryLines}
+      onRestart={() => {
+        setIsFinished(false)
+        setSummary(null)
+        setStartSignal((value) => value + 1)
+      }}
+      onExit={() => navigate('/overview/games')}
+      onReady={() => setStartSignal((value) => value + 1)}
+    >
+      <SpatialSweepGame
+        startSignal={startSignal}
+        onFinished={(result) => {
+          setSummary(result)
+          setIsFinished(true)
+        }}
+      />
+    </GameShell>
   )
 }

@@ -14,7 +14,12 @@ function createPattern(level: number): number[] {
   return indices.slice(0, patternLength)
 }
 
-export default function SpatialSweepGame() {
+type SpatialSweepProps = {
+  startSignal?: number
+  onFinished?: (summary: { level: number; bestLevel: number; attemptsLeft: number; averageTime: number }) => void
+}
+
+export default function SpatialSweepGame({ startSignal, onFinished }: SpatialSweepProps) {
   const [pattern, setPattern] = useState<number[]>([])
   const [activeCells, setActiveCells] = useState<number[]>([])
   const [selectedCells, setSelectedCells] = useState<number[]>([])
@@ -25,177 +30,195 @@ export default function SpatialSweepGame() {
   const [bestLevel, setBestLevel] = useState(0)
   const [roundStart, setRoundStart] = useState<number | null>(null)
   const [times, setTimes] = useState<number[]>([])
+  const [isFinished, setIsFinished] = useState(false)
 
   const timeoutsRef = useRef<number[]>([])
 
   const highlightDelay = useMemo(() => Math.max(520, 1000 - level * 60), [level])
 
-  const clearTimeouts = () => {
+  const clearTimeouts = useCallback(() => {
     timeoutsRef.current.forEach((id) => window.clearTimeout(id))
     timeoutsRef.current = []
-  }
+  }, [])
 
-  useEffect(() => () => clearTimeouts(), [])
-
-  const beginRound = useCallback(
-    (nextLevel: number, reusePattern = false) => {
-      clearTimeouts()
-      setStatus('showing')
-      setRoundStart(null)
-      setSelectedCells([])
-      setMessage('Memorér mønsteret – felterne lyser ét ad gangen.')
-      setPattern((previous) => {
-        if (reusePattern && previous.length > 0) {
-          return [...previous]
-        }
-        return createPattern(nextLevel)
-      })
-    },
-    [],
-  )
+  useEffect(() => () => clearTimeouts(), [clearTimeouts])
 
   useEffect(() => {
-    if (status !== 'showing' || pattern.length === 0) {
-      return
+    if (typeof startSignal === 'number') {
+      beginRound(1, false)
     }
+  }, [startSignal])
 
-    clearTimeouts()
-
-    pattern.forEach((cellIndex, index) => {
-      const highlightTimeout = window.setTimeout(() => {
-        setActiveCells([cellIndex])
-      }, index * highlightDelay)
-
-      const releaseTimeout = window.setTimeout(() => {
-        setActiveCells([])
-      }, index * highlightDelay + highlightDelay * 0.6)
-
-      timeoutsRef.current.push(highlightTimeout, releaseTimeout)
-    })
-
-    const finishTimeout = window.setTimeout(() => {
+  const beginRound = useCallback(
+    (nextLevel: number, isRetry: boolean) => {
+      clearTimeouts()
+      const nextPattern = createPattern(nextLevel)
+      setPattern(nextPattern)
       setActiveCells([])
-      setStatus('guessing')
-      setMessage('Vælg de felter, der var tændt. Du kan ombestemme dig, indtil du har markeret alle.')
+      setSelectedCells([])
+      setStatus('showing')
+      setMessage('Se mønsteret – det forsvinder om lidt.')
       setRoundStart(performance.now())
-    }, pattern.length * highlightDelay + 250)
+      setIsFinished(false)
 
-    timeoutsRef.current.push(finishTimeout)
-  }, [highlightDelay, pattern, status])
+      nextPattern.forEach((cellIndex, index) => {
+        const highlightTimeout = window.setTimeout(() => {
+          setActiveCells([cellIndex])
+        }, index * highlightDelay)
 
-  const handleStart = () => {
-    setAttemptsLeft(MAX_ATTEMPTS)
-    setTimes([])
-    setBestLevel((previous) => Math.max(previous, level - 1))
-    setLevel(1)
-    beginRound(1)
-  }
+        const clearTimeoutId = window.setTimeout(() => {
+          setActiveCells([])
+        }, index * highlightDelay + highlightDelay * 0.6)
 
-  const handleCellToggle = (cellIndex: number) => {
-    if (status !== 'guessing') {
-      return
-    }
+        timeoutsRef.current.push(highlightTimeout, clearTimeoutId)
+      })
 
-    setSelectedCells((previous) => {
-      if (previous.includes(cellIndex)) {
-        return previous.filter((value) => value !== cellIndex)
-      }
-      const nextSelection = [...previous, cellIndex]
-      if (nextSelection.length === pattern.length) {
-        evaluateSelection(nextSelection)
-      }
-      return nextSelection
-    })
-  }
+      const finishTimeout = window.setTimeout(() => {
+        setActiveCells([])
+        setStatus('guessing')
+        setMessage(isRetry ? 'Prøv igen og genskab mønsteret.' : 'Genskab mønsteret.')
+      }, nextPattern.length * highlightDelay + 320)
 
-  const evaluateSelection = (selection: number[]) => {
-    const isCorrect =
-      selection.length === pattern.length &&
-      pattern.every((cell) => selection.includes(cell))
+      timeoutsRef.current.push(finishTimeout)
 
-    setStatus('feedback')
-    setActiveCells([...pattern])
-
-    if (roundStart !== null) {
-      const elapsed = performance.now() - roundStart
-      setTimes((previous) => [...previous, elapsed])
-    }
-
-    const feedbackTimeout = window.setTimeout(() => {
-      setActiveCells([])
-      if (isCorrect) {
-        const nextLevel = level + 1
+      if (!isRetry) {
         setLevel(nextLevel)
-        setBestLevel((previous) => Math.max(previous, nextLevel))
-        setMessage('Flot! Sekvensen udvides – hold fokus på detaljerne.')
-        beginRound(nextLevel)
+      }
+    },
+    [clearTimeouts, highlightDelay],
+  )
+
+  const handleCellClick = useCallback(
+    (index: number) => {
+      if (status !== 'guessing') {
+        return
+      }
+
+      if (selectedCells.includes(index)) {
+        return
+      }
+
+      const nextSelection = [...selectedCells, index]
+      setSelectedCells(nextSelection)
+      const elapsed = roundStart ? performance.now() - roundStart : 0
+
+      if (elapsed > 0) {
+        setTimes((prev) => [...prev, elapsed])
+      }
+
+      const isPatternComplete = nextSelection.length === pattern.length
+      const isCorrect = isPatternComplete && pattern.every((value) => nextSelection.includes(value))
+
+      if (!isPatternComplete) {
+        return
+      }
+
+      if (isCorrect) {
+        setStatus('feedback')
+        setMessage('Korrekt! Nyt mønster på vej.')
+        setBestLevel((prev) => Math.max(prev, level))
+
+        const feedbackTimeout = window.setTimeout(() => {
+          beginRound(level + 1, false)
+        }, 900)
+        timeoutsRef.current.push(feedbackTimeout)
       } else {
-        const remainingAttempts = attemptsLeft - 1
-        setAttemptsLeft(remainingAttempts)
-        if (remainingAttempts <= 0) {
-          setStatus('gameover')
-          setMessage('Alle forsøg brugt. Start forfra for at opbygge en ny serie.')
+        const nextAttempts = attemptsLeft - 1
+        setAttemptsLeft(nextAttempts)
+        setStatus(nextAttempts <= 0 ? 'gameover' : 'feedback')
+        setMessage(nextAttempts <= 0 ? 'Tiden er gået – prøv igen.' : 'Forkert. Prøv igen.')
+
+        if (nextAttempts <= 0) {
+          setIsFinished(true)
+          onFinished?.({
+            level,
+            bestLevel: Math.max(bestLevel, level),
+            attemptsLeft: nextAttempts,
+            averageTime:
+              times.length > 0 ? times.reduce((sum, t) => sum + t, 0) / times.length : 0,
+          })
         } else {
-          setStatus('showing')
-          setMessage('Ikke helt. Se mønsteret igen og prøv en gang til.')
-          beginRound(level, true)
+          const retryTimeout = window.setTimeout(() => {
+            beginRound(level, true)
+          }, 1000)
+          timeoutsRef.current.push(retryTimeout)
         }
       }
-    }, 900)
+    },
+    [attemptsLeft, beginRound, bestLevel, level, onFinished, pattern, roundStart, selectedCells, status, times],
+  )
 
-    timeoutsRef.current.push(feedbackTimeout)
-  }
-
-  const averageTime = useMemo(() => {
-    if (times.length === 0) {
-      return 0
-    }
-    const total = times.reduce((sum, value) => sum + value, 0)
-    return Math.round(total / times.length)
+  const averageTimeMs = useMemo(() => {
+    if (times.length === 0) return 0
+    return times.reduce((sum, t) => sum + t, 0) / times.length
   }, [times])
 
   return (
-    <div className="spatial-sweep-game">
-      <div className="spatial-sweep-game__stage">
-        <p className="spatial-sweep-game__status" role="status">
-          {message}
-        </p>
-
-        <div
-          className={`spatial-sweep-game__grid ${
-            status === 'showing' ? 'is-locked' : ''
-          }`}
-          role="group"
-          aria-label="Hukommelsesgitter"
-        >
-          {Array.from({ length: TOTAL_CELLS }, (_, index) => {
-            const isActive = activeCells.includes(index)
-            const isSelected = selectedCells.includes(index)
-            const isCorrectCell = pattern.includes(index)
-            const isIncorrectSelection = isSelected && !isCorrectCell && status === 'feedback'
-
-            return (
-              <button
-                key={index}
-                type="button"
-                className={`spatial-sweep-game__cell ${
-                  isActive ? 'is-active' : ''
-                } ${isSelected ? 'is-selected' : ''} ${isIncorrectSelection ? 'is-wrong' : ''}`}
-                onClick={() => handleCellToggle(index)}
-                disabled={status === 'showing' || status === 'gameover'}
-                aria-pressed={isSelected}
-              />
-            )
-          })}
+    <div className="spatial-sweep-game spatial-sweep-game--immersive">
+      <header className="spatial-sweep-game__header">
+        <div>
+          <p className="spatial-sweep-game__eyebrow">Spatial Sweep</p>
+          <h2>Genskab mønsteret</h2>
+          <p className="spatial-sweep-game__message">{message}</p>
         </div>
+        <div className="spatial-sweep-game__metrics">
+          <div>
+            <span>Niveau</span>
+            <strong>{level}</strong>
+          </div>
+          <div>
+            <span>Bedste</span>
+            <strong>{bestLevel}</strong>
+          </div>
+          <div>
+            <span>Forsøg</span>
+            <strong>{attemptsLeft}</strong>
+          </div>
+          <div>
+            <span>Gns. reaktion</span>
+            <strong>{averageTimeMs > 0 ? `${Math.round(averageTimeMs)} ms` : '-'}</strong>
+          </div>
+        </div>
+      </header>
 
-        <div className="spatial-sweep-game__actions">
+      <div className="spatial-sweep-game__board" role="grid" aria-label="Genskab mønsteret">
+        {Array.from({ length: TOTAL_CELLS }, (_, index) => {
+          const isActive = activeCells.includes(index)
+          const isSelected = selectedCells.includes(index)
+          const isPatternCell = pattern.includes(index)
+          return (
+            <button
+              key={index}
+              type="button"
+              role="gridcell"
+              className={`spatial-sweep-game__cell ${
+                isActive ? 'is-active' : ''
+              } ${isSelected ? 'is-selected' : ''}`}
+              aria-pressed={isSelected}
+              aria-label={`Felt ${index + 1}`}
+              onClick={() => handleCellClick(index)}
+              disabled={status !== 'guessing'}
+            >
+              <span className="spatial-sweep-game__cell-dot" data-target={isPatternCell} />
+            </button>
+          )
+        })}
+      </div>
+
+      <div className="spatial-sweep-game__actions">
+        {status === 'idle' && (
+          <p className="spatial-sweep-game__hint">
+            Start spillet for at se mønsteret, du skal huske.
+          </p>
+        )}
+        <div className="spatial-sweep-game__action-row">
           <button
             type="button"
             className="menu__primary-button"
-            onClick={handleStart}
+            onClick={() => beginRound(level, false)}
+            disabled={status === 'showing'}
           >
-            {status === 'idle' || status === 'gameover' ? 'Start Spatial Sweep' : 'Genstart'}
+            {status === 'idle' ? 'Start' : 'Næste'}
           </button>
           <button
             type="button"
@@ -207,36 +230,6 @@ export default function SpatialSweepGame() {
           </button>
         </div>
       </div>
-
-      <aside className="game-scoreboard spatial-sweep-game__scoreboard">
-        <h2 className="game-scoreboard__title">Fokusdata</h2>
-        <dl className="game-scoreboard__rows">
-          <div className="game-scoreboard__row">
-            <dt>Niveau</dt>
-            <dd>{status === 'idle' ? '-' : level}</dd>
-          </div>
-          <div className="game-scoreboard__row">
-            <dt>Bedste niveau</dt>
-            <dd>{bestLevel}</dd>
-          </div>
-          <div className="game-scoreboard__row">
-            <dt>Felter i mønster</dt>
-            <dd>{pattern.length}</dd>
-          </div>
-          <div className="game-scoreboard__row">
-            <dt>Forsøg tilbage</dt>
-            <dd>{attemptsLeft}</dd>
-          </div>
-          <div className="game-scoreboard__row">
-            <dt>Gennemsnitlig reaktion</dt>
-            <dd>{averageTime > 0 ? `${Math.round(averageTime / 10) / 100} sek` : '-'}</dd>
-          </div>
-        </dl>
-        <p className="spatial-sweep-game__hint">
-          Spatial Sweep udfordrer din rumlige arbejdshukommelse. Udvid gradvist din kapacitet ved at
-          klare længere mønstre uden fejl.
-        </p>
-      </aside>
     </div>
   )
 }

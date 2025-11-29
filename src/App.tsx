@@ -98,7 +98,6 @@ function AppChrome({
   return (
     <main className={`app app--${mode} ${hideTopBar ? 'app--fullbleed' : ''}`}>
       <span className="app__halo app__halo--one" aria-hidden="true" />
-      <span className="app__halo app__halo--two" aria-hidden="true" />
       <div className="app__inner">
         {!hideTopBar && (
         <header className="app-shell__top" aria-label="Global navigation">

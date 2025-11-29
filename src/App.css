@@ -132,12 +132,6 @@ body[data-theme='focus'] {
   left: -90px;
 }
 
-.app__halo--two {
-  bottom: -160px;
-  right: -80px;
-  background: var(--halo-two, rgba(236, 72, 153, 0.2));
-}
-
 body[data-theme='focus'] .app__halo {
   opacity: 0.75;
 }

@@ -26,7 +26,12 @@ function createRandomPadIndex(): number {
   return Math.floor(Math.random() * pads.length)
 }
 
-export default function PatternPulseGame() {
+type PatternPulseGameProps = {
+  startSignal?: number
+  onFinished?: (summary: { level: number; bestLevel: number; timeLeft: number }) => void
+}
+
+export default function PatternPulseGame({ startSignal, onFinished }: PatternPulseGameProps) {
   const [sequence, setSequence] = useState<number[]>([])
   const [status, setStatus] = useState<GameStatus>('idle')
   const [activePad, setActivePad] = useState<number | null>(null)
@@ -36,47 +41,25 @@ export default function PatternPulseGame() {
   const [message, setMessage] = useState('Tryk på start for at se den første pulssekvens.')
   const [timerSeconds, setTimerSeconds] = useState(45)
   const [timerActive, setTimerActive] = useState(false)
+  const [isFinished, setIsFinished] = useState(false)
 
   const timeoutsRef = useRef<number[]>([])
   const timerIntervalRef = useRef<number | null>(null)
-  const levelRef = useRef(level)
 
-  const highlightDelay = useMemo(() => Math.max(450, 900 - level * 45), [level])
+  const highlightDelay = useMemo(() => 520 - Math.min(level * 12, 180), [level])
 
   const clearTimeouts = useCallback(() => {
     timeoutsRef.current.forEach((id) => window.clearTimeout(id))
     timeoutsRef.current = []
   }, [])
 
-  useEffect(() => {
-    return () => {
-      clearTimeouts()
-      if (timerIntervalRef.current !== null) {
-        window.clearInterval(timerIntervalRef.current)
-      }
-    }
-  }, [clearTimeouts])
-
-  useEffect(() => {
-    levelRef.current = level
-  }, [level])
-
   const endGameDueToTimer = useCallback(() => {
-    clearTimeouts()
-    if (timerIntervalRef.current !== null) {
-      window.clearInterval(timerIntervalRef.current)
-      timerIntervalRef.current = null
-    }
     setTimerActive(false)
-    setTimerSeconds(0)
-    setSequence([])
-    setStatus('idle')
-    setActivePad(null)
-    setPlayerIndex(0)
-    setLevel(0)
-    setMessage('Tiden er gået. Tryk start for at prøve igen.')
-    setBestLevel((previous) => Math.max(previous, levelRef.current))
-  }, [clearTimeouts])
+    setIsFinished(true)
+    setStatus('failed')
+    setMessage('Tiden er gået. Prøv igen og slå din rekord.')
+    onFinished?.({ level, bestLevel: Math.max(bestLevel, level), timeLeft: 0 })
+  }, [bestLevel, level, onFinished])
 
   useEffect(() => {
     if (!timerActive) {
@@ -88,16 +71,16 @@ export default function PatternPulseGame() {
     }
 
     timerIntervalRef.current = window.setInterval(() => {
-      setTimerSeconds((previous) => {
-        if (previous <= 1) {
+      setTimerSeconds((prev) => {
+        const next = Math.max(0, prev - 1)
+        if (next <= 0) {
           if (timerIntervalRef.current !== null) {
             window.clearInterval(timerIntervalRef.current)
             timerIntervalRef.current = null
           }
           endGameDueToTimer()
-          return 0
         }
-        return previous - 1
+        return next
       })
     }, 1000)
 
@@ -110,7 +93,23 @@ export default function PatternPulseGame() {
   }, [timerActive, endGameDueToTimer])
 
   useEffect(() => {
-    if (status !== 'showing' || sequence.length === 0) {
+    return () => {
+      clearTimeouts()
+      if (timerIntervalRef.current !== null) {
+        window.clearInterval(timerIntervalRef.current)
+        timerIntervalRef.current = null
+      }
+    }
+  }, [clearTimeouts])
+
+  useEffect(() => {
+    if (typeof startSignal === 'number') {
+      beginGame()
+    }
+  }, [startSignal])
+
+  useEffect(() => {
+    if (status !== 'showing') {
       return
     }
 
@@ -139,6 +138,7 @@ export default function PatternPulseGame() {
 
   const beginGame = () => {
     clearTimeouts()
+    setIsFinished(false)
     const firstSequence = [createRandomPadIndex()]
     setSequence(firstSequence)
     setLevel(1)
@@ -167,24 +167,26 @@ export default function PatternPulseGame() {
         setPlayerIndex(0)
         setLevel(nextLevel)
         setStatus('transition')
-       
         setBestLevel((previous) => Math.max(previous, nextLevel))
 
         const pauseTimeout = window.setTimeout(() => {
           setStatus('showing')
-
+          setMessage('Ny sekvens – følg lyset.')
         }, 1000)
         timeoutsRef.current.push(pauseTimeout)
       }
     } else {
       setStatus('failed')
+      setIsFinished(true)
       setMessage('Sekvensen blev brudt. Prøv igen for at slå din rekord.')
       setBestLevel((previous) => Math.max(previous, level))
       setActivePad(padIndex)
+      setTimerActive(false)
       const resetTimeout = window.setTimeout(() => {
         setActivePad(null)
       }, 400)
       timeoutsRef.current.push(resetTimeout)
+      onFinished?.({ level, bestLevel: Math.max(bestLevel, level), timeLeft: timerSeconds })
     }
   }
 
@@ -196,22 +198,43 @@ export default function PatternPulseGame() {
     setPlayerIndex(0)
     setLevel(0)
     setMessage('Tryk på start for at se den første pulssekvens.')
+    setTimerSeconds(45)
+    setTimerActive(false)
+    setIsFinished(false)
   }
 
+  const padStyle = (pad: PatternPad): PadCSSProperties => ({
+    '--pad-color': pad.base,
+    '--pad-active-color': pad.glow,
+  })
+
   return (
-    <div className="pattern-pulse-game">
-      <div className="pattern-pulse-game__stage">
-        <p className="pattern-pulse-game__status" role="status">
-          {message}
-        </p>
+    <div className="pattern-pulse-game pattern-pulse-game--immersive">
+      <div className="pattern-pulse-game__header">
+        <div>
+          <span className="pattern-pulse-game__eyebrow">Pattern Pulse</span>
+          <p className="pattern-pulse-game__title">Memorér sekvensen</p>
+          <p className="pattern-pulse-game__subtitle">{message}</p>
+        </div>
+        <div className="pattern-pulse-game__meters">
+          <div className="pattern-pulse-game__meter">
+            <span>Tid</span>
+            <strong>{timerSeconds}s</strong>
+          </div>
+          <div className="pattern-pulse-game__meter">
+            <span>Niveau</span>
+            <strong>{level}</strong>
+          </div>
+          <div className="pattern-pulse-game__meter">
+            <span>Bedste</span>
+            <strong>{bestLevel}</strong>
+          </div>
+        </div>
+      </div>
 
-        <div className="pattern-pulse-game__pads" aria-live="polite">
+      <div className="pattern-pulse-game__grid">
+        <div className="pattern-pulse-game__pads">
           {pads.map((pad, index) => {
-            const padStyle: PadCSSProperties = {
-              '--pad-color': pad.base,
-              '--pad-active-color': pad.glow,
-            }
-
             return (
               <button
                 key={pad.id}
@@ -219,7 +242,7 @@ export default function PatternPulseGame() {
                 className={`pattern-pulse-game__pad ${
                   activePad === index ? 'is-active' : ''
                 } ${status === 'awaiting' ? 'is-clickable' : ''}`}
-                style={padStyle}
+                style={padStyle(pad)}
                 onClick={() => handlePadClick(index)}
                 disabled={status !== 'awaiting'}
                 aria-label={pad.label}
@@ -229,7 +252,7 @@ export default function PatternPulseGame() {
         </div>
 
         <div className="pattern-pulse-game__actions">
-          {!timerActive && (
+          {!timerActive && !isFinished && (
             <button
               type="button"
               className="menu__primary-button"
@@ -249,43 +272,6 @@ export default function PatternPulseGame() {
           </button>
         </div>
       </div>
-
-      <aside className="game-scoreboard pattern-pulse-game__scoreboard">
-        <h2 className="game-scoreboard__title">Sekvensdata</h2>
-        <dl className="game-scoreboard__rows">
-          <div className="game-scoreboard__row">
-            <dt>Nuværende niveau</dt>
-            <dd>{level}</dd>
-          </div>
-          <div className="game-scoreboard__row">
-            <dt>Bedste niveau</dt>
-            <dd>{bestLevel}</dd>
-          </div>
-          <div className="game-scoreboard__row">
-            <dt>Trin i sekvens</dt>
-            <dd>{sequence.length}</dd>
-          </div>
-          <div className="game-scoreboard__row">
-            <dt>Status</dt>
-            <dd>
-              {status === 'idle'
-                ? 'Klar til start'
-                : status === 'showing'
-                  ? 'Viser mønster'
-                  : status === 'transition'
-                    ? 'Ny sekvens om lidt'
-                    : status === 'awaiting'
-                      ? 'Din tur'
-                      : 'Sekvens misset'}
-            </dd>
-          </div>
-          <div className="game-scoreboard__row">
-            <dt>Tid tilbage</dt>
-            <dd>{timerSeconds}s</dd>
-          </div>
-        </dl>
-      </aside>
-
     </div>
   )
 }

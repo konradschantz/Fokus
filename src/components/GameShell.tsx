@@ -9,6 +9,7 @@ type GameShellProps = {
   summaryLines?: string[]
   onRestart: () => void
   onExit?: () => void
+  onReady?: () => void
   children: ReactNode
 }
 
@@ -21,6 +22,7 @@ export default function GameShell({
   summaryLines,
   onRestart,
   onExit,
+  onReady,
   children,
 }: GameShellProps) {
   const navigate = useNavigate()
@@ -42,6 +44,9 @@ export default function GameShell({
       next -= 1
       if (next <= 0) {
         setReady(true)
+        if (onReady) {
+          onReady()
+        }
         window.clearInterval(id)
       }
       setCountdown(next)

@@ -305,9 +305,10 @@ function renderShape(cell: OddOneOutCell): JSX.Element {
 interface OddOneOutGameProps {
   onGameFinished?: (score: number) => void
   onScoreSubmitted?: () => void
+  startSignal?: number
 }
 
-export default function OddOneOutGame({ onGameFinished, onScoreSubmitted }: OddOneOutGameProps) {
+export default function OddOneOutGame({ onGameFinished, onScoreSubmitted, startSignal }: OddOneOutGameProps) {
   const [phase, setPhase] = useState<OddOneOutPhase>('idle')
   const [gameInstance, setGameInstance] = useState(0)
   const [board, setBoard] = useState<BoardState>(() => generateBoard(0))
@@ -397,6 +398,12 @@ export default function OddOneOutGame({ onGameFinished, onScoreSubmitted }: OddO
   const handleReset = useCallback(() => {
     handleStart()
   }, [handleStart])
+
+  useEffect(() => {
+    if (typeof startSignal === 'number') {
+      handleStart()
+    }
+  }, [handleStart, startSignal])
 
   const handleCellClick = useCallback(
     (cell: OddOneOutCell) => {

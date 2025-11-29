@@ -1,32 +1,51 @@
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import BrandLogo from '../components/BrandLogo'
+import GameShell from '../components/GameShell'
 import WordWeaveGame from '../games/wordweave/WordWeaveGame'
 import './NewCognitiveGames.css'
 
 export default function WordWeaveScreen() {
   const navigate = useNavigate()
+  const [isFinished, setIsFinished] = useState(false)
+  const [startSignal, setStartSignal] = useState(0)
+  const [summary, setSummary] = useState<{ score: number; bestScore: number; bestStreak: number; round: number }>({
+    score: 0,
+    bestScore: 0,
+    bestStreak: 0,
+    round: 0,
+  })
+
+  const summaryLines = useMemo(
+    () => [
+      `Score: ${summary.score}`,
+      `Bedste score: ${summary.bestScore}`,
+      `Bedste streak: ${summary.bestStreak}`,
+      `Runde: ${summary.round}`,
+    ],
+    [summary],
+  )
 
   return (
-    <section className="menu game-page word-weave">
-      <div className="menu__top-bar">
-        <BrandLogo size={64} wordmarkSize="1.75rem" />
-        <button
-          type="button"
-          className="menu__back-button"
-          onClick={() => navigate('/overview/games')}
-        >
-          Tilbage til spiloversigt
-        </button>
-      </div>
-
-      <header className="menu__header word-weave__header">
-        <h1>Word Weave</h1>
-        <p>Match nøgleord med det mest præcise synonym og byg et mere fleksibelt ordforråd.</p>
-      </header>
-
-      <div className="game-page__grid word-weave__layout">
-        <WordWeaveGame />
-      </div>
-    </section>
+    <GameShell
+      title="Word Weave"
+      subtitle="Find det stærkeste synonym"
+      isFinished={isFinished}
+      summaryLines={summaryLines}
+      onRestart={() => {
+        setIsFinished(false)
+        setSummary({ score: 0, bestScore: 0, bestStreak: 0, round: 0 })
+        setStartSignal((v) => v + 1)
+      }}
+      onExit={() => navigate('/overview/games')}
+      onReady={() => setStartSignal((v) => v + 1)}
+    >
+      <WordWeaveGame
+        startSignal={startSignal}
+        onFinished={(result) => {
+          setSummary(result)
+          setIsFinished(true)
+        }}
+      />
+    </GameShell>
   )
 }

@@ -17,7 +17,7 @@ type Challenge = {
 
 const operations: Operation[] = [
   { symbol: '+', apply: (a, b) => a + b, range: [3, 24] },
-  { symbol: '−', apply: (a, b) => a - b, range: [3, 18] },
+  { symbol: '-', apply: (a, b) => a - b, range: [3, 18] },
   { symbol: '×', apply: (a, b) => a * b, range: [2, 12] },
 ]
 
@@ -47,7 +47,12 @@ function createChallenge(level: number): Challenge {
   }
 }
 
-export default function MindMathGame() {
+type MindMathGameProps = {
+  startSignal?: number
+  onFinished?: (summary: { score: number; bestScore: number; accuracy: number; mistakes: number }) => void
+}
+
+export default function MindMathGame({ startSignal, onFinished }: MindMathGameProps) {
   const [status, setStatus] = useState<GameStatus>('idle')
   const [timeLeft, setTimeLeft] = useState(60)
   const [score, setScore] = useState(0)
@@ -57,6 +62,7 @@ export default function MindMathGame() {
   const [feedback, setFeedback] = useState('Sæt gang i træningen for at udfordre dit regnehoved.')
   const [bestScore, setBestScore] = useState(0)
   const [answers, setAnswers] = useState(0)
+  const [isFinished, setIsFinished] = useState(false)
 
   useEffect(() => {
     if (status !== 'running') {
@@ -67,6 +73,13 @@ export default function MindMathGame() {
       setStatus('finished')
       setFeedback('Tiden er gået! Hvor mange kunne du nå?')
       setBestScore((previous) => Math.max(previous, score))
+      setIsFinished(true)
+      onFinished?.({
+        score,
+        bestScore: Math.max(bestScore, score),
+        accuracy: answers === 0 ? 0 : Math.round((score / answers) * 100),
+        mistakes,
+      })
       return
     }
 
@@ -75,7 +88,7 @@ export default function MindMathGame() {
     }, 1000)
 
     return () => window.clearTimeout(id)
-  }, [score, status, timeLeft])
+  }, [answers, bestScore, mistakes, onFinished, score, status, timeLeft])
 
   const accuracy = useMemo(() => {
     if (answers === 0) {
@@ -91,7 +104,7 @@ export default function MindMathGame() {
     [],
   )
 
-  const startGame = () => {
+  const startGame = useCallback(() => {
     setStatus('running')
     setTimeLeft(60)
     setScore(0)
@@ -99,8 +112,15 @@ export default function MindMathGame() {
     setLevel(1)
     setAnswers(0)
     setFeedback('Vurder om regnestykket er korrekt så hurtigt som muligt.')
+    setIsFinished(false)
     nextChallenge(1)
-  }
+  }, [nextChallenge])
+
+  useEffect(() => {
+    if (typeof startSignal === 'number') {
+      startGame()
+    }
+  }, [startSignal, startGame])
 
   const handleAnswer = (isCorrect: boolean) => {
     if (status !== 'running' || challenge === null) {
@@ -131,10 +151,11 @@ export default function MindMathGame() {
     setFeedback('Sæt gang i træningen for at udfordre dit regnehoved.')
     setChallenge(null)
     setAnswers(0)
+    setIsFinished(false)
   }
 
   return (
-    <div className="mind-math-game">
+    <div className="mind-math-game mind-math-game--immersive">
       <div className="mind-math-game__stage">
         <p className="mind-math-game__status" role="status">
           {feedback}
@@ -152,12 +173,7 @@ export default function MindMathGame() {
         </div>
 
         <div className="mind-math-game__actions">
-          <button
-            type="button"
-            className="menu__primary-button"
-            onClick={startGame}
-            disabled={status === 'running'}
-          >
+          <button type="button" className="menu__primary-button" onClick={startGame} disabled={status === 'running'}>
             Start Mind Math
           </button>
           <button type="button" className="menu__secondary-button" onClick={resetGame}>
@@ -185,35 +201,24 @@ export default function MindMathGame() {
         </div>
       </div>
 
-      <aside className="game-scoreboard mind-math-game__scoreboard">
-        <h2 className="game-scoreboard__title">Resultater</h2>
-        <dl className="game-scoreboard__rows">
-          <div className="game-scoreboard__row">
-            <dt>Aktuel score</dt>
-            <dd>{score}</dd>
-          </div>
-          <div className="game-scoreboard__row">
-            <dt>Bedste score</dt>
-            <dd>{bestScore}</dd>
-          </div>
-          <div className="game-scoreboard__row">
-            <dt>Præcision</dt>
-            <dd>{answers === 0 ? '-' : `${accuracy}%`}</dd>
-          </div>
-          <div className="game-scoreboard__row">
-            <dt>Fejl</dt>
-            <dd>{mistakes}</dd>
-          </div>
-          <div className="game-scoreboard__row">
-            <dt>Nuværende tempo</dt>
-            <dd>Level {level}</dd>
-          </div>
-        </dl>
-        <p className="mind-math-game__hint">
-          Mind Math bygger på mental aritmetik fra Peak-universet. Besvar rigtigt i træk for at øge
-          tempoet og skærpe din numeriske fleksibilitet.
-        </p>
-      </aside>
+      <div className="mind-math-game__score">
+        <div>
+          <span>Score</span>
+          <strong>{score}</strong>
+        </div>
+        <div>
+          <span>Bedste</span>
+          <strong>{Math.max(bestScore, score)}</strong>
+        </div>
+        <div>
+          <span>Præcision</span>
+          <strong>{answers === 0 ? '-' : `${accuracy}%`}</strong>
+        </div>
+        <div>
+          <span>Fejl</span>
+          <strong>{mistakes}</strong>
+        </div>
+      </div>
     </div>
   )
 }

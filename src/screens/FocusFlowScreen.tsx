@@ -1,32 +1,49 @@
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import BrandLogo from '../components/BrandLogo'
+import GameShell from '../components/GameShell'
 import FocusFlowGame from '../games/focusflow/FocusFlowGame'
 import './NewCognitiveGames.css'
 
 export default function FocusFlowScreen() {
   const navigate = useNavigate()
+  const [isFinished, setIsFinished] = useState(false)
+  const [startSignal, setStartSignal] = useState(0)
+  const [summary, setSummary] = useState<{ level: number; bestLevel: number; lives: number }>({
+    level: 1,
+    bestLevel: 1,
+    lives: 3,
+  })
+
+  const summaryLines = useMemo(
+    () => [
+      `Niveau: ${summary.level}`,
+      `Bedste: ${summary.bestLevel}`,
+      `Liv tilbage: ${summary.lives}`,
+    ],
+    [summary],
+  )
 
   return (
-    <section className="menu game-page focus-flow">
-      <div className="menu__top-bar">
-        <BrandLogo size={64} wordmarkSize="1.75rem" />
-        <button
-          type="button"
-          className="menu__back-button"
-          onClick={() => navigate('/overview/games')}
-        >
-          Tilbage til spiloversigt
-        </button>
-      </div>
-
-      <header className="menu__header focus-flow__header">
-        <h1>Focus Flow</h1>
-        <p>Klik tallene i rækkefølge og hold hovedet koldt, når nettet skifter form.</p>
-      </header>
-
-      <div className="game-page__grid focus-flow__layout">
-        <FocusFlowGame />
-      </div>
-    </section>
+    <GameShell
+      title="Focus Flow"
+      subtitle="Klik tallene i rækkefølge"
+      isFinished={isFinished}
+      summaryLines={summaryLines}
+      onRestart={() => {
+        setIsFinished(false)
+        setSummary({ level: 1, bestLevel: 1, lives: 3 })
+        setStartSignal((v) => v + 1)
+      }}
+      onExit={() => navigate('/overview/games')}
+      onReady={() => setStartSignal((v) => v + 1)}
+    >
+      <FocusFlowGame
+        startSignal={startSignal}
+        onFinished={(result) => {
+          setSummary(result)
+          setIsFinished(true)
+        }}
+      />
+    </GameShell>
   )
 }

@@ -7,13 +7,15 @@ import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
+import { useNavigate } from 'react-router-dom'
+import GameShell from '../../components/GameShell'
 import { loadSortingBestScore, saveSortingBestScore } from '../../utils/sortingBestScore'
 import './SortingGame.css'
 
 type ShapeType = 'square' | 'triangle' | 'circle'
 type Direction = 'left' | 'right'
 
-type Phase = 'idle' | 'countdown' | 'running' | 'paused' | 'finished'
+type Phase = 'idle' | 'running' | 'paused' | 'finished'
 
 interface Shape {
   id: number
@@ -41,8 +43,9 @@ const SHAPE_LABELS: Record<ShapeType, string> = {
 
 const GAME_DURATION_SECONDS = 60
 const INITIAL_QUEUE_LENGTH = 5
+
 function randomItem<T>(items: readonly T[]): T {
-  return items[Math.floor(Math.random() * items.length)]
+  return items[Math.floor(Math.random() * (items.length))]
 }
 
 function generateRules(): SortingRules {
@@ -78,6 +81,7 @@ function createShape(id: number): Shape {
 }
 
 export default function SortingGame() {
+  const navigate = useNavigate()
   const [phase, setPhase] = useState<Phase>('idle')
   const [queue, setQueue] = useState<Shape[]>([])
   const [rules, setRules] = useState<SortingRules>(() => generateRules())
@@ -87,7 +91,8 @@ export default function SortingGame() {
   const [bestScore, setBestScore] = useState(0)
   const [achievedNewBest, setAchievedNewBest] = useState(false)
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null)
-  const [countdownRemaining, setCountdownRemaining] = useState<number | null>(3)
+  const [activeDragOffset, setActiveDragOffset] = useState<{ x: number; y: number } | null>(null)
+  const [shellReady, setShellReady] = useState(false)
 
   const shapeIdRef = useRef(queue.length)
   const phaseRef = useRef<Phase>(phase)
@@ -99,7 +104,6 @@ export default function SortingGame() {
     startX: 0,
     startY: 0,
   })
-  const [activeDragOffset, setActiveDragOffset] = useState<{ x: number; y: number } | null>(null)
 
   useEffect(() => {
     let isMounted = true
@@ -119,63 +123,43 @@ export default function SortingGame() {
     phaseRef.current = phase
   }, [phase])
 
-  const clearHintTimeout = useCallback(() => {
-    if (hintTimeoutRef.current !== null) {
-      window.clearTimeout(hintTimeoutRef.current)
-      hintTimeoutRef.current = null
-    }
-  }, [])
-
-  const scheduleHintShuffle = useCallback(() => {
-    if (phaseRef.current !== 'running') {
+  useEffect(() => {
+    if (!feedback) {
       return
     }
 
-    clearHintTimeout()
-
-    const delay = (10 + Math.random() * 30) * 1000
-
-    hintTimeoutRef.current = window.setTimeout(() => {
-      setRules((currentRules) => {
-        const shapeToFlip = randomItem(SHAPE_TYPES)
-        const toggledDirection =
-          currentRules[shapeToFlip] === 'left' ? 'right' : 'left'
-
-        let nextRules: SortingRules = {
-          ...currentRules,
-          [shapeToFlip]: toggledDirection,
-        }
-
-        const directions = new Set<Direction>(Object.values(nextRules))
-
-        if (directions.size === 1) {
-          const alternativeShapes = SHAPE_TYPES.filter((shape) => shape !== shapeToFlip)
-          const backupShape = randomItem(alternativeShapes)
-
-          nextRules = {
-            ...nextRules,
-            [backupShape]: nextRules[backupShape] === 'left' ? 'right' : 'left',
-          }
-        }
-
-        return nextRules
-      })
-
-      scheduleHintShuffle()
-    }, delay)
-  }, [clearHintTimeout])
-
-  useEffect(() => {
-    if (phase === 'running') {
-      scheduleHintShuffle()
-    } else {
-      clearHintTimeout()
-    }
+    const timeout = window.setTimeout(() => {
+      setFeedback(null)
+    }, 250)
 
     return () => {
-      clearHintTimeout()
+      window.clearTimeout(timeout)
     }
-  }, [phase, scheduleHintShuffle, clearHintTimeout])
+  }, [feedback])
+
+  useEffect(() => {
+    return () => {
+      if (audioContextRef.current) {
+        audioContextRef.current.close().catch(() => {})
+        audioContextRef.current = null
+      }
+    }
+  }, [])
+
+  const resetSwipeState = useCallback(() => {
+    swipeStateRef.current = {
+      pointerId: null,
+      startX: 0,
+      startY: 0,
+    }
+    setActiveDragOffset(null)
+  }, [])
+
+  useEffect(() => {
+    if (phase !== 'running') {
+      resetSwipeState()
+    }
+  }, [phase, resetSwipeState])
 
   const resetQueue = useCallback(() => {
     shapeIdRef.current = 0
@@ -204,71 +188,42 @@ export default function SortingGame() {
       return
     }
 
-    let context = audioContextRef.current
-
-    if (!context) {
-      context = new audioContextCtor()
-      audioContextRef.current = context
+    if (!audioContextRef.current) {
+      audioContextRef.current = new audioContextCtor()
     }
+
+    const context = audioContextRef.current
 
     if (context.state === 'suspended') {
       void context.resume().catch(() => {})
     }
 
-    const now = context.currentTime
     const oscillator = context.createOscillator()
-    const gain = context.createGain()
+    const gainNode = context.createGain()
 
-    const isCorrect = type === 'correct'
-    const duration = isCorrect ? 0.35 : 0.45
-    const startFrequency = isCorrect ? 880 : 240
-    const endFrequency = isCorrect ? 1320 : 160
-    const peakVolume = isCorrect ? 0.18 : 0.22
+    oscillator.type = 'sine'
 
-    oscillator.type = isCorrect ? 'triangle' : 'sawtooth'
-    oscillator.frequency.setValueAtTime(startFrequency, now)
-    oscillator.frequency.exponentialRampToValueAtTime(endFrequency, now + duration)
+    if (type === 'correct') {
+      oscillator.frequency.value = 720
+    } else {
+      oscillator.frequency.value = 180
+    }
 
-    gain.gain.setValueAtTime(0, now)
-    gain.gain.linearRampToValueAtTime(peakVolume, now + 0.05)
-    gain.gain.exponentialRampToValueAtTime(0.001, now + duration)
+    gainNode.gain.value = 0.15
 
-    oscillator.connect(gain)
-    gain.connect(context.destination)
+    oscillator.connect(gainNode)
+    gainNode.connect(context.destination)
 
-    oscillator.start(now)
-    oscillator.stop(now + duration + 0.05)
+    oscillator.start()
+    oscillator.stop(context.currentTime + 0.15)
   }, [])
 
-  const advanceCurrentShape = useCallback(
-    (direction: Direction | null) => {
-      setQueue((currentQueue) => {
-        if (currentQueue.length === 0) {
-          return currentQueue
-        }
-
-        const [currentShape, ...rest] = currentQueue
-        const expectedDirection = rules[currentShape.type]
-        const isCorrect = direction !== null && direction === expectedDirection
-
-        setScore((previous) => {
-          const nextScore = isCorrect ? previous + 1 : Math.max(0, previous - 1)
-          return nextScore
-        })
-
-        setFeedback(isCorrect ? 'correct' : 'incorrect')
-        playFeedbackSound(isCorrect ? 'correct' : 'incorrect')
-
-        if (direction !== null) {
-          setSortedCount((previous) => previous + 1)
-        }
-
-        const nextQueue = [...rest, createShape(shapeIdRef.current++)]
-        return nextQueue
-      })
-    },
-    [rules, playFeedbackSound],
-  )
+  const clearHintTimeout = useCallback(() => {
+    if (hintTimeoutRef.current !== null) {
+      window.clearTimeout(hintTimeoutRef.current)
+      hintTimeoutRef.current = null
+    }
+  }, [])
 
   const handleChoice = useCallback(
     (direction: Direction) => {
@@ -276,59 +231,63 @@ export default function SortingGame() {
         return
       }
 
-      advanceCurrentShape(direction)
+      const [currentShape, ...restQueue] = queue
+
+      if (!currentShape) {
+        return
+      }
+
+      const correctDirection = rules[currentShape.type]
+      const isCorrect = correctDirection === direction
+
+      setQueue(restQueue)
+      setSortedCount((previous) => previous + 1)
+
+      if (isCorrect) {
+        setScore((previous) => previous + 10)
+        setFeedback('correct')
+        playFeedbackSound('correct')
+      } else {
+        setScore((previous) => Math.max(0, previous - 5))
+        setFeedback('incorrect')
+        playFeedbackSound('incorrect')
+      }
     },
-    [advanceCurrentShape],
+    [playFeedbackSound, queue, rules],
   )
 
-  const resetSwipeState = useCallback(() => {
-    swipeStateRef.current = {
-      pointerId: null,
-      startX: 0,
-      startY: 0,
+  const handlePointerStart = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    if (phaseRef.current !== 'running') {
+      return
     }
-    setActiveDragOffset(null)
+
+    swipeStateRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+    }
+
+    if (event.currentTarget.setPointerCapture) {
+      event.currentTarget.setPointerCapture(event.pointerId)
+    }
   }, [])
 
-  const handlePointerDown = useCallback(
-    (event: ReactPointerEvent<HTMLDivElement>) => {
-      if (phaseRef.current !== 'running') {
-        return
-      }
+  const handlePointerMove = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    const state = swipeStateRef.current
 
-      swipeStateRef.current = {
-        pointerId: event.pointerId,
-        startX: event.clientX,
-        startY: event.clientY,
-      }
+    if (phaseRef.current !== 'running' || state.pointerId !== event.pointerId) {
+      return
+    }
 
-      setActiveDragOffset({ x: 0, y: 0 })
+    const deltaX = event.clientX - state.startX
+    const deltaY = event.clientY - state.startY
 
-      if (event.currentTarget.setPointerCapture) {
-        event.currentTarget.setPointerCapture(event.pointerId)
-      }
-    },
-    [],
-  )
+    if (Math.abs(deltaX) < 6 && Math.abs(deltaY) < 6) {
+      return
+    }
 
-  const handlePointerMove = useCallback(
-    (event: ReactPointerEvent<HTMLDivElement>) => {
-      const state = swipeStateRef.current
-
-      if (
-        phaseRef.current !== 'running' ||
-        state.pointerId !== event.pointerId
-      ) {
-        return
-      }
-
-      const deltaX = event.clientX - state.startX
-      const deltaY = event.clientY - state.startY
-
-      setActiveDragOffset({ x: deltaX, y: deltaY })
-    },
-    [],
-  )
+    setActiveDragOffset({ x: deltaX, y: deltaY })
+  }, [])
 
   const handlePointerEnd = useCallback(
     (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -356,6 +315,54 @@ export default function SortingGame() {
     },
     [handleChoice, resetSwipeState],
   )
+
+  const scheduleHintShuffle = useCallback(() => {
+    clearHintTimeout()
+    hintTimeoutRef.current = window.setTimeout(() => {
+      setRules(generateRules())
+    }, 8000)
+  }, [clearHintTimeout])
+
+  useEffect(() => {
+    if (phase !== 'running') {
+      clearHintTimeout()
+      return
+    }
+
+    scheduleHintShuffle()
+
+    return () => {
+      clearHintTimeout()
+    }
+  }, [phase, scheduleHintShuffle, clearHintTimeout])
+
+  useEffect(() => {
+    if (phase !== 'running') {
+      return
+    }
+
+    const handleBlur = () => {
+      if (phaseRef.current === 'running') {
+        forcedPauseRef.current = true
+        setPhase('paused')
+      }
+    }
+
+    const handleFocus = () => {
+      if (forcedPauseRef.current && phaseRef.current === 'paused') {
+        forcedPauseRef.current = false
+        setPhase('running')
+      }
+    }
+
+    window.addEventListener('blur', handleBlur)
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+      window.removeEventListener('blur', handleBlur)
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [])
 
   useEffect(() => {
     if (phase !== 'running') {
@@ -398,112 +405,16 @@ export default function SortingGame() {
       return
     }
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (phaseRef.current !== 'running') {
-        return
-      }
-
-      if (event.key === 'ArrowLeft') {
-        event.preventDefault()
-        handleChoice('left')
-      }
-
-      if (event.key === 'ArrowRight') {
-        event.preventDefault()
-        handleChoice('right')
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [phase, handleChoice])
-
-  useEffect(() => {
-    const handleBlur = () => {
-      if (phaseRef.current === 'running') {
-        forcedPauseRef.current = true
-        setPhase('paused')
-      }
-    }
-
-    const handleFocus = () => {
-      if (forcedPauseRef.current && phaseRef.current === 'paused') {
-        forcedPauseRef.current = false
-        setPhase('running')
-      }
-    }
-
-    window.addEventListener('blur', handleBlur)
-    window.addEventListener('focus', handleFocus)
-
-    return () => {
-      window.removeEventListener('blur', handleBlur)
-      window.removeEventListener('focus', handleFocus)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!feedback) {
+    if (queue.length === 0) {
+      setQueue([createShape(shapeIdRef.current++)])
       return
     }
 
-    const timeout = window.setTimeout(() => {
-      setFeedback(null)
-    }, 250)
-
-    return () => {
-      window.clearTimeout(timeout)
+    if (queue.length < INITIAL_QUEUE_LENGTH) {
+      setQueue((currentQueue) => [...currentQueue, createShape(shapeIdRef.current++)])
     }
-  }, [feedback])
+  }, [queue.length, phase])
 
-  useEffect(() => {
-    return () => {
-      if (audioContextRef.current) {
-        audioContextRef.current.close().catch(() => {})
-        audioContextRef.current = null
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    if (phase !== 'running') {
-      resetSwipeState()
-    }
-  }, [phase, resetSwipeState])
-
-  const startGame = useCallback(() => {
-    setScore(0)
-    setTimeRemaining(GAME_DURATION_SECONDS)
-    setRules(generateRules())
-    resetQueue()
-    setFeedback(null)
-    setSortedCount(0)
-    setAchievedNewBest(false)
-    forcedPauseRef.current = false
-    setPhase('running')
-  }, [resetQueue])
-
-  useEffect(() => {
-    if (phase === 'idle') {
-      startGame()
-    }
-  }, [phase, startGame])
-
-  useEffect(() => {
-    if (phase !== 'finished') {
-      return
-    }
-
-    const restartTimeout = window.setTimeout(() => {
-      startGame()
-    }, 1600)
-
-    return () => {
-      window.clearTimeout(restartTimeout)
-    }
-  }, [phase, startGame])
 
   const leftShapes = useMemo(() => SHAPE_TYPES.filter((shape) => rules[shape] === 'left'), [rules])
   const rightShapes = useMemo(
@@ -511,68 +422,81 @@ export default function SortingGame() {
     [rules],
   )
 
-  const displayedBestScore = Math.max(bestScore, score)
+  const activeShape = queue[0]
+
+  const summaryLines = [
+    `Score: ${score}`,
+    `Sorterede figurer: ${sortedCount}`,
+    `Bedste score: ${Math.max(bestScore, score)}`,
+    `Tid tilbage: ${timeRemaining}s`,
+  ]
 
   return (
-    <section className="sorting-game sorting-game--immersive">
-      <div className="sorting-game__content">
-        <div className="sorting-game__status" aria-live="polite">
-          <div className="sorting-game__metric" aria-label="Tid tilbage">
-            <span className="sorting-game__metric-label">Tid tilbage</span>
-            <span className="sorting-game__metric-value">{timeRemaining}s</span>
-          </div>
-          <div className="sorting-game__metric" aria-label="Aktuel score">
-            <span className="sorting-game__metric-label">Aktuel score</span>
-            <span className="sorting-game__metric-value">{score}</span>
-          </div>
-          <div className="sorting-game__metric" aria-label="Bedste score">
-            <span className="sorting-game__metric-label">Bedste score</span>
-            <span className="sorting-game__metric-value">{displayedBestScore}</span>
-          </div>
-          <div className="sorting-game__metric" aria-label="Sorterede figurer">
-            <span className="sorting-game__metric-label">Sorterede figurer</span>
-            <span className="sorting-game__metric-value">{sortedCount}</span>
-          </div>
-        </div>
-
-        <div className="sorting-game__play-area">
-          <div className="sorting-game__rule-column sorting-game__rule-column--left">
-            <div className="sorting-game__rule-title">Venstre</div>
-            <div className="sorting-game__rule-items">
-              {leftShapes.map((shape) => (
-                <div key={`left-${shape}`} className={`sorting-game__rule-item sorting-game__rule-item--${shape}`}>
-                  <span
-                    className={`sorting-game__rule-shape sorting-game__rule-shape--${shape}`}
-                    style={{ '--shape-color': SHAPE_COLORS[shape] } as CSSProperties}
-                    aria-hidden="true"
-                  />
-                  <span className="sorting-game__rule-label">{SHAPE_LABELS[shape]}</span>
-                </div>
-              ))}
+    <GameShell
+      title="Sorting"
+      subtitle="Skub figurer til venstre eller højre"
+      isFinished={phase === 'finished'}
+      summaryLines={summaryLines}
+      onRestart={() => {
+        setPhase('idle')
+        setShellReady(false)
+        setTimeRemaining(GAME_DURATION_SECONDS)
+        setQueue([])
+        setRules(generateRules())
+        setScore(0)
+        setSortedCount(0)
+        setAchievedNewBest(false)
+      }}
+      onExit={() => navigate('/overview/games')}
+      onReady={() => {
+        setShellReady(true)
+        setPhase('running')
+        setScore(0)
+        setSortedCount(0)
+        setTimeRemaining(GAME_DURATION_SECONDS)
+        setRules(generateRules())
+        resetQueue()
+      }}
+    >
+      <section className="sorting-game sorting-game--immersive">
+        <div className="sorting-game__content">
+          <div className="sorting-game__play-area">
+            <div className="sorting-game__rule-column sorting-game__rule-column--left">
+              <div className="sorting-game__rule-title">Venstre</div>
+              <div className="sorting-game__rule-items">
+                {leftShapes.map((shape) => (
+                  <div key={`left-${shape}`} className={`sorting-game__rule-item sorting-game__rule-item--${shape}`}>
+                    <span
+                      className={`sorting-game__rule-shape sorting-game__rule-shape--${shape}`}
+                      style={{ '--shape-color': SHAPE_COLORS[shape] } as CSSProperties}
+                      aria-hidden="true"
+                    />
+                    <span className="sorting-game__rule-label">{SHAPE_LABELS[shape]}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div className="sorting-game__queue">
             <div
-              className="sorting-game__queue-track"
-              aria-label="Figurkø"
-              onPointerDown={handlePointerDown}
+              className="sorting-game__queue"
+              onPointerDown={handlePointerStart}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerEnd}
               onPointerCancel={handlePointerEnd}
-              onPointerLeave={handlePointerEnd}
+              aria-label="Træk figuren til venstre eller højre"
             >
-              {phase === 'running' || phase === 'paused' ? (
+              {queue.length > 0 ? (
                 queue.map((shape, index) => {
                   const isActive = index === 0
-                  const offset = Math.min(index, 4)
-                  const translateY = offset * -0.65
-                  const scale = isActive ? 1 : Math.max(0.7, 1 - offset * 0.08)
-                  const opacity = isActive ? 1 : Math.max(0.35, 0.85 - offset * 0.1)
-                  const feedbackClass = isActive && feedback ? ` sorting-game__shape--${feedback}` : ''
-                  const dragClass =
-                    isActive && activeDragOffset ? ' sorting-game__shape--dragging' : ''
-                  const baseClass = `sorting-game__shape sorting-game__shape--${shape.type}`
+                  const translateY = index * 1.2
+                  const scale = isActive ? 1 : 0.92
+                  const opacity = isActive ? 1 : 0.7
+                  const baseClass = 'sorting-game__shape'
+                  const dragClass = isActive && activeDragOffset ? ' sorting-game__shape--dragging' : ''
+                  const feedbackClass =
+                    feedback && isActive && activeShape?.id === shape.id
+                      ? ` sorting-game__shape--${feedback}`
+                      : ''
                   const stateClass = isActive
                     ? ' sorting-game__shape--active'
                     : ' sorting-game__shape--queued'
@@ -606,7 +530,7 @@ export default function SortingGame() {
                 })
               ) : (
                 <div className="sorting-game__queue-placeholder" aria-live="polite">
-                  Gør dig klar... spillet starter automatisk.
+                  Klar... venter på næste figur.
                 </div>
               )}
             </div>
@@ -647,49 +571,7 @@ export default function SortingGame() {
             Højre →
           </button>
         </div>
-
-        {phase === 'paused' && (
-          <div className="sorting-game__overlay" role="status" aria-live="assertive">
-            <div className="sorting-game__overlay-content">
-              <h2>Pause</h2>
-              <p>Fokusér vinduet igen for at fortsætte spillet.</p>
-            </div>
-          </div>
-        )}
-
-        {phase === 'finished' && (
-          <div className="sorting-game__overlay" role="status" aria-live="assertive">
-            <div className="sorting-game__overlay-content sorting-game__overlay-content--finished">
-              <h2>Runden er slut!</h2>
-              <p className="sorting-game__overlay-description">
-                Ny runde starter automatisk. Se dine resultater herunder.
-              </p>
-
-              <dl className="sorting-game__scoreboard">
-                <div className="sorting-game__scoreboard-row">
-                  <dt>Score denne runde</dt>
-                  <dd>{score}</dd>
-                </div>
-                <div className="sorting-game__scoreboard-row">
-                  <dt>Sorterede figurer</dt>
-                  <dd>{sortedCount}</dd>
-                </div>
-                <div className="sorting-game__scoreboard-row">
-                  <dt>Bedste score</dt>
-                  <dd>{displayedBestScore}</dd>
-                </div>
-              </dl>
-
-              {achievedNewBest && (
-                <p className="sorting-game__overlay-description" aria-live="polite">
-                  Stærkt gået! Du slog din tidligere rekord.
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-    </section>
+      </section>
+    </GameShell>
   )
 }
-
