@@ -939,7 +939,7 @@ body[data-theme='focus'] .game-scoreboard {
 
 @media (max-width: 1024px) {
   .app {
-    padding: clamp(1.25rem, 1vw, 2rem);
+
   }
 
   .app-shell__primary-nav {
