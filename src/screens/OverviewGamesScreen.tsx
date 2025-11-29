@@ -160,6 +160,17 @@ const sections: GameSection[] = [
         badge: 'Ny',
         focus: 'Semantisk fleksibilitet',
       },
+      {
+        id: 'word-search',
+        title: 'Word Search',
+        description:
+          'Find skjulte ord i gitteret på kryds og tværs med fuld kontrol over størrelse og ordliste.',
+        ctaLabel: 'Åbn Word Search',
+        to: '/word-search',
+        icon: '/gameIcons_svg/word_search_game_svg.svg',
+        badge: 'Ny',
+        focus: 'Visuel scanning & mønstre',
+      },
     ],
   },
 ]
