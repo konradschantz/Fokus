@@ -1,0 +1,33 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grid" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5B6BFF" />
+      <stop offset="1" stop-color="#00E6A7" />
+    </linearGradient>
+  </defs>
+  <rect x="16" y="16" width="168" height="168" rx="28" fill="#0F172A" />
+  <rect x="26" y="26" width="148" height="148" rx="22" fill="#0C1C3F" stroke="url(#grid)" stroke-width="4" />
+  <g stroke="#1F3B7A" stroke-width="3">
+    <line x1="50" y1="50" x2="150" y2="50" />
+    <line x1="50" y1="82" x2="150" y2="82" />
+    <line x1="50" y1="114" x2="150" y2="114" />
+    <line x1="50" y1="146" x2="150" y2="146" />
+    <line x1="50" y1="50" x2="50" y2="146" />
+    <line x1="82" y1="50" x2="82" y2="146" />
+    <line x1="114" y1="50" x2="114" y2="146" />
+    <line x1="146" y1="50" x2="146" y2="146" />
+  </g>
+  <g font-family="'Space Grotesk', 'Inter', sans-serif" font-weight="700" fill="#E6EDFF" font-size="20" text-anchor="middle">
+    <text x="66" y="75">F</text>
+    <text x="98" y="75">O</text>
+    <text x="130" y="75">K</text>
+    <text x="66" y="107">U</text>
+    <text x="98" y="107">S</text>
+    <text x="130" y="107">R</text>
+    <text x="66" y="139">O</text>
+    <text x="98" y="139">L</text>
+    <text x="130" y="139">G</text>
+  </g>
+  <circle cx="140" cy="60" r="26" fill="rgba(91, 107, 255, 0.22)" stroke="#7CE8C8" stroke-width="4" />
+  <path d="M160 86L176 102" stroke="#7CE8C8" stroke-width="8" stroke-linecap="round" />
+</svg>

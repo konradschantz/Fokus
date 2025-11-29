@@ -193,7 +193,6 @@ export default function OverviewGamesScreen() {
         <section key={section.id} className="menu__section" aria-labelledby={`${section.id}-title`}>
           <div className="menu__section-header">
             <div>
-              <p className="menu__section-eyebrow">{section.eyebrow}</p>
               <h2 id={`${section.id}-title`}>{section.title}</h2>
             </div>
             <p className="menu__section-description">{section.description}</p>
@@ -206,17 +205,19 @@ export default function OverviewGamesScreen() {
           >
             {section.games.map((game) => (
               <article key={game.id} className="menu__card" role="listitem">
-                {game.badge && <span className="menu__card-badge">{game.badge}</span>}
                 <div className="menu__card-media">
-                  <img src={game.icon} alt={`${game.title} ikon`} className="menu__card-icon" />
+                  <Link
+                    to={game.to}
+                    className="menu__card-icon-link"
+                    aria-label={`Gå til ${game.title}`}
+                  >
+                    <img src={game.icon} alt={`${game.title} ikon`} className="menu__card-icon" />
+                  </Link>
                 </div>
                 <div className="menu__card-content">
                   <h3>{game.title}</h3>
                   <p>{game.description}</p>
                 </div>
-                <Link to={game.to} className="menu__primary-button">
-                  {game.ctaLabel}
-                </Link>
               </article>
             ))}
           </div>

@@ -249,9 +249,7 @@ function AppChrome({
         <span className="sr-only">Luk menu</span>
       </button>
       {/* Brand watermark in left corner using SVG logo */}
-      <div className="brand-watermark" aria-hidden="true">
-        <BrandLogo as="div" align="left" size={72} showWordmark={false} />
-      </div>
+   
     </main>
   )
 }
