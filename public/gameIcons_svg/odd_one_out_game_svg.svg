@@ -1,14 +1,50 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
-  <rect width="120" height="120" rx="18" fill="#F4F6FB"/>
-  <g transform="translate(18 36)" fill="none" stroke="#0F172A" stroke-width="3">
-    <circle cx="18" cy="18" r="12" fill="#2563EB" stroke="none"/>
-    <circle cx="52" cy="18" r="12" fill="#2563EB" stroke="none"/>
-    <rect x="70" y="6" width="24" height="24" rx="12" fill="#10B981" stroke="none"/>
+  <defs>
+    <linearGradient id="bgGradientOdd" x1="12" y1="10" x2="108" y2="110" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7DD3FC"/>
+      <stop offset="0.5" stop-color="#A78BFA"/>
+      <stop offset="1" stop-color="#F472B6"/>
+    </linearGradient>
+    <linearGradient id="oddCircle" x1="22" y1="14" x2="46" y2="38" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#38BDF8"/>
+    </linearGradient>
+    <linearGradient id="oddSquare" x1="70" y1="6" x2="94" y2="30" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F472B6"/>
+      <stop offset="1" stop-color="#FB7185"/>
+    </linearGradient>
+    <filter id="pieceShadow" x="6" y="16" width="108" height="92" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#0F172A" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+  <style>
+    .float { animation: float 7s ease-in-out infinite; transform-origin: 60px 60px; }
+    .pulse { animation: pulse 2.6s ease-in-out infinite; }
+    .spark { animation: twinkle 3s ease-in-out infinite; }
+    @keyframes float { 0%, 100% { transform: translateY(-1px); } 50% { transform: translateY(2px); } }
+    @keyframes pulse { 0%, 100% { opacity: 0.85; transform: scale(0.98); } 50% { opacity: 1; transform: scale(1.04); } }
+    @keyframes twinkle { 0%, 100% { opacity: 0.25; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.1); } }
+  </style>
+
+  <rect width="120" height="120" rx="18" fill="url(#bgGradientOdd)"/>
+
+  <g filter="url(#pieceShadow)" class="float">
+    <g transform="translate(18 34)" stroke="#0F172A" stroke-width="3">
+      <circle cx="18" cy="18" r="12" fill="url(#oddCircle)"/>
+      <circle cx="52" cy="18" r="12" fill="#38BDF8"/>
+      <rect x="70" y="6" width="24" height="24" rx="8" fill="url(#oddSquare)" class="pulse"/>
+    </g>
+    <g transform="translate(18 74)" fill="#F8FAFC" stroke="#0F172A" stroke-width="2.5">
+      <circle cx="18" cy="0" r="10"/>
+      <circle cx="52" cy="0" r="10"/>
+      <circle cx="86" cy="0" r="10"/>
+    </g>
   </g>
-  <g transform="translate(18 72)" fill="#CBD5F5" stroke="#0F172A" stroke-width="2.5">
-    <circle cx="18" cy="0" r="10"/>
-    <circle cx="52" cy="0" r="10"/>
-    <circle cx="86" cy="0" r="10"/>
+
+  <path d="M30 16h60" stroke="#F8FAFC" stroke-width="3" stroke-linecap="round" stroke-dasharray="6 6" opacity="0.7"/>
+
+  <g class="spark" fill="#F8FAFC" stroke="#E0F2FE" stroke-width="1">
+    <path d="M18 28l1.5 3 3 1.5-3 1.5-1.5 3-1.5-3-3-1.5 3-1.5 1.5-3z"/>
+    <path d="M100 100l1.5 3 3 1.5-3 1.5-1.5 3-1.5-3-3-1.5 3-1.5 1.5-3z"/>
   </g>
-  <path d="M30 18h60" stroke="#D6DEEF" stroke-width="3" stroke-linecap="round" stroke-dasharray="6 6"/>
 </svg>

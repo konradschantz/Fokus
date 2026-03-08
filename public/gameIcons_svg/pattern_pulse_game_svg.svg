@@ -1,10 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
-  <rect width="120" height="120" rx="18" fill="#F4F6FB"/>
-  <polyline points="18,78 38,46 54,66 70,38 94,62" fill="none" stroke="#2563EB" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="18" cy="78" r="6" fill="#2563EB"/>
-  <circle cx="38" cy="46" r="6" fill="#10B981"/>
-  <circle cx="54" cy="66" r="6" fill="#2563EB"/>
-  <circle cx="70" cy="38" r="6" fill="#0F172A" opacity="0.85"/>
-  <circle cx="94" cy="62" r="6" fill="#2563EB"/>
-  <path d="M22 96h76" stroke="#D6DEEF" stroke-width="3" stroke-linecap="round" stroke-dasharray="6 6"/>
+  <defs>
+    <linearGradient id="bgGradientPattern" x1="12" y1="10" x2="108" y2="110" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7DD3FC"/>
+      <stop offset="0.5" stop-color="#A78BFA"/>
+      <stop offset="1" stop-color="#F472B6"/>
+    </linearGradient>
+    <linearGradient id="lineGradient" x1="18" y1="38" x2="94" y2="90" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22D3EE"/>
+      <stop offset="1" stop-color="#6366F1"/>
+    </linearGradient>
+    <filter id="lineShadow" x="6" y="26" width="108" height="76" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+  <style>
+    .float { animation: float 7s ease-in-out infinite; transform-origin: 60px 60px; }
+    .pulse { animation: pulse 2.4s ease-in-out infinite; }
+    .spark { animation: twinkle 3s ease-in-out infinite; }
+    @keyframes float { 0%, 100% { transform: translateY(-1px); } 50% { transform: translateY(2px); } }
+    @keyframes pulse { 0%, 100% { opacity: 0.85; transform: scale(0.98); } 50% { opacity: 1; transform: scale(1.04); } }
+    @keyframes twinkle { 0%, 100% { opacity: 0.25; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.1); } }
+  </style>
+
+  <rect width="120" height="120" rx="18" fill="url(#bgGradientPattern)"/>
+
+  <g filter="url(#lineShadow)" class="float">
+    <polyline points="18,78 38,46 54,66 70,38 94,62" fill="none" stroke="url(#lineGradient)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="18" cy="78" r="6.5" fill="#22D3EE" stroke="#0F172A" stroke-width="1.5"/>
+    <circle cx="38" cy="46" r="6.5" fill="#10B981" stroke="#0F172A" stroke-width="1.5" class="pulse"/>
+    <circle cx="54" cy="66" r="6.5" fill="#38BDF8" stroke="#0F172A" stroke-width="1.5"/>
+    <circle cx="70" cy="38" r="6.5" fill="#0F172A" opacity="0.9"/>
+    <circle cx="94" cy="62" r="6.5" fill="#F472B6" stroke="#0F172A" stroke-width="1.5" class="pulse"/>
+  </g>
+
+  <path d="M22 98h76" stroke="#F8FAFC" stroke-width="3" stroke-linecap="round" stroke-dasharray="6 6" opacity="0.7"/>
+
+  <g class="spark" fill="#F8FAFC" stroke="#E0F2FE" stroke-width="1">
+    <path d="M18 32l1.5 3 3 1.5-3 1.5-1.5 3-1.5-3-3-1.5 3-1.5 1.5-3z"/>
+    <path d="M102 24l1.5 3 3 1.5-3 1.5-1.5 3-1.5-3-3-1.5 3-1.5 1.5-3z"/>
+  </g>
 </svg>

@@ -1,15 +1,49 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
-  <rect width="120" height="120" rx="18" fill="#F4F6FB"/>
-  <rect x="26" y="26" width="68" height="68" rx="10" fill="#fff" stroke="#2563EB" stroke-width="3"/>
-  <rect x="34" y="34" width="16" height="16" rx="4" fill="#E8EEFC"/>
-  <rect x="52" y="34" width="16" height="16" rx="4" fill="#CBD5F5"/>
-  <rect x="70" y="34" width="16" height="16" rx="4" fill="#E8EEFC"/>
-  <rect x="34" y="52" width="16" height="16" rx="4" fill="#CBD5F5"/>
-  <rect x="52" y="52" width="16" height="16" rx="4" fill="#E8EEFC"/>
-  <rect x="70" y="52" width="16" height="16" rx="4" fill="#CBD5F5"/>
-  <rect x="34" y="70" width="16" height="16" rx="4" fill="#E8EEFC"/>
-  <rect x="52" y="70" width="16" height="16" rx="4" fill="#CBD5F5"/>
-  <rect x="70" y="70" width="16" height="16" rx="4" fill="#E8EEFC"/>
-  <path d="M38 42l16 16 18-18 12 12" stroke="#10B981" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="86" cy="46" r="5" fill="#2563EB"/>
+  <defs>
+    <linearGradient id="bgGradientSweep" x1="12" y1="10" x2="108" y2="110" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7DD3FC"/>
+      <stop offset="0.5" stop-color="#A78BFA"/>
+      <stop offset="1" stop-color="#F472B6"/>
+    </linearGradient>
+    <linearGradient id="gridGradient" x1="26" y1="26" x2="94" y2="94" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FBFF"/>
+      <stop offset="1" stop-color="#E4ECFF"/>
+    </linearGradient>
+    <filter id="gridShadow" x="8" y="8" width="104" height="104" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#0F172A" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+  <style>
+    .float { animation: float 7s ease-in-out infinite; transform-origin: 60px 60px; }
+    .pulse { animation: pulse 2.6s ease-in-out infinite; }
+    .spark { animation: twinkle 3s ease-in-out infinite; }
+    @keyframes float { 0%, 100% { transform: translateY(-1px); } 50% { transform: translateY(2px); } }
+    @keyframes pulse { 0%, 100% { opacity: 0.82; transform: scale(0.98); } 50% { opacity: 1; transform: scale(1.04); } }
+    @keyframes twinkle { 0%, 100% { opacity: 0.25; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.1); } }
+  </style>
+
+  <rect width="120" height="120" rx="18" fill="url(#bgGradientSweep)"/>
+
+  <g filter="url(#gridShadow)" class="float">
+    <rect x="24" y="24" width="72" height="72" rx="12" fill="rgba(255,255,255,0.35)" stroke="#1E293B" stroke-width="1.6"/>
+    <rect x="28" y="28" width="64" height="64" rx="10" fill="url(#gridGradient)" stroke="#0F172A" stroke-width="2.6"/>
+
+    <rect x="34" y="34" width="16" height="16" rx="4" fill="#E8EEFC"/>
+    <rect x="52" y="34" width="16" height="16" rx="4" fill="#CBD5F5"/>
+    <rect x="70" y="34" width="16" height="16" rx="4" fill="#E8EEFC"/>
+    <rect x="34" y="52" width="16" height="16" rx="4" fill="#CBD5F5"/>
+    <rect x="52" y="52" width="16" height="16" rx="4" fill="#E8EEFC"/>
+    <rect x="70" y="52" width="16" height="16" rx="4" fill="#CBD5F5"/>
+    <rect x="34" y="70" width="16" height="16" rx="4" fill="#E8EEFC"/>
+    <rect x="52" y="70" width="16" height="16" rx="4" fill="#CBD5F5"/>
+    <rect x="70" y="70" width="16" height="16" rx="4" fill="#E8EEFC"/>
+
+    <path d="M38 42l16 16 18-18 12 12" stroke="#10B981" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="pulse"/>
+    <circle cx="86" cy="46" r="5.5" fill="#2563EB" stroke="#0F172A" stroke-width="1.4"/>
+  </g>
+
+  <g class="spark" fill="#F8FAFC" stroke="#E0F2FE" stroke-width="1">
+    <path d="M18 28l1.5 3 3 1.5-3 1.5-1.5 3-1.5-3-3-1.5 3-1.5 1.5-3z"/>
+    <path d="M102 24l1.5 3 3 1.5-3 1.5-1.5 3-1.5-3-3-1.5 3-1.5 1.5-3z"/>
+  </g>
 </svg>

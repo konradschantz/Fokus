@@ -1,8 +1,45 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
-  <rect width="120" height="120" rx="18" fill="#F4F6FB"/>
-  <circle cx="60" cy="60" r="36" stroke="#2563EB" stroke-width="4"/>
-  <circle cx="60" cy="60" r="24" stroke="#0F172A" stroke-width="3" stroke-dasharray="6 6"/>
-  <circle cx="60" cy="60" r="12" fill="#2563EB" opacity="0.18"/>
-  <circle cx="60" cy="60" r="6" fill="#0F172A"/>
-  <path d="M60 20v10m0 60v10m40-40h-10m-60 0H20m54-26 7-7m-48 48-7 7m48 0 7 7m-48-48-7-7" stroke="#10B981" stroke-width="3" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="bgGradientFocus" x1="14" y1="10" x2="108" y2="108" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7DD3FC"/>
+      <stop offset="0.5" stop-color="#A78BFA"/>
+      <stop offset="1" stop-color="#F472B6"/>
+    </linearGradient>
+    <linearGradient id="ringGradient" x1="24" y1="18" x2="96" y2="102" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22D3EE"/>
+      <stop offset="1" stop-color="#6366F1"/>
+    </linearGradient>
+    <linearGradient id="coreGradient" x1="50" y1="50" x2="72" y2="72" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0EA5E9"/>
+      <stop offset="1" stop-color="#1E3A8A"/>
+    </linearGradient>
+    <filter id="softShadow" x="-4" y="-4" width="128" height="128" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#0F172A" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+  <style>
+    .float { animation: float 7s ease-in-out infinite; transform-origin: 60px 60px; }
+    .pulse-ring { animation: pulse 2.8s ease-in-out infinite; transform-origin: 60px 60px; }
+    .twinkle { animation: twinkle 3.5s ease-in-out infinite; }
+    @keyframes float { 0%, 100% { transform: translateY(-1px); } 50% { transform: translateY(2px); } }
+    @keyframes pulse { 0% { transform: scale(0.98); opacity: 0.65; } 50% { transform: scale(1.04); opacity: 1; } 100% { transform: scale(0.98); opacity: 0.65; } }
+    @keyframes twinkle { 0%, 100% { opacity: 0.3; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.1); } }
+  </style>
+
+  <rect width="120" height="120" rx="18" fill="url(#bgGradientFocus)"/>
+
+  <g filter="url(#softShadow)" class="float">
+    <circle cx="60" cy="60" r="40" fill="rgba(255,255,255,0.22)" stroke="#0F172A" stroke-width="1.5" stroke-dasharray="6 6"/>
+    <circle cx="60" cy="60" r="32" stroke="url(#ringGradient)" stroke-width="4" class="pulse-ring"/>
+    <circle cx="60" cy="60" r="22" stroke="#0F172A" stroke-width="3" stroke-dasharray="5 6"/>
+    <circle cx="60" cy="60" r="14" fill="rgba(14,165,233,0.22)" stroke="#22D3EE" stroke-width="2"/>
+    <circle cx="60" cy="60" r="7.5" fill="url(#coreGradient)" stroke="#0F172A" stroke-width="1.5"/>
+    <path d="M60 18v12m0 60v12m42-42h-12m-60 0H18m58-30 9-9m-52 52-9 9m52 0 9 9m-52-52-9-9" stroke="#10B981" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <g class="twinkle" fill="#F8FAFC" stroke="#E0F2FE" stroke-width="1">
+    <path d="M22 30l2 4 4 2-4 2-2 4-2-4-4-2 4-2 2-4z"/>
+    <path d="M98 20l1.5 3 3 1.5-3 1.5-1.5 3-1.5-3-3-1.5 3-1.5 1.5-3z"/>
+    <path d="M96 100l1.5 3 3 1.5-3 1.5-1.5 3-1.5-3-3-1.5 3-1.5 1.5-3z"/>
+  </g>
 </svg>
